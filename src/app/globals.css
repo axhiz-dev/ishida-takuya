@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/* ============================================================
+   デザイントークン（Tailwind v4 CSS-first / @theme）
+   ============================================================ */
+@theme {
+  /* 背景・面 */
+  --color-bg: #07070d;
+  --color-bg-alt: #0b0b14;
+  --color-surface: #101019;
+  --color-surface-2: #15151f;
+
+  /* テキスト */
+  --color-ink: #f4f4f6;
+  --color-ink-muted: #9a9aae;
+  --color-ink-faint: #6b6b80;
+
+  /* アクセント（サイトのアイデンティティ） */
+  --color-brand-cyan: #22d3ee;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-fuchsia: #e879f9;
+
+  /* フォント（next/font が供給する CSS 変数に接続） */
+  --font-sans: var(--font-noto-sans-jp), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-noto-sans-jp), sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* コンテナ */
+  --breakpoint-xs: 480px;
+}
+
+/* ============================================================
+   ベース
+   ============================================================ */
+:root {
+  color-scheme: dark;
+  --brand-gradient: linear-gradient(
+    100deg,
+    var(--color-brand-cyan),
+    var(--color-brand-violet) 55%,
+    var(--color-brand-fuchsia)
+  );
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* セクションのアンカーがヘッダーに隠れないように */
+[id] {
+  scroll-margin-top: 6rem;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-brand-violet) 55%, transparent);
+  color: #fff;
+}
+
+/* フォーカスリング（アクセシビリティ） */
+:focus-visible {
+  outline: 2px solid var(--color-brand-violet);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* カスタムスクロールバー */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #26263a;
+  border-radius: 999px;
+  border: 2px solid var(--color-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #34344d;
+}
+
+/* ============================================================
+   ユーティリティ
+   ============================================================ */
+.text-gradient {
+  background: var(--brand-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 75%);
+}
+
+.glass {
+  background: color-mix(in oklab, var(--color-bg) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* conic グラデーションの角度をアニメートするためのカスタムプロパティ */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ============================================================
+   キーフレーム
+   ============================================================ */
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+.animate-shimmer {
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes float-blob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(4%, -6%, 0) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-5%, 4%, 0) scale(0.95);
+  }
+}
+.animate-blob {
+  animation: float-blob 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce-cue {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+.animate-cue {
+  animation: bounce-cue 1.8s ease-in-out infinite;
+}
+
+@keyframes border-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* ============================================================
+   reduced-motion グローバル kill-switch
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

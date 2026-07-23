@@ -14,6 +14,8 @@ on:
   push:
     branches:
       - main
+      # プレビュー用の一時トリガー: PR #3 確認後にこの行は削除する
+      - claude/web-engineer-portfolio-site-xuh15t
   workflow_dispatch:
 
 permissions:
