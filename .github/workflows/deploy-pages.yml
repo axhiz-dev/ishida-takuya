@@ -1,0 +1,87 @@
+# GitHub Pages へのデプロイ。
+#
+# 前提(リポジトリ設定・設定済み):
+#   - Settings → Pages → Source: GitHub Actions
+#   - Settings → Environments → github-pages → Deployment branches:
+#     main を許可(プレビュー用に別ブランチからデプロイしたい場合は
+#     そのブランチも許可し、下の push.branches に一時追加する)
+#
+# アプリ(package.json)がまだ存在しない場合はビルド・デプロイをスキップ。
+# デプロイ先: https://<owner>.github.io/<repo>/
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      has-app: ${{ steps.app.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # アプリ未実装のリポジトリでは以降を skip(deploy ジョブもスキップされる)
+      - name: Detect app
+        id: app
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "package.json not found — skipping build and deploy."
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.app.outputs.exists == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.app.outputs.exists == 'true'
+        run: npm ci
+
+      # Pages が未設定でも Source=GitHub Actions で自動有効化を試みる
+      - name: Setup Pages
+        if: steps.app.outputs.exists == 'true'
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # Next.js の静的書き出し(out/ に生成)。basePath はリポジトリ名
+      - name: Build (static export)
+        if: steps.app.outputs.exists == 'true'
+        run: npm run build
+        env:
+          NEXT_OUTPUT: export
+          NEXT_BASE_PATH: /${{ github.event.repository.name }}
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.app.outputs.exists == 'true'
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.has-app == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
