@@ -5,7 +5,10 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      # プレビュー用の一時トリガー: マージ後はこの行を削除する
+      - claude/build-log-portfolio-eyrpd7
   workflow_dispatch:
 
 permissions:
