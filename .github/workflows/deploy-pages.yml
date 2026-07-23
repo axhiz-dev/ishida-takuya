@@ -35,6 +35,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Pages が未設定でも Source=GitHub Actions で自動有効化する
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - name: Build (static export)
         run: npm run build
         env:
