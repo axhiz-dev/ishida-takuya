@@ -6,6 +6,7 @@
   --color-ink-soft: #55554f;
   --color-ink-faint: #8b8b83;
   --color-accent: #1e3a5f;
+  --color-accent-bright: #2e5688;
   --color-accent-soft: #eef2f7;
   --color-line: #e5e4de;
   --font-sans: "Noto Sans JP Variable", "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -24,21 +25,170 @@ body {
   font-feature-settings: "palt";
 }
 
-/* スクロール時の控えめなフェードイン */
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* ===== 方眼紙風の背景 ===== */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(30, 58, 95, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 58, 95, 0.055) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/* ===== ロード時のイントロアニメーション ===== */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intro {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.intro-1 { animation-delay: 0.05s; }
+.intro-2 { animation-delay: 0.15s; }
+.intro-3 { animation-delay: 0.25s; }
+.intro-4 { animation-delay: 0.35s; }
+.intro-5 { animation-delay: 0.45s; }
+
+/* ===== スクロール時のフェードイン（Reveal） ===== */
 .reveal {
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .reveal.is-visible {
   opacity: 1;
   transform: none;
 }
+
+/* 子要素が順に浮かび上がる stagger 版 */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.stagger.is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+.stagger.is-visible > *:nth-child(1) { transition-delay: 0.04s; }
+.stagger.is-visible > *:nth-child(2) { transition-delay: 0.1s; }
+.stagger.is-visible > *:nth-child(3) { transition-delay: 0.16s; }
+.stagger.is-visible > *:nth-child(4) { transition-delay: 0.22s; }
+.stagger.is-visible > *:nth-child(5) { transition-delay: 0.28s; }
+.stagger.is-visible > *:nth-child(6) { transition-delay: 0.34s; }
+.stagger.is-visible > *:nth-child(7) { transition-delay: 0.4s; }
+.stagger.is-visible > *:nth-child(8) { transition-delay: 0.46s; }
+.stagger.is-visible > *:nth-child(n + 9) { transition-delay: 0.52s; }
+
+/* ===== Reveal内で発火する演出 ===== */
+/* タイムラインの縦線が上から描画される */
+.tl-line {
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+.is-visible .tl-line,
+.is-visible.tl-root .tl-line {
+  transform: scaleY(1);
+}
+
+/* スキルバーが伸びる */
+.skill-bar {
+  width: 0;
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+.is-visible .skill-bar {
+  width: var(--w);
+}
+
+/* ===== マイクロインタラクション ===== */
+/* hoverで下線が左から伸びるリンク */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 1px;
+  transition: background-size 0.3s ease;
+}
+.link-underline:hover {
+  background-size: 100% 1px;
+}
+
+/* hoverで浮くカード */
+.card-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px -12px rgba(30, 58, 95, 0.25);
+  border-color: var(--color-accent);
+}
+
+/* カード上部のアクセントバーがhoverで伸びる */
+.card-bar {
+  position: relative;
+  overflow: hidden;
+}
+.card-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-bar:hover::before {
+  transform: scaleX(1);
+}
+
+/* ===== 開閉アコーディオン（grid-template-rowsで高さアニメーション） ===== */
+.acc {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.acc.acc-open {
+  grid-template-rows: 1fr;
+}
+.acc > div {
+  overflow: hidden;
+}
+
+/* ===== reduced motion ===== */
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  html {
+    scroll-behavior: auto;
+  }
+  .intro,
+  .reveal,
+  .stagger > *,
+  .tl-line,
+  .skill-bar,
+  .acc,
+  .card-hover,
+  .card-bar::before {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .skill-bar {
+    width: var(--w) !important;
   }
 }
 
@@ -57,13 +207,6 @@ body {
   /* 画面専用要素を隠す */
   .print-hidden {
     display: none !important;
-  }
-
-  /* フェードインを無効化（印刷時に非表示のままにならないように） */
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
   }
 
   /* 職歴プロジェクトなどの途中で改ページさせない */

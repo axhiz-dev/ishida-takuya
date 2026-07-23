@@ -21,7 +21,7 @@
 
 | ファイル | 内容 |
 | --- | --- |
-| `src/data/constants.ts` | 希望年収・Offers診断額・稼働条件などの定数 |
+| `src/data/constants.ts` | 経験年数・プロジェクト数などの数値定数 |
 | `src/data/profile.ts` | 名前・肩書・職務要約・リンク・メールアドレス |
 | `src/data/career.ts` | 職務経歴（本業 `careers` / 副業 `sideWorks`） |
 | `src/data/skills.ts` | スキルと経験年数 |
@@ -54,5 +54,6 @@ A4向けに余白・改ページを最適化した印刷用スタイルが適用
 
 ## メモ
 
-- `index.html` に `<meta name="robots" content="noindex">` を入れており、検索エンジンには載りません（年収などを載せているため）。検索に載せたい場合はこの行を削除してください。
+- `index.html` に `<meta name="robots" content="noindex">` を入れており、検索エンジンには載りません（URLを渡した相手だけに見せる想定のため）。検索に載せたい場合はこの行を削除してください。
+- PDF出力のレイアウトは `src/components/resume/ResumeDocument.tsx` に分離されています。画面のデザインを変えてもPDF側には影響しません。
 - SPAのため、ビルド時に `index.html` を `404.html` へコピーして GitHub Pages 上での直接URLアクセス（`/engineer` など）に対応しています。

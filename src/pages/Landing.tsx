@@ -1,60 +1,94 @@
 import { Link } from "react-router-dom";
 import { profile } from "../data/profile";
 
-const cards = [
+const panels = [
   {
     to: "/engineer",
     eyebrow: "For Recruiters & Agents",
     title: "採用ご担当者さまへ",
-    description: "職務経歴・スキル・希望条件をまとめた経歴書ページです。",
+    description:
+      "職務経歴・プロジェクト・スキルをまとめた経歴書ページ。技術タグで案件を絞り込めます。",
     cta: "職務経歴を見る",
+    dark: false,
   },
   {
     to: "/business",
     eyebrow: "For Business Partners",
     title: "事業者さまへ",
-    description: "これまでの実績と、お力になれることをご紹介するページです。",
+    description:
+      "これまでの実績と、お力になれることを、専門用語を使わずにご紹介するページです。",
     cta: "実績・できることを見る",
+    dark: true,
   },
 ];
 
 export default function Landing() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center px-6 py-16">
-      <p className="text-[11px] font-semibold tracking-[0.3em] text-accent uppercase">
-        {profile.nameEn}
-      </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-        {profile.nameJa}
-      </h1>
-      <p className="mt-3 text-sm text-ink-soft">{profile.title}</p>
-      <div className="mt-6 h-px w-10 bg-accent" />
+    <main className="bg-grid flex min-h-svh flex-col">
+      {/* 名前 */}
+      <div className="px-6 pt-20 pb-12 text-center sm:pt-28 sm:pb-16">
+        <p className="intro intro-1 text-[11px] font-semibold tracking-[0.35em] text-accent uppercase">
+          {profile.nameEn}
+        </p>
+        <h1 className="intro intro-2 mt-4 text-5xl font-bold tracking-tight sm:text-7xl">
+          {profile.nameJa}
+        </h1>
+        <p className="intro intro-3 mt-4 text-sm tracking-wide text-ink-soft">
+          {profile.title}
+        </p>
+        <div className="intro intro-4 mx-auto mt-7 h-px w-12 bg-accent" />
+      </div>
 
-      <div className="mt-12 grid w-full max-w-2xl gap-4 sm:grid-cols-2">
-        {cards.map((card) => (
+      {/* スプリットパネル */}
+      <div className="intro intro-5 flex flex-1 flex-col gap-px border-t border-line bg-line sm:flex-row">
+        {panels.map((panel) => (
           <Link
-            key={card.to}
-            to={card.to}
-            className="group rounded-md border border-line bg-white p-6 transition hover:border-accent hover:shadow-sm"
+            key={panel.to}
+            to={panel.to}
+            className={`group flex flex-1 basis-0 flex-col justify-between p-8 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-12 sm:hover:flex-[1.5] ${
+              panel.dark
+                ? "bg-accent text-white hover:bg-[#22436e]"
+                : "bg-paper hover:bg-white"
+            }`}
           >
-            <p className="text-[10px] font-semibold tracking-[0.2em] text-ink-faint uppercase">
-              {card.eyebrow}
+            <p
+              className={`text-[10px] font-semibold tracking-[0.25em] uppercase ${
+                panel.dark ? "text-white/60" : "text-ink-faint"
+              }`}
+            >
+              {panel.eyebrow}
             </p>
-            <h2 className="mt-2 text-lg font-bold tracking-tight group-hover:text-accent">
-              {card.title}
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-ink-soft">
-              {card.description}
-            </p>
-            <p className="mt-5 text-xs font-medium text-accent">
-              {card.cta} →
+            <div className="py-10 sm:py-16">
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                {panel.title}
+              </h2>
+              <p
+                className={`mt-4 max-w-sm text-xs leading-relaxed sm:text-sm ${
+                  panel.dark ? "text-white/75" : "text-ink-soft"
+                }`}
+              >
+                {panel.description}
+              </p>
+            </div>
+            <p
+              className={`flex items-center gap-2 text-xs font-semibold sm:text-sm ${
+                panel.dark ? "text-white" : "text-accent"
+              }`}
+            >
+              {panel.cta}
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1.5"
+              >
+                →
+              </span>
             </p>
           </Link>
         ))}
       </div>
 
-      <p className="mt-12 text-xs text-ink-faint">
-        © {new Date().getFullYear()} {profile.nameJa}
+      <p className="border-t border-line px-6 py-4 text-center text-[11px] text-ink-faint">
+        © {new Date().getFullYear()} {profile.nameJa} ({profile.nameEn})
       </p>
     </main>
   );

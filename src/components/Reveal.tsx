@@ -1,12 +1,17 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
-/** スクロールで表示領域に入ったら控えめにフェードインさせるラッパー */
+/**
+ * スクロールで表示領域に入ったらフェードインさせるラッパー。
+ * stagger を指定すると直下の子要素が順に浮かび上がる。
+ */
 export default function Reveal({
   children,
   className = "",
+  stagger = false,
 }: {
   children: ReactNode;
   className?: string;
+  stagger?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,7 +34,7 @@ export default function Reveal({
   }, []);
 
   return (
-    <div ref={ref} className={`reveal ${className}`}>
+    <div ref={ref} className={`${stagger ? "stagger" : "reveal"} ${className}`}>
       {children}
     </div>
   );
