@@ -1,3 +1,10 @@
+# CI: lint + build + Playwright E2E スモークテスト
+#
+# アプリ(package.json)がまだ存在しない場合は全ステップをスキップして
+# green で終わる。アプリ側に必要な npm scripts:
+#   - lint     : 静的解析
+#   - build    : プロダクションビルド
+#   - test:e2e : Playwright E2E テスト(playwright.config.ts を想定)
 name: CI
 
 on:
@@ -13,29 +20,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # アプリ未実装のリポジトリでは以降を skip(CI は green のまま)
+      - name: Detect app
+        id: app
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "package.json not found — skipping CI steps."
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.app.outputs.exists == 'true'
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
+        if: steps.app.outputs.exists == 'true'
         run: npm ci
 
       - name: Lint
+        if: steps.app.outputs.exists == 'true'
         run: npm run lint
 
       - name: Build
+        if: steps.app.outputs.exists == 'true'
         run: npm run build
 
       - name: Install Playwright browser
+        if: steps.app.outputs.exists == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke tests
+        if: steps.app.outputs.exists == 'true'
         run: npm run test:e2e
 
       # スクリーンショット付きレポート。Actions の Artifacts からダウンロードして目視確認できる。
       - name: Upload Playwright report
-        if: always()
+        if: always() && steps.app.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
