@@ -1,0 +1,22 @@
+[
+  {
+    "date": "2026-07-24",
+    "macrostructure": "Split Studio",
+    "theme": "Studio",
+    "theme_axes": "light / high-contrast-serif / chromatic-green",
+    "nav": "N9 Edge-aligned minimal",
+    "footer": "Ft5 Statement",
+    "enrichment": "none",
+    "brief": "石田拓也 · ビジネス相手向け（信頼性と親近感）/business"
+  },
+  {
+    "date": "2026-07-24",
+    "macrostructure": "Long Document",
+    "theme": "Almanac",
+    "theme_axes": "light / grotesk-sans / cool",
+    "nav": "N3 Side-rail（索引レール版）",
+    "footer": "Ft4 Dense typographic",
+    "enrichment": "none",
+    "brief": "石田拓也 · エンジニア向け職務経歴書 /engineer"
+  }
+]

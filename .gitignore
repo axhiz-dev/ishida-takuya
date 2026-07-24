@@ -41,3 +41,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# E2E が生成するキャプチャと PDF（CI では Artifacts から取得する）
+/screenshots/

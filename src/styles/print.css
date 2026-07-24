@@ -1,0 +1,72 @@
+/* 印刷。職務経歴書として刷ったときに読めることを最優先する。
+ *
+ * 各コンポーネントの印刷時レイアウトは、CSS Modules 側の
+ * @media print ブロックに置いてある（クラス名がハッシュ化されるため）。
+ * ここには @page と、要素セレクタで書ける全体の設定だけを置く。 */
+
+@page {
+  size: A4;
+  margin: 14mm 14mm 16mm;
+}
+
+@media print {
+  /* 紙は白黒で刷られる前提。画面用の色トークンをまとめてモノクロに寄せる。
+     個別のコンポーネントで色を上書きせずに済むよう、ここで一括で差し替える。
+     tokens.css より後に読み込まれるので、同じ詳細度でも後勝ちで効く。 */
+  :root,
+  [data-theme] {
+    --color-paper: #fff;
+    --color-paper-2: #fff;
+    --color-paper-3: #eee;
+    --color-rule: #c4c4c4;
+    --color-rule-2: #666;
+    --color-muted: #555;
+    --color-neutral: #333;
+    --color-ink-2: #111;
+    --color-ink: #000;
+    --color-accent: #000;
+    --shadow-card: none;
+  }
+
+  html,
+  body {
+    /* 画面用の overflow-x: clip を必ず解除する。
+       root に overflow が効いたままだと Chrome は 1 ページ目しか印刷しない。 */
+    overflow: visible;
+    height: auto;
+    background: #fff;
+    color: #000;
+    /* 紙は白黒で刷られる前提。色ではなく罫線と余白で構造を出す。 */
+    font-size: 9.5pt;
+    line-height: 1.65;
+  }
+
+  /* 見出しの直後で改ページしない */
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+    color: #000;
+  }
+
+  /* 段落や表の行を途中で割らない */
+  p,
+  li,
+  tr,
+  blockquote,
+  figure {
+    break-inside: avoid;
+  }
+
+  /* 画面用の入場アニメーションは紙では無意味 */
+  .enter {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .skip-link {
+    display: none;
+  }
+}
