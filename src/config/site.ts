@@ -35,13 +35,21 @@ export const ROUTES = {
     title: "職務経歴 — 石田拓也",
     description:
       "石田拓也の職務経歴書。担当領域・技術スタック・意思決定の記録をこの 1 ページにまとめています。",
-    /** 左レールの目次。id は各 <section> の id と一致させる。 */
+    /**
+     * 章。id は各 <section> の id と一致させる。
+     *
+     * `snap: true` の章は 1 画面に収まり、スクロールで引っかかる。
+     * 中身の詰まった章（経歴・事例）は `snap: false` にして
+     * 内部を普通にスクロールさせる。ここを間違えると読者と戦うことになる。
+     *
+     * **章を足したいときはこの配列に 1 行足すだけでよい。**
+     */
     sections: [
-      { id: "summary", label: "要約" },
-      { id: "career", label: "職務経歴" },
-      { id: "skills", label: "スキル" },
-      { id: "cases", label: "事例" },
-      { id: "contact", label: "連絡先" },
+      { id: "intro", no: "00", label: "はじめに", snap: true },
+      { id: "stack", no: "01", label: "スタック", snap: true },
+      { id: "work", no: "02", label: "経歴", snap: false },
+      { id: "cases", no: "03", label: "事例", snap: false },
+      { id: "contact", no: "04", label: "連絡先", snap: true },
     ],
   },
   business: {

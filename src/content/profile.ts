@@ -4,8 +4,12 @@ export const profile: Profile = {
   name: "石田 拓也",
   nameLatin: "Takuya Ishida",
   role: "ソフトウェアエンジニア",
-  headline:
-    "プロダクトの手ざわりと、それを支える設計の両方をやります。フロントエンドが主戦場です。",
+  // mark は text に含まれる短い語を指す。画面で一番大きい声はここ 1 箇所だけ。
+  headline: {
+    text: "手ざわりのいい画面を、ちゃんと動く形でつくります。",
+    mark: "手ざわり",
+  },
+  lede: "プロダクトの見た目と、それを支える設計の両方をやります。フロントエンドが主戦場です。",
   location: "東京",
 
   status: {

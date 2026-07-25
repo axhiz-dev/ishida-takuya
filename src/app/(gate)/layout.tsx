@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { gateFonts } from "@/lib/fonts";
+import { fontVariables } from "@/lib/fonts";
+import { NO_JS_INIT_SCRIPT } from "@/lib/theme";
 import { ROUTES, SITE_URL } from "@/config/site";
 import "@/styles/tokens.css";
 import "@/styles/base.css";
@@ -19,8 +20,10 @@ export const metadata: Metadata = {
 
 export default function GateLayout({ children }: { children: React.ReactNode }) {
   return (
-    // フォント変数のクラスは data-theme と同じ要素に置く（(business)/layout.tsx を参照）
-    <html lang="ja" data-theme="gate" className={gateFonts}>
+    <html lang="ja" data-theme="gate" className={`no-js ${fontVariables}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: NO_JS_INIT_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );

@@ -1,63 +1,94 @@
-/* Hallmark · gate page (章立てを持たない入口) · genre: editorial · theme: Gate
- * audience: 訪問者すべて · use: 2 つの入口のどちらかを選ばせる · tone: quiet
- * anchor hue: cool 250°（+ 予告としての緑 145° を扉 2 に 1 点だけ）
- * enrichment: none (typography only) · motion: enter (load, once) · underline-draw
- * pre-emit critique: P5 H5 E4 S4 R5 V4
+/* Hallmark · gate page（章立てを持たない入口）· genre: editorial
+ * theme: 自前の配色（暗色 + 共通の青 + 予告としての緑）
+ * audience: 訪問者すべて · use: 2 つの入口のどちらかを選ばせる · tone: quiet / crafted
+ * enrichment: カーソル追従のスポットライト（HP3）
+ * motion: ロード時の入場 · カーソル追従 · リンクの下線
+ * pre-emit critique: P5 H5 E4 S4 R5 V5
  *
- * 2 つの扉は、その先のページの書体とアクセント色を先に見せる役割も持つ。
- * 左＝Almanac（モノスペースのラベル・青）／右＝Studio（セリフ・緑）。
+ * 2 つの扉は、その先のページのテーマ（ダーク / ライト）を予告する役割も持つ。
  */
 
+.stage {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ══ カーソル追従のスポットライト ════════════════
+   「進みたいほうに光を当てる」という意味を持たせている。
+   追従が無効なとき（タッチ・モーション低減）は静的な光になる。 */
+
+.light {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    38rem 38rem at 50% 30%,
+    color-mix(in oklab, var(--color-accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
+.stage[data-spotlight] .light {
+  background: radial-gradient(
+    32rem 32rem at var(--mx, 50%) var(--my, 40%),
+    color-mix(in oklab, var(--color-accent) 20%, transparent),
+    transparent 68%
+  );
+}
+
+/* ══ 骨格 ════════════════════════════════════════ */
+
 .gate {
+  position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: var(--space-3xl);
-  min-height: 100dvh;
+  gap: var(--space-2xl);
+  min-height: 100svh;
   width: 100%;
   max-width: var(--page-max);
   margin-inline: auto;
-  padding: var(--space-3xl) var(--page-gutter) var(--space-xl);
+  padding: var(--space-2xl) var(--page-gutter) var(--space-xl);
 }
 
-/* ══ 名前 ══════════════════════════════════════ */
+/* ══ 名前と宣言 ══════════════════════════════════ */
 
 .head {
   display: grid;
-  gap: var(--space-xs);
+  gap: var(--space-lg);
+  max-width: 46rem;
 }
 
 .name {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-md);
-  font-size: var(--text-display);
-  font-weight: 400;
-  font-variation-settings: "opsz" 144, "SOFT" 30;
-  line-height: var(--lh-tight);
-  letter-spacing: var(--tracking-display);
-}
-
-.nameLatin {
+  align-items: center;
+  gap: var(--space-sm);
   font-family: var(--font-label);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   letter-spacing: var(--tracking-label);
   color: var(--color-muted);
 }
 
-.role {
-  font-family: var(--font-label);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  color: var(--color-neutral);
+.nameLatin {
+  color: var(--color-accent-2);
 }
 
-/* ══ 2 つの扉 ══════════════════════════════════ */
+.statement {
+  font-size: clamp(1.75rem, 3.2vw + 0.5rem, 3.25rem);
+  font-variation-settings: "wdth" 82, "opsz" 72;
+  line-height: 1.32;
+  letter-spacing: var(--tracking-display);
+}
+
+/* ══ 2 つの扉 ════════════════════════════════════ */
 
 .doors {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   align-content: center;
   align-items: stretch;
 }
@@ -68,28 +99,34 @@
   gap: var(--space-sm);
   padding: var(--space-xl);
   border: var(--rule-fine) solid var(--color-rule);
-  background: var(--color-paper-2);
+  border-radius: var(--radius-card);
+  background: color-mix(in oklab, var(--color-paper-2) 70%, transparent);
+  backdrop-filter: blur(6px);
   transition:
     border-color var(--dur-short) var(--ease-out),
-    background-color var(--dur-short) var(--ease-out);
+    background-color var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out);
 }
 
 .door:hover {
-  border-color: var(--color-ink);
-  background: var(--color-paper);
+  border-color: var(--color-rule-2);
+  background: var(--color-paper-2);
+  transform: translateY(-2px);
 }
 
 .door:active {
-  background: var(--color-paper-3);
+  transform: translateY(0);
 }
 
 .doorLabel {
+  font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
-  color: var(--color-muted);
 }
 
 .doorTitle {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
   line-height: var(--lh-snug);
   letter-spacing: var(--tracking-tight);
 }
@@ -98,7 +135,7 @@
   max-width: 30ch;
   padding-block: var(--space-2xs) var(--space-lg);
   font-size: var(--text-sm);
-  color: var(--color-ink-2);
+  color: var(--color-muted);
 }
 
 .doorFoot {
@@ -118,51 +155,40 @@
   color: var(--color-muted);
 }
 
-/* 矢印だけが動く。カード自体は拡大させない。 */
+/* 矢印だけが動く。カード全体を拡大しない。 */
 .doorArrow {
   transition: transform var(--dur-short) var(--ease-out);
 }
 
 .door:hover .doorArrow {
-  transform: translateX(4px);
+  transform: translateX(5px);
 }
 
-/* ── 扉 1：Almanac の予告（モノスペース・青） ── */
+/* ── 扉 1：ダークの予告（青） ── */
 
-.door[data-kind="engineer"] .doorLabel {
-  font-family: var(--font-label);
-  color: var(--color-accent);
-}
-
-.door[data-kind="engineer"] .doorTitle {
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: var(--text-xl);
-}
-
+.door[data-kind="engineer"] .doorLabel,
 .door[data-kind="engineer"] .doorArrow {
   color: var(--color-accent);
 }
 
-/* ── 扉 2：Studio の予告（セリフ・緑） ── */
-
-.door[data-kind="business"] .doorLabel {
-  font-family: var(--font-label);
-  color: var(--color-accent-2);
-}
-
-.door[data-kind="business"] .doorTitle {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-variation-settings: "opsz" 72, "SOFT" 30;
+.door[data-kind="engineer"] .doorTitle {
+  font-variation-settings: "wdth" 80, "opsz" 40;
   font-size: var(--text-2xl);
 }
 
+/* ── 扉 2：ライトの予告（緑） ── */
+
+.door[data-kind="business"] .doorLabel,
 .door[data-kind="business"] .doorArrow {
   color: var(--color-accent-2);
 }
 
-/* ══ 足元 ══════════════════════════════════════ */
+.door[data-kind="business"] .doorTitle {
+  font-variation-settings: "wdth" 100, "opsz" 32;
+  font-size: var(--text-xl);
+}
+
+/* ══ 足元 ════════════════════════════════════════ */
 
 .foot {
   display: flex;
@@ -210,8 +236,8 @@
 
 @media (width < 52rem) {
   .gate {
-    gap: var(--space-2xl);
-    padding-top: var(--space-2xl);
+    gap: var(--space-xl);
+    padding-top: var(--space-xl);
   }
 
   .doors {
@@ -225,5 +251,11 @@
 
   .doorBody {
     padding-bottom: var(--space-md);
+  }
+}
+
+@media print {
+  .light {
+    display: none;
   }
 }

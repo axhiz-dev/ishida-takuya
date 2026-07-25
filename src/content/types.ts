@@ -27,13 +27,25 @@ export type Link = {
 
 /* ────────────────────────────── プロフィール ── */
 
+/**
+ * 見出しの中の 1 語だけ背後に色帯を敷く。
+ * `mark` は `text` に含まれる部分文字列を指す。含まれていなければ帯は出ない。
+ * 画面で一番大きい声を 1 箇所だけ作るための仕掛けなので、短い語を選ぶこと。
+ */
+export type MarkedText = {
+  text: string;
+  mark: string;
+};
+
 export type Profile = {
   name: string;
   nameLatin: string;
   /** 「フルスタックエンジニア」など。 */
   role: string;
-  /** 1 行で何をする人か。 */
-  headline: string;
+  /** 冒頭の宣言。1 語だけ強調される。 */
+  headline: MarkedText;
+  /** 宣言の下に続く 1〜2 文。 */
+  lede: string;
   location: string;
   /** 現在の状況。採用側が最初に知りたい情報。 */
   status: {
@@ -97,6 +109,12 @@ export type Skill = {
   years?: number;
   /** 「どこで使ったか」。自己申告だけにしないための根拠。 */
   evidence?: string;
+  /**
+   * ロゴの差し替え。通常は name から自動で引けるので不要。
+   * 表示名と対応表のキーがずれるときだけ指定する。
+   * 対応表は src/components/icons/registry.ts。
+   */
+  icon?: string;
 };
 
 export type SkillGroup = {

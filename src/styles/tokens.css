@@ -6,11 +6,18 @@
  * 生の oklch()・hex・font-family をコンポーネント側に書かないこと。
  *
  * テーマは <html data-theme="..."> で切り替える。
- *   almanac … /engineer  light · grotesk-sans · cool（青 250°）
- *   studio  … /business  light · high-contrast-serif · chromatic-green（145°）
+ *   engineer-dark   /engineer 既定    ほぼ黒（純黒ではない）
+ *   engineer-light  /engineer 切替後  ほぼ白
+ *   business        /business 固定    ほぼ白・少し暖かい
+ *   gate            /                 両者の中間
  *
- * 2 テーマは Hallmark の theme-diversification rule に対して
- * 「display style」と「accent hue」の 2 軸で異なる（必要条件は 1 軸）。
+ * 配色の方針：
+ *   青をサイト共通の identity にして「同じ人が作った」を担保し、
+ *   副色でページの温度を分ける（engineer = 琥珀 / business = 緑）。
+ *   アクセントは 1 ページ 2 色まで。
+ *
+ *   技術ロゴのブランド色は「テーマのアクセント」ではなく
+ *   「コンテンツが持つ色」として扱う。面積制限は青と副色にのみ適用する。
  */
 
 :root {
@@ -27,11 +34,14 @@
   --space-4xl: 9rem;
 
   /* ── ページ寸法 ──────────────────────────────── */
-  --page-max: 78rem;
-  --page-gutter: clamp(1.25rem, 4vw, 3rem);
+  --page-max: 80rem;
+  --page-gutter: clamp(1.25rem, 4vw, 3.5rem);
   --measure: 62ch;
-  --rule-hair: 0.5px;
+  --rule-hair: 1px;
   --rule-fine: 1px;
+
+  /* 章の最低高さ。scroll-snap の 1 コマ分。 */
+  --chapter-min-h: 100svh;
 
   /* ── モーション ──────────────────────────────── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -49,101 +59,15 @@
   --z-sticky-nav: 300;
   --z-modal: 400;
 
-  /* ページ内 sticky が nav の下に潜るためのオフセット */
   --banner-height: 0px;
 
-  /* ── 形：既定は角なし。テーマごとに上書き ─────────── */
-  --radius-card: 0;
-  --radius-pill: 0;
-  --radius-input: 0;
+  /* ── 形 ──────────────────────────────────────── */
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --radius-input: 8px;
   --shadow-card: none;
-}
 
-/* ══════════════════════════════════════════════════
-   ALMANAC — /engineer
-   年鑑・リファレンス本のレジスタ。密度が高く、表と相性がいい。
-   paper: light(94%) · display: grotesk-sans · accent: cool 250°
-   ══════════════════════════════════════════════════ */
-
-[data-theme="almanac"] {
-  color-scheme: light;
-
-  --color-paper: oklch(94% 0.008 245);
-  --color-paper-2: oklch(91% 0.01 245);
-  --color-paper-3: oklch(86% 0.012 240);
-  --color-rule: oklch(74% 0.012 240);
-  --color-rule-2: oklch(38% 0.018 240);
-  --color-muted: oklch(46% 0.014 245);
-  --color-neutral: oklch(28% 0.016 245);
-  --color-ink-2: oklch(20% 0.018 245);
-  --color-ink: oklch(16% 0.02 245);
-  --color-accent: oklch(38% 0.135 250);
-  --color-accent-ink: oklch(97% 0.006 245);
-  --color-focus: oklch(38% 0.135 250);
-
-  --font-display: var(--font-grotesk), var(--font-jp-sans), ui-sans-serif, sans-serif;
-  --font-body: var(--font-grotesk), var(--font-jp-sans), ui-sans-serif, sans-serif;
-  --font-label: var(--font-mono-label), var(--font-jp-sans), ui-monospace, monospace;
-  --font-mono: var(--font-mono-label), ui-monospace, monospace;
-
-  --display-weight: 600;
-  --body-weight: 400;
-
-  --text-xs: 0.6875rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-md: 1.0625rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 1.875rem;
-  --text-display: clamp(2.25rem, 3.5vw + 1rem, 3.75rem);
-  --text-display-s: clamp(1.5rem, 2vw + 1rem, 2.25rem);
-
-  --tracking-display: -0.014em;
-  --tracking-tight: -0.005em;
-  --tracking-label: 0.08em;
-
-  --lh-tight: 1.14;
-  --lh-snug: 1.3;
-  --lh-normal: 1.72;
-  --lh-relaxed: 1.85;
-
-  --section-gap: 5.5rem;
-  --measure: 66ch;
-  --page-max: 84rem;
-}
-
-/* ══════════════════════════════════════════════════
-   STUDIO — /business
-   独立した作り手のレジスタ。静かで、余白が広い。
-   paper: light(96.5%) · display: high-contrast-serif · accent: green 145°
-   ══════════════════════════════════════════════════ */
-
-[data-theme="studio"] {
-  color-scheme: light;
-
-  --color-paper: oklch(96.5% 0.006 200);
-  --color-paper-2: oklch(93.5% 0.007 200);
-  --color-paper-3: oklch(89% 0.01 200);
-  --color-rule: oklch(82% 0.008 200);
-  --color-rule-2: oklch(68% 0.01 200);
-  --color-muted: oklch(48% 0.012 205);
-  --color-neutral: oklch(34% 0.016 205);
-  --color-ink-2: oklch(22% 0.02 205);
-  --color-ink: oklch(13% 0.024 205);
-  --color-accent: oklch(46% 0.14 145);
-  --color-accent-ink: oklch(98% 0.006 200);
-  --color-focus: oklch(46% 0.14 145);
-
-  --font-display: var(--font-serif-display), var(--font-jp-serif), ui-serif, Georgia, serif;
-  --font-body: var(--font-sans-body), var(--font-jp-sans), ui-sans-serif, system-ui, sans-serif;
-  /* ラベルも本文と同じ書体。ビジネス相手にモノスペースは冷たい。
-     区別は大きさとトラッキングで付ける（2 書体に抑える）。 */
-  --font-label: var(--font-sans-body), var(--font-jp-sans), ui-sans-serif, sans-serif;
-
-  --display-weight: 400;
-  --body-weight: 400;
-
+  /* ── 文字サイズ：低密度に振るので大きめ ──────────── */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -151,77 +75,166 @@
   --text-lg: 1.375rem;
   --text-xl: 1.75rem;
   --text-2xl: 2.25rem;
-  --text-display: clamp(2.5rem, 4.5vw + 1rem, 4.75rem);
-  --text-display-s: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+  --text-3xl: 3rem;
+  --text-display: clamp(2.75rem, 6vw + 0.5rem, 5.5rem);
+  --text-display-s: clamp(1.875rem, 3vw + 1rem, 3rem);
 
-  --tracking-display: -0.022em;
-  --tracking-tight: -0.01em;
-  --tracking-label: 0.1em;
+  --tracking-display: -0.03em;
+  --tracking-tight: -0.012em;
+  --tracking-normal: 0;
+  --tracking-label: 0.14em;
 
-  --lh-tight: 1.1;
-  --lh-snug: 1.28;
+  --lh-tight: 1.06;
+  --lh-snug: 1.25;
   --lh-normal: 1.8;
   --lh-relaxed: 1.9;
 
-  --section-gap: 6.5rem;
-  --measure: 60ch;
-  --page-max: 80rem;
+  --section-gap: 7rem;
 
-  --radius-card: 6px;
-  --radius-pill: 4px;
-  --radius-input: 4px;
-  --shadow-card: 0 1px 2px oklch(20% 0.014 205 / 0.05);
+  /* Bricolage の可変軸。見出しの大きさに応じて字面を締める。 */
+  --display-wdth: 100;
+  --display-opsz: 24;
+}
+
+/* ══════════════════════════════════════════════════
+   ENGINEER — ダーク（既定）
+   ほぼ黒。ただし純黒ではなく、寒色のヒューを持たせる。
+   青 = 共通 identity ／ 琥珀 = このページの副色
+   ══════════════════════════════════════════════════ */
+
+[data-theme="engineer-dark"] {
+  color-scheme: dark;
+
+  --color-paper: oklch(17% 0.014 265);
+  --color-paper-2: oklch(21% 0.016 265);
+  --color-paper-3: oklch(25% 0.018 265);
+  --color-rule: oklch(27% 0.014 265);
+  --color-rule-2: oklch(52% 0.018 260);
+  --color-muted: oklch(72% 0.016 255);
+  --color-neutral: oklch(83% 0.012 252);
+  --color-ink-2: oklch(90% 0.010 250);
+  --color-ink: oklch(95% 0.008 250);
+
+  --color-accent: oklch(72% 0.16 250);
+  --color-accent-2: oklch(80% 0.13 70);
+  --color-accent-ink: oklch(17% 0.014 265);
+  --color-mark: oklch(34% 0.085 250);
+  --color-focus: oklch(80% 0.13 70);
+
+  /* ダークではロゴの地に敷く面がないと沈むので、専用の受け皿を持つ */
+  --color-chip: oklch(23% 0.017 265);
+
+  /* ダークは本文ウェイトを 50 落とす（Hallmark のダークレシピ） */
+  --body-weight: 350;
+  --display-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════
+   ENGINEER — ライト（切り替え後）
+   同じ骨格・同じアクセントのヒューで、地を反転させる。
+   ══════════════════════════════════════════════════ */
+
+[data-theme="engineer-light"] {
+  color-scheme: light;
+
+  --color-paper: oklch(97% 0.006 250);
+  --color-paper-2: oklch(94% 0.008 250);
+  --color-paper-3: oklch(90% 0.010 250);
+  --color-rule: oklch(89% 0.008 250);
+  --color-rule-2: oklch(58% 0.014 252);
+  --color-muted: oklch(46% 0.018 258);
+  --color-neutral: oklch(34% 0.020 260);
+  --color-ink-2: oklch(27% 0.020 260);
+  --color-ink: oklch(20% 0.020 260);
+
+  --color-accent: oklch(45% 0.17 250);
+  --color-accent-2: oklch(52% 0.14 65);
+  --color-accent-ink: oklch(98% 0.005 250);
+  --color-mark: oklch(88% 0.075 250);
+  --color-focus: oklch(45% 0.17 250);
+
+  --color-chip: oklch(94% 0.008 250);
+
+  --body-weight: 400;
+  --display-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════
+   BUSINESS — ライト固定
+   同じ青を共有しつつ、副色を緑にして静けさを残す。
+   事業側の相手に切り替えを出す理由がないので 1 テーマだけ。
+   ══════════════════════════════════════════════════ */
+
+[data-theme="business"] {
+  color-scheme: light;
+
+  --color-paper: oklch(97% 0.008 235);
+  --color-paper-2: oklch(94% 0.010 235);
+  --color-paper-3: oklch(90% 0.012 235);
+  --color-rule: oklch(87% 0.010 235);
+  --color-rule-2: oklch(58% 0.016 240);
+  --color-muted: oklch(47% 0.022 245);
+  --color-neutral: oklch(35% 0.026 245);
+  --color-ink-2: oklch(28% 0.028 245);
+  --color-ink: oklch(21% 0.030 245);
+
+  --color-accent: oklch(44% 0.17 250);
+  --color-accent-2: oklch(45% 0.13 152);
+  --color-accent-ink: oklch(98% 0.006 235);
+  --color-mark: oklch(89% 0.060 250);
+  --color-focus: oklch(44% 0.17 250);
+
+  --color-chip: oklch(94% 0.010 235);
+
+  --body-weight: 400;
+  --display-weight: 500;
+
+  /* 事業側は密度を上げすぎない */
+  --measure: 58ch;
+  --section-gap: 8rem;
 }
 
 /* ══════════════════════════════════════════════════
    GATE — /
-   両テーマの中間。青みのニュートラル紙に、
-   左右それぞれのアクセントを 1 点ずつ置いて予告にする。
+   両ページの中間。扉ごとに行き先のアクセントを 1 点ずつ置く。
    ══════════════════════════════════════════════════ */
 
 [data-theme="gate"] {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --color-paper: oklch(95.5% 0.006 230);
-  --color-paper-2: oklch(92.5% 0.008 230);
-  --color-paper-3: oklch(88% 0.01 230);
-  --color-rule: oklch(80% 0.01 230);
-  --color-rule-2: oklch(60% 0.012 230);
-  --color-muted: oklch(47% 0.013 230);
-  --color-neutral: oklch(32% 0.016 230);
-  --color-ink-2: oklch(21% 0.018 230);
-  --color-ink: oklch(15% 0.02 230);
-  --color-accent: oklch(38% 0.135 250);
-  --color-accent-2: oklch(46% 0.14 145);
-  --color-accent-ink: oklch(97% 0.006 230);
-  --color-focus: oklch(38% 0.135 250);
+  --color-paper: oklch(19% 0.016 262);
+  --color-paper-2: oklch(23% 0.018 262);
+  --color-paper-3: oklch(27% 0.020 262);
+  --color-rule: oklch(29% 0.016 262);
+  --color-rule-2: oklch(54% 0.018 258);
+  --color-muted: oklch(74% 0.016 254);
+  --color-neutral: oklch(84% 0.012 252);
+  --color-ink-2: oklch(91% 0.010 250);
+  --color-ink: oklch(96% 0.008 250);
 
-  --font-display: var(--font-serif-display), var(--font-jp-serif), ui-serif, Georgia, serif;
-  --font-body: var(--font-grotesk), var(--font-jp-sans), ui-sans-serif, sans-serif;
-  --font-label: var(--font-mono-label), var(--font-jp-sans), ui-monospace, monospace;
+  --color-accent: oklch(72% 0.16 250);
+  --color-accent-2: oklch(74% 0.14 152);
+  --color-accent-ink: oklch(19% 0.016 262);
+  --color-mark: oklch(35% 0.085 250);
+  --color-focus: oklch(80% 0.13 70);
 
-  --display-weight: 400;
-  --body-weight: 400;
+  --color-chip: oklch(25% 0.019 262);
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-md: 1.125rem;
-  --text-lg: 1.375rem;
-  --text-xl: 1.625rem;
-  --text-2xl: 2rem;
-  --text-display: clamp(2.25rem, 4vw + 1rem, 3.75rem);
-  --text-display-s: clamp(1.5rem, 2vw + 1rem, 2rem);
+  --body-weight: 350;
+  --display-weight: 600;
 
-  --tracking-display: -0.02em;
-  --tracking-tight: -0.008em;
-  --tracking-label: 0.1em;
+  --measure: 52ch;
+  --page-max: 74rem;
+}
 
-  --lh-tight: 1.12;
-  --lh-snug: 1.3;
-  --lh-normal: 1.75;
-  --lh-relaxed: 1.85;
+/* ══════════════════════════════════════════════════
+   書体
+   3 役割 = Hallmark の 2+1 ルールの上限。
+   和文は各役割のスクリプト相方なので役割は増えない。
+   ══════════════════════════════════════════════════ */
 
-  --measure: 56ch;
-  --page-max: 72rem;
+:root {
+  --font-display: var(--font-bricolage), var(--font-jp-display), ui-sans-serif, sans-serif;
+  --font-body: var(--font-geist), var(--font-jp-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-mono), var(--font-jp-sans), ui-monospace, monospace;
 }

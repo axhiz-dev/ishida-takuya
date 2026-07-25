@@ -11,6 +11,7 @@
 html {
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
+  background: var(--color-paper);
 }
 
 body {
@@ -25,9 +26,9 @@ body {
   letter-spacing: var(--tracking-tight);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* 和文の約物を詰める。 */
+  /* 和文の約物を詰める */
   font-feature-settings: "palt" 1;
-  /* 和文を文節で折り返す。非対応ブラウザは従来どおりの折り返しになるだけ。 */
+  /* 和文を文節で折り返す。非対応ブラウザは従来どおり */
   word-break: auto-phrase;
 }
 
@@ -51,12 +52,13 @@ h4 {
   font-family: var(--font-display);
   font-weight: var(--display-weight);
   font-style: normal;
+  font-variation-settings:
+    "wdth" var(--display-wdth),
+    "opsz" var(--display-opsz);
   line-height: var(--lh-snug);
   letter-spacing: var(--tracking-tight);
-  /* 長い英単語や URL が行から溢れないように */
   overflow-wrap: anywhere;
   min-width: 0;
-  /* 見出しは行数のバランスを取り、最終行だけ 1 語になるのを避ける */
   text-wrap: balance;
 }
 
@@ -92,7 +94,6 @@ table {
   width: 100%;
 }
 
-/* 数字が並ぶところは必ず等幅数字にする */
 .tnum,
 table,
 time {
@@ -104,7 +105,7 @@ time {
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 3px;
-  border-radius: 1px;
+  border-radius: 2px;
 }
 
 :focus:not(:focus-visible) {
@@ -113,7 +114,7 @@ time {
 
 /* ── スキップリンク ─────────────────────────── */
 .skip-link {
-  position: absolute;
+  position: fixed;
   left: var(--space-md);
   top: var(--space-md);
   z-index: var(--z-modal);
@@ -123,28 +124,79 @@ time {
   font-family: var(--font-label);
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-label);
-  transform: translateY(-200%);
+  border-radius: var(--radius-input);
+  transform: translateY(-300%);
 }
 
 .skip-link:focus-visible {
   transform: translateY(0);
 }
 
-/* ── ページロード時の入場 ─────────────────────
-   1 回だけ・上部のブロックだけ。
-   「全セクションがスクロールでフェードイン」は Hallmark の禁止事項なので、
-   スクロール連動の装飾アニメーションは一切使わない。 */
+/* ══ 1 語の背後に敷くハイライト帯 ═══════════════
+   x-height の背後に置く。baseline に置くと太い下線に見える。 */
+.mark {
+  /* 和文は欧文のような x-height を持たないので、欧文向けの
+     「16%〜92%」だと字面をほぼ覆って蛍光ペンの塊に見える。
+     少し下げて低くし、文字が帯に乗っている状態にする。 */
+  --mark-top: 26%;
+  --mark-bottom: 90%;
+  background-image: linear-gradient(
+    180deg,
+    transparent var(--mark-top),
+    var(--color-mark) var(--mark-top),
+    var(--color-mark) var(--mark-bottom),
+    transparent var(--mark-bottom)
+  );
+  /* 帯が文字にぴったり過ぎると窮屈なので、左右にだけ余白を足す */
+  padding-inline: 0.16em;
+  margin-inline: -0.04em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ══ 章の入場 ═══════════════════════════════════
+   1 スクロール = 1 章という構造では、各章は事実上それぞれが 1 ページ。
+   なので章に入ったときの入場は「ページロード時の 1 回」に相当する。
+   ただし歯止めを 3 つ入れる：
+     · 入場するのはその章の最上位 2〜3 要素だけ
+     · 1 回だけ。戻ってきても再生しない（JS 側で unobserve）
+     · 合計のずらしは 500ms 以内 */
 .enter {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(10px);
+}
+
+[data-entered="true"] .enter,
+.enter[data-entered="true"] {
   animation: enter var(--dur-long) var(--ease-out) forwards;
-  animation-delay: calc(var(--i, 0) * 60ms);
+  animation-delay: calc(var(--i, 0) * 70ms);
 }
 
 @keyframes enter {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* JS が無効／失敗しても内容は必ず見えること */
+.no-js .enter {
+  opacity: 1;
+  transform: none;
+}
+
+/* ══ scroll-snap（/engineer の章立て） ═══════════
+   引っかかりは proximity に留める。mandatory にすると
+   流し読みしたい採用担当と戦うことになる。
+   逃げ道を 3 重に用意する：
+     · 内容の詰まった章には scroll-snap-align を付けない
+     · ビューポート高が 640px 未満なら切る
+     · モーション低減時は切る（下の @media でも上書きしている） */
+
+@media (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+  html[data-theme^="engineer"] {
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
   }
 }
 
@@ -159,8 +211,16 @@ time {
     scroll-behavior: auto !important;
   }
 
+  html {
+    scroll-snap-type: none !important;
+  }
+
   .enter {
     transform: none;
+  }
+
+  [data-entered="true"] .enter,
+  .enter[data-entered="true"] {
     animation-name: enter-reduced;
   }
 

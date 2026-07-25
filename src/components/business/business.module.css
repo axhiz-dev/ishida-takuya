@@ -1,17 +1,16 @@
-/* Hallmark · macrostructure: Split Studio · genre: editorial · theme: Studio
- * nav: N9 Edge-aligned minimal · CTA: C1 Outlined chip
- * proof: T1 Pull-quote with marginalia · footer: Ft5 Statement
- * audience: 事業側の意思決定者・現場担当 · use: 相談してよい相手か判断させる · tone: quiet / confident
- * anchor hue: chromatic-green 145° · enrichment: none (typography only)
- * motion: enter (load, once) · underline-draw · chip-press
- * pre-emit critique: P5 H4 E4 S4 R5 V4
+/* Hallmark · macrostructure: Feature Stack（左が固定・右がスクロールで入れ替わる）
+ * genre: editorial · theme: 自前の配色（明るい紙 + 共通の青 + 緑）
+ * nav: N5 Floating pill · footer: Ft6 Letter close
+ * audience: 事業側の意思決定者・現場担当 · use: 相談してよい相手か判断させる · tone: quiet / warm
+ * enrichment: none（顔写真は未設定のあいだモノグラム）
+ * motion: ロード時の入場 · スクロール同期の主張切り替え · リンクの下線
+ * pre-emit critique: P5 H4 E4 S4 R5 V5
  *
- * /engineer との差分：macrostructure・nav・footer がすべて別、
- * theme は display style（セリフ ↔ グロテスク）と accent hue（緑 ↔ 青）の 2 軸で異なる。
+ * /engineer とは macrostructure・nav・footer・地の明暗がすべて別。
+ * 共有しているのは書体とアクセントの青だけ — それが「同じ人が作った」の担保。
  */
 
 .page,
-.nav,
 .footer {
   width: 100%;
   max-width: var(--page-max);
@@ -19,26 +18,57 @@
   padding-inline: var(--page-gutter);
 }
 
-/* ══ N9 · Edge-aligned minimal ══════════════════
-   左端と右端だけ。あいだは埋めない — 空きが設計。 */
+/* ══ N5 · 浮遊ピルのナビ ═════════════════════════ */
 
 .nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky-nav);
+  padding: var(--space-md) var(--page-gutter);
+  transition: padding var(--dur-short) var(--ease-out);
+}
+
+.navInner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
-  padding-block: var(--space-lg);
+  width: 100%;
+  max-width: calc(var(--page-max) - var(--page-gutter) * 2);
+  margin-inline: auto;
+  padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) var(--space-lg);
+  border-radius: var(--radius-pill);
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    box-shadow var(--dur-short) var(--ease-out);
+}
+
+/* 少しでもスクロールしたら地色を敷いて、本文と重なっても読めるようにする */
+.nav[data-lifted] .navInner {
+  background: color-mix(in oklab, var(--color-paper) 86%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 2px oklch(20% 0.03 245 / 0.06);
+}
+
+.navBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
 }
 
 .wordmark {
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 40, "SOFT" 30;
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 92, "opsz" 20;
   font-size: var(--text-md);
   letter-spacing: var(--tracking-tight);
   white-space: nowrap;
 }
 
-/* ══ C1 · Outlined chip ════════════════════════ */
+/* ══ 相談ボタン ══════════════════════════════════ */
 
 .chip {
   display: inline-flex;
@@ -46,48 +76,44 @@
   gap: 0.5em;
   min-height: 44px;
   padding: var(--space-xs) var(--space-lg);
-  border: var(--rule-fine) solid var(--color-rule-2);
   border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
   font-size: var(--text-sm);
   white-space: nowrap;
   transition:
-    border-color var(--dur-micro) var(--ease-out),
-    color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
     transform var(--dur-micro) var(--ease-out);
 }
 
 .chip:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  background: var(--color-ink);
 }
 
 .chip:active {
   transform: translateY(1px);
 }
 
-.chip[aria-disabled="true"],
-.chip:disabled {
+.chip[aria-disabled="true"] {
   opacity: 0.55;
   cursor: not-allowed;
-  border-color: var(--color-rule);
-  color: var(--color-muted);
   transform: none;
 }
 
 .chipLarge {
-  min-height: 52px;
+  min-height: 54px;
   padding-inline: var(--space-xl);
   font-size: var(--text-md);
 }
 
-/* ══ 宣言 ══════════════════════════════════════ */
+/* ══ 宣言 ════════════════════════════════════════ */
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
   gap: var(--space-3xl);
   align-items: end;
-  padding-block: var(--space-xl) var(--space-4xl);
+  padding-block: var(--space-4xl) var(--space-4xl);
 }
 
 .heroText {
@@ -96,11 +122,9 @@
 }
 
 .statement {
-  /* content 側が持つ 2 行がそのまま 2 行で収まる大きさに留める。 */
-  font-size: clamp(2.25rem, 3.6vw + 0.75rem, 4rem);
-  font-weight: 400;
-  font-variation-settings: "opsz" 144, "SOFT" 30;
-  line-height: 1.28;
+  font-size: clamp(2rem, 3.6vw + 0.6rem, 3.75rem);
+  font-variation-settings: "wdth" 84, "opsz" 96;
+  line-height: 1.3;
   letter-spacing: var(--tracking-display);
 }
 
@@ -112,21 +136,20 @@
 .lede {
   max-width: var(--measure);
   font-size: var(--text-md);
-  color: var(--color-ink-2);
+  color: var(--color-neutral);
 }
 
 .reassurance {
   padding-left: var(--space-md);
-  border-left: 2px solid var(--color-accent);
+  border-left: 2px solid var(--color-accent-2);
   font-size: var(--text-sm);
-  color: var(--color-neutral);
+  color: var(--color-muted);
 }
 
 .heroAside {
   justify-self: end;
   width: 100%;
-  /* 宣言のブロックと高さを近づける。差が大きいと下揃えのぶん上が空いて見える。 */
-  max-width: 19rem;
+  max-width: 18rem;
 }
 
 /* ── 顔写真（未設定のあいだはモノグラム） ── */
@@ -142,7 +165,6 @@
   aspect-ratio: 4 / 5;
   overflow: hidden;
   background: var(--color-paper-2);
-  border: var(--rule-hair) solid var(--color-rule);
   border-radius: var(--radius-card);
 }
 
@@ -154,12 +176,12 @@
 
 .monogram {
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 30;
-  font-size: clamp(3rem, 8vw, 4.5rem);
+  font-variation-settings: "wdth" 80, "opsz" 96;
+  font-weight: var(--display-weight);
+  font-size: clamp(2.5rem, 7vw, 3.75rem);
   line-height: 1;
-  letter-spacing: 0.1em;
-  text-indent: 0.1em;
-  /* 装飾扱いでも読める濃さにする（コントラスト 3:1 以上） */
+  letter-spacing: 0.08em;
+  text-indent: 0.08em;
   color: var(--color-muted);
 }
 
@@ -180,7 +202,7 @@
   color: var(--color-muted);
 }
 
-/* ══ セクション ═════════════════════════════════ */
+/* ══ セクション ══════════════════════════════════ */
 
 .section {
   padding-bottom: var(--section-gap);
@@ -189,65 +211,91 @@
 .sectionTitle {
   max-width: 22ch;
   margin-bottom: var(--space-lg);
-  font-size: var(--text-xl);
-  font-weight: 400;
-  font-variation-settings: "opsz" 72, "SOFT" 30;
-  line-height: var(--lh-snug);
+  font-size: var(--text-2xl);
+  font-variation-settings: "wdth" 88, "opsz" 40;
+  letter-spacing: var(--tracking-display);
 }
 
 .sectionLede {
   max-width: var(--measure);
   margin-bottom: var(--space-2xl);
-  color: var(--color-ink-2);
+  color: var(--color-neutral);
 }
 
-/* ══ Split Studio の 1 行 ═══════════════════════
-   左に主張、右に証拠。行ごとに入れ替わる。
-   あいだは余白のみ — 罫線は引かない。 */
+/* ══ Feature Stack ═══════════════════════════════
+   左が固定され、右がスクロールで入れ替わる。 */
 
-.rows {
+.stack {
   display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: var(--space-3xl);
+  align-items: start;
   padding-top: var(--space-lg);
 }
 
-.row {
+.claims {
+  position: sticky;
+  top: 9rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--space-2xl);
-  align-items: start;
-}
-
-.row[data-flipped] .claim {
-  order: 2;
+  gap: var(--space-xs);
 }
 
 .claim {
   display: grid;
-  gap: var(--space-sm);
-  align-content: start;
-  padding-top: var(--space-xs);
+  gap: var(--space-3xs);
+  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
+  border-left: 2px solid var(--color-rule);
+  color: var(--color-muted);
+  transition:
+    border-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+
+.claim:hover {
+  color: var(--color-ink);
+}
+
+.claim[data-active] {
+  border-left-color: var(--color-accent-2);
+  color: var(--color-ink);
 }
 
 .claimTitle {
-  max-width: 26ch;
-  font-size: var(--text-lg);
-  font-weight: 400;
-  font-variation-settings: "opsz" 48, "SOFT" 30;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 92, "opsz" 24;
+  font-size: var(--text-md);
   line-height: var(--lh-snug);
 }
 
 .claimFor {
-  font-family: var(--font-label);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  color: var(--color-accent);
+  line-height: 1.7;
+  color: var(--color-muted);
 }
 
-.claimBody {
+.proofs {
+  display: grid;
+  gap: var(--space-4xl);
+}
+
+.proofRow {
+  display: grid;
+  gap: var(--space-lg);
+  align-content: center;
+  scroll-margin-top: 9rem;
+}
+
+/* 広い画面では主張の見出しは左の固定ペインが持つので、
+   ここには本文だけを出す。 */
+.proofClaimTitle,
+.proofClaimFor {
+  display: none;
+}
+
+.proofClaimBody {
   max-width: var(--measure);
-  padding-top: var(--space-2xs);
-  color: var(--color-ink-2);
+  color: var(--color-neutral);
 }
 
 .proof {
@@ -256,26 +304,25 @@
   padding: var(--space-xl);
   background: var(--color-paper-2);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
 }
 
 .proofKind {
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
-  color: var(--color-muted);
+  color: var(--color-accent-2);
 }
 
 .proofTitle {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 92, "opsz" 24;
   font-size: var(--text-md);
-  font-weight: 500;
-  font-family: var(--font-body);
   line-height: var(--lh-snug);
 }
 
 .proofDetail {
   font-size: var(--text-sm);
-  color: var(--color-ink-2);
+  color: var(--color-neutral);
 }
 
 .proofFacts {
@@ -285,7 +332,7 @@
   margin-top: var(--space-2xs);
   border-top: var(--rule-hair) solid var(--color-rule);
   font-size: var(--text-sm);
-  color: var(--color-neutral);
+  color: var(--color-muted);
 }
 
 .proofFacts li {
@@ -297,18 +344,17 @@
   content: "";
   position: absolute;
   left: 0;
-  top: 0.78em;
-  width: 6px;
+  top: 0.85em;
+  width: 7px;
   height: var(--rule-fine);
-  background: var(--color-accent);
+  background: var(--color-accent-2);
 }
 
-/* ══ 進め方 ═════════════════════════════════════ */
+/* ══ 進め方 ══════════════════════════════════════ */
 
 .steps {
   display: grid;
   gap: var(--space-xl);
-  counter-reset: step;
 }
 
 .step {
@@ -322,10 +368,10 @@
 
 .stepNo {
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 72, "SOFT" 30;
+  font-variation-settings: "wdth" 85, "opsz" 40;
+  font-weight: var(--display-weight);
   font-size: var(--text-xl);
   line-height: 1;
-  /* 手順の番号は情報なので、薄くしすぎない（コントラスト 3:1 以上） */
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -337,9 +383,9 @@
 }
 
 .stepTitle {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 92, "opsz" 24;
   font-size: var(--text-md);
-  font-weight: 500;
-  font-family: var(--font-body);
 }
 
 .stepProvide {
@@ -356,7 +402,7 @@
   color: var(--color-muted);
 }
 
-/* ══ T1 · 引用 + 余白に出典 ═════════════════════ */
+/* ══ T1 · 引用 + 余白に出典 ══════════════════════ */
 
 .voices {
   display: grid;
@@ -375,10 +421,10 @@
 .voiceQuote {
   max-width: 46ch;
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 48, "SOFT" 30;
+  font-variation-settings: "wdth" 96, "opsz" 32;
+  font-weight: 400;
   font-size: var(--text-lg);
   line-height: 1.75;
-  text-indent: -0.5em;
 }
 
 .voiceSource {
@@ -398,10 +444,10 @@
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
-  color: var(--color-accent);
+  color: var(--color-accent-2);
 }
 
-/* ══ 費用の目安 ═════════════════════════════════
+/* ══ 費用の目安 ══════════════════════════════════
    3 枚のカードを横に並べない。行として読ませる。 */
 
 .pricing {
@@ -429,10 +475,11 @@
 .tierRange {
   margin: 0;
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 48, "SOFT" 30;
+  font-variation-settings: "wdth" 90, "opsz" 32;
+  font-weight: var(--display-weight);
   font-size: var(--text-lg);
   font-variant-numeric: tabular-nums;
-  color: var(--color-accent);
+  color: var(--color-accent-2);
 }
 
 .tierNote {
@@ -448,7 +495,7 @@
   color: var(--color-neutral);
 }
 
-/* ══ よくある質問 ═══════════════════════════════ */
+/* ══ よくある質問 ════════════════════════════════ */
 
 .faq {
   display: grid;
@@ -467,17 +514,18 @@
 .faqQ {
   margin-bottom: var(--space-xs);
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 48, "SOFT" 30;
+  font-variation-settings: "wdth" 92, "opsz" 24;
+  font-weight: var(--display-weight);
   font-size: var(--text-md);
 }
 
 .faqA {
   margin: 0;
   max-width: var(--measure);
-  color: var(--color-ink-2);
+  color: var(--color-neutral);
 }
 
-/* ══ 締め ═══════════════════════════════════════
+/* ══ 締め ════════════════════════════════════════
    ボタンはひとつ。並べない。 */
 
 .cta {
@@ -489,14 +537,12 @@
 
 .ctaLine {
   max-width: 20ch;
-  overflow-wrap: anywhere;
-  min-width: 0;
-  text-wrap: balance;
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 30;
+  font-variation-settings: "wdth" 86, "opsz" 64;
+  font-weight: var(--display-weight);
   font-size: var(--text-2xl);
   line-height: var(--lh-snug);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: var(--tracking-display);
 }
 
 .ctaNote {
@@ -504,43 +550,44 @@
   color: var(--color-muted);
 }
 
-/* ══ Ft5 · Statement ═══════════════════════════ */
+/* ══ Ft6 · レターの結び ══════════════════════════ */
 
 .footer {
   display: grid;
-  gap: var(--space-xl);
-  padding-block: var(--space-2xl) var(--space-xl);
-  border-top: var(--rule-fine) solid var(--color-rule-2);
+  gap: var(--space-md);
+  padding-block: var(--space-2xl) var(--space-3xl);
+  border-top: var(--rule-fine) solid var(--color-rule);
 }
 
 .footerLine {
-  max-width: 24ch;
-  overflow-wrap: anywhere;
-  min-width: 0;
-  text-wrap: balance;
+  max-width: 26ch;
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 30;
-  font-size: clamp(1.5rem, 3.5vw, 2.75rem);
-  line-height: 1.35;
+  font-variation-settings: "wdth" 88, "opsz" 96;
+  font-weight: var(--display-weight);
+  font-size: clamp(1.375rem, 2.6vw, 2.25rem);
+  line-height: 1.45;
   letter-spacing: var(--tracking-display);
+}
+
+.footerSign {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
 }
 
 .footerMeta {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
   gap: var(--space-sm) var(--space-lg);
   padding-top: var(--space-md);
   border-top: var(--rule-hair) solid var(--color-rule);
   font-size: var(--text-sm);
-  color: var(--color-muted);
 }
 
-/* ══ リンク ═════════════════════════════════════ */
+/* ══ リンク ══════════════════════════════════════ */
 
 .textLink {
   position: relative;
+  color: var(--color-accent);
   white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out);
 }
@@ -558,10 +605,6 @@
   transition: transform var(--dur-short) var(--ease-out);
 }
 
-.textLink:hover {
-  color: var(--color-accent);
-}
-
 .textLink:hover::after {
   transform: scaleX(1);
 }
@@ -570,27 +613,51 @@
    レスポンシブ
    ══════════════════════════════════════════════ */
 
-@media (width < 60rem) {
+@media (width < 64rem) {
   .hero {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2xl);
     align-items: start;
-    padding-block: var(--space-2xl) var(--space-3xl);
+    padding-block: var(--space-3xl);
   }
 
   .heroAside {
     justify-self: start;
-    max-width: 16rem;
+    max-width: 14rem;
   }
 
-  .row {
+  /* 固定ペインをやめ、主張 → 証拠 の縦積みに落とす。
+     狭い画面で左右に分けても読めないため。 */
+  .stack {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-lg);
+    gap: var(--space-2xl);
   }
 
-  /* 縦一列になったら、主張が常に証拠より先に来る */
-  .row[data-flipped] .claim {
-    order: 0;
+  .claims {
+    display: none;
+  }
+
+  .proofs {
+    gap: var(--space-3xl);
+  }
+
+  .proofClaimTitle {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    font-variation-settings: "wdth" 90, "opsz" 32;
+    font-size: var(--text-lg);
+    line-height: var(--lh-snug);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .proofClaimFor {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-family: var(--font-label);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--color-accent-2);
   }
 
   .voice {
@@ -624,29 +691,37 @@
   .proof {
     padding: var(--space-lg);
   }
-
-  .statement {
-    max-width: none;
-  }
 }
 
 /* このページは配布物ではないので、印刷は最低限読める状態にだけする。 */
 @media print {
   .nav,
-  .cta,
-  .footer {
+  .cta {
     display: none;
   }
 
-  .row,
+  .claims {
+    display: none;
+  }
+
+  .stack {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .proofClaimTitle,
+  .proofClaimFor {
+    display: block;
+  }
+
+  .proofRow,
   .voice,
-  .step {
+  .step,
+  .faqItem {
     break-inside: avoid;
   }
 
   .proof {
     background: none;
     border: var(--rule-fine) solid var(--color-rule-2);
-    box-shadow: none;
   }
 }

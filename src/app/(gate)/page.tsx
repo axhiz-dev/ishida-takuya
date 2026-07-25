@@ -1,9 +1,13 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { career, profile, skills } from "@/content";
 import { ROUTES } from "@/config/site";
 import { coreSkills, formatDate, totalExperienceYears } from "@/lib/derive";
+import { useCursorSpotlight } from "@/lib/useCursorSpotlight";
 import { PlaceholderNotice } from "@/components/common/PlaceholderNotice";
+import { MarkedHeading } from "@/components/common/MarkedHeading";
 import styles from "./gate.module.css";
 
 const step = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -12,10 +16,15 @@ const step = (i: number) => ({ "--i": i }) as CSSProperties;
  * 入口。1 画面で完結させる。
  *
  * ここに来た人がやることは「どちらの自分を見せるか」を選ぶことだけなので、
- * 情報は名前・肩書き・行き先 2 つに絞る。それぞれの扉が、
- * その先のページのテーマ（書体とアクセント色）を予告する。
+ * 情報は名前・一行・行き先 2 つに絞る。それぞれの扉が、
+ * その先のページのテーマ（ダーク / ライト）を予告する。
+ *
+ * カーソル追従のスポットライトはこのページだけに置いている。
+ * 「進みたいほうに光を当てる」という意味があるので装飾ではなく、
+ * かつ読ませる面ではないので可読性を邪魔しない。
  */
 export default function GatePage() {
+  const spotlight = useCursorSpotlight<HTMLDivElement>();
   const years = totalExperienceYears(career);
   const core = coreSkills(skills).slice(0, 3);
 
@@ -25,7 +34,7 @@ export default function GatePage() {
       kind: "engineer" as const,
       label: "採用・技術の方へ",
       title: "職務経歴",
-      body: "これまでの担当領域・技術スタック・判断の記録を 1 ページにまとめています。PDF でも出せます。",
+      body: "担当領域・技術スタック・判断の記録。PDF でも出せます。",
       meta: `${years} 年 / ${core.join(" · ")}`,
     },
     {
@@ -33,24 +42,26 @@ export default function GatePage() {
       kind: "business" as const,
       label: "お仕事のご相談の方へ",
       title: "できることと実績",
-      body: "何を頼めて、どう進んで、いくらくらいかかるのか。つくらない相談も承っています。",
+      body: "何を頼めて、どう進んで、いくらくらいかかるのか。",
       meta: "初回 30 分の相談は無料",
     },
   ];
 
   return (
-    <>
-      <PlaceholderNotice />
+    <div className={styles.stage} ref={spotlight}>
+      <div className={styles.light} aria-hidden="true" />
 
       <main className={styles.gate}>
         <header className={styles.head}>
-          <h1 className={`${styles.name} enter`} style={step(0)}>
+          <p className={`${styles.name} enter`} style={step(0)} data-entered="true">
             {profile.name}
             <span className={styles.nameLatin}>{profile.nameLatin}</span>
-          </h1>
-          <p className={`${styles.role} enter`} style={step(1)}>
-            {profile.role}・{profile.location}
+            <PlaceholderNotice />
           </p>
+
+          <h1 className={`${styles.statement} enter`} style={step(1)} data-entered="true">
+            <MarkedHeading value={profile.headline} />
+          </h1>
         </header>
 
         <nav className={styles.doors} aria-label="用途で選ぶ">
@@ -61,6 +72,7 @@ export default function GatePage() {
               className={`${styles.door} enter`}
               data-kind={door.kind}
               style={step(2 + index)}
+              data-entered="true"
             >
               <span className={styles.doorLabel}>{door.label}</span>
               <span className={styles.doorTitle}>{door.title}</span>
@@ -75,7 +87,7 @@ export default function GatePage() {
           ))}
         </nav>
 
-        <footer className={`${styles.foot} enter`} style={step(4)}>
+        <footer className={`${styles.foot} enter`} style={step(4)} data-entered="true">
           <a className={styles.textLink} href={`mailto:${profile.email}`}>
             {profile.email}
           </a>
@@ -84,6 +96,6 @@ export default function GatePage() {
           </p>
         </footer>
       </main>
-    </>
+    </div>
   );
 }

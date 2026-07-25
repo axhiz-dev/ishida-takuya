@@ -12,10 +12,10 @@ import {
   testimonials,
 } from "@/content";
 import { ROUTES } from "@/config/site";
-import { PlaceholderNotice } from "@/components/common/PlaceholderNotice";
+import { MarkedHeading } from "@/components/common/MarkedHeading";
 import { EdgeNav } from "@/components/business/EdgeNav";
 import { Portrait } from "@/components/business/Portrait";
-import { Diptych } from "@/components/business/Diptych";
+import { FeatureStack } from "@/components/business/FeatureStack";
 import styles from "@/components/business/business.module.css";
 
 const step = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -26,7 +26,9 @@ export default function BusinessPage() {
       <a className="skip-link" href="#main">
         本文へ移動
       </a>
-      <PlaceholderNotice />
+
+      {/* ナビが浮くタイミングを測るための番兵。高さ 0 の目印。 */}
+      <div id="nav-sentinel" aria-hidden="true" />
 
       <EdgeNav name={profile.name} email={profile.email} />
 
@@ -34,22 +36,22 @@ export default function BusinessPage() {
         {/* ── 宣言 ─────────────────────────────── */}
         <section className={styles.hero}>
           <div className={styles.heroText}>
-            <h1 className={`${styles.statement} enter`} style={step(0)}>
-              {businessIntro.statement.map((line) => (
+            <h1 className={`${styles.statement} enter`} style={step(0)} data-entered="true">
+              {businessIntro.statement.lines.map((line) => (
                 <span key={line} className={styles.statementLine}>
-                  {line}
+                  <MarkedHeading value={{ text: line, mark: businessIntro.statement.mark }} />
                 </span>
               ))}
             </h1>
-            <p className={`${styles.lede} enter`} style={step(1)}>
+            <p className={`${styles.lede} enter`} style={step(1)} data-entered="true">
               {businessIntro.lede}
             </p>
-            <p className={`${styles.reassurance} enter`} style={step(2)}>
+            <p className={`${styles.reassurance} enter`} style={step(2)} data-entered="true">
               {businessIntro.reassurance}
             </p>
           </div>
 
-          <div className={`${styles.heroAside} enter`} style={step(3)}>
+          <div className={`${styles.heroAside} enter`} style={step(3)} data-entered="true">
             <Portrait
               photo={profile.photo}
               name={profile.name}
@@ -64,12 +66,7 @@ export default function BusinessPage() {
           <h2 id="offerings-head" className={styles.sectionTitle}>
             できることと、その裏づけ
           </h2>
-
-          <div className={styles.rows}>
-            {offerings.map((offering, index) => (
-              <Diptych key={offering.id} offering={offering} flipped={index % 2 === 1} />
-            ))}
-          </div>
+          <FeatureStack offerings={[...offerings]} />
         </section>
 
         {/* ── 進め方 ───────────────────────────── */}
@@ -173,13 +170,13 @@ export default function BusinessPage() {
         </section>
       </main>
 
-      {/* ── Ft5 · Statement ───────────────────── */}
+      {/* ── Ft6 · レターの結び ────────────────── */}
       <footer className={styles.footer}>
         <p className={styles.footerLine}>
           つくるかどうかを決める前の相談が、いちばん役に立つと思っています。
         </p>
+        <p className={styles.footerSign}>— {profile.name}</p>
         <div className={styles.footerMeta}>
-          <span>{profile.name}</span>
           <Link className={styles.textLink} href={ROUTES.engineer.path}>
             エンジニアとしての経歴はこちら
             <span aria-hidden="true"> →</span>

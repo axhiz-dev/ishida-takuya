@@ -1,177 +1,585 @@
-/* Hallmark · macrostructure: Long Document · genre: editorial · theme: Almanac
- * nav: N3 Side-rail (索引レール版) · section head: S3 Sticky pinned
- * features: F3 Tabular spec sheet · CTA: C3 Typographic link · footer: Ft4 Dense typographic
- * audience: 採用担当・エージェント · use: 経歴を 1 ページで判断させる · tone: technical / austere
- * anchor hue: cool 250° · enrichment: none (typography only)
- * motion: enter (load, once) · rail-track (現在地) · underline-draw
- * pre-emit critique: P5 H5 E4 S5 R5 V4
+/* Hallmark · macrostructure: 章立て（Manifesto 系・1 スクロール 1 章）
+ * genre: editorial · theme: studied-DNA → 自前の配色（ほぼ黒 + 共通の青 + 琥珀）
+ * nav: N10 Scroll-morph · footer: Ft1 Mast-headed
+ * audience: 採用担当・エージェント · use: 何を作れる人かを画面で示す · tone: crafted / confident
+ * enrichment: none（技術ロゴはコンテンツが持つ色）
+ * motion: 章ごとの一度きりの入場 · 現在地追従 · リンクの下線
+ * pre-emit critique: P5 H4 E4 S5 R4 V5
+ *
+ * 第 1 版（Long Document / Almanac / N3 / Ft4）から macrostructure・nav・footer が別。
+ * 第 1 版の失敗は「1 画面あたりの情報量が多すぎたこと」なので、
+ * ここでは 1 つのアイデアに 1 画面を与えることを最優先する。
  */
 
-/* ══ 骨格 ════════════════════════════════════════
-   左に索引レール、右に本文。中央寄せにはしない。
-   本文カラムは measure で止めて、右側に余白を残す。 */
+/* scroll-snap の宣言は <html> に対するものなので base.css 側に置いてある
+   （CSS Modules は要素だけのセレクタを許さない）。ここでは章ごとの
+   scroll-snap-align だけを扱う。 */
 
-.shell {
+/* ══ 骨格 ════════════════════════════════════════ */
+
+.page {
+  position: relative;
+  z-index: var(--z-base);
+  --nav-h: 4.5rem;
+  --rail-w: 10rem;
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  padding-left: calc(var(--page-gutter) + var(--rail-w));
+}
+
+/* レイアウトの実グリッドに揃えた縦線。
+   このページが何本の柱の上に組まれているかを見せる線。 */
+.gridLines {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   display: grid;
-  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
-  align-items: start;
-  min-height: 100dvh;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
 }
 
-.doc {
-  padding: var(--space-3xl) var(--page-gutter) var(--space-2xl);
-  max-width: 62rem;
+.gridLines span {
+  border-right: var(--rule-hair) solid var(--color-rule);
 }
 
-/* ══ 文書のヘッダ ═══════════════════════════════ */
-
-.masthead {
-  display: grid;
-  gap: var(--space-md);
-  padding-bottom: var(--space-2xl);
+.gridLines span:last-child {
+  border-right: none;
 }
 
-.name {
+/* ══ N10 · スクロールで畳まるナビ ════════════════ */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky-nav);
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-md);
-  font-size: var(--text-display);
-  line-height: var(--lh-tight);
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--space-lg) var(--page-gutter);
+  transition:
+    padding var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out);
+}
+
+/* 章が進んだら畳む。地色を敷いて本文と重なっても読めるようにする。 */
+.nav[data-condensed] {
+  padding-block: var(--space-xs);
+  background: color-mix(in oklab, var(--color-paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 90, "opsz" 20;
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
+}
+
+.navBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.print {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: var(--space-2xs) var(--space-md);
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-chip);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+  white-space: nowrap;
+  transition:
+    border-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.print:hover {
+  border-color: var(--color-rule-2);
+  color: var(--color-ink);
+}
+
+.print:active {
+  transform: translateY(1px);
+}
+
+.print:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ══ 左端の進行レール ════════════════════════════ */
+
+.rail {
+  position: fixed;
+  top: 50%;
+  left: max(var(--page-gutter), calc((100vw - var(--page-max)) / 2 + var(--page-gutter)));
+  transform: translateY(-50%);
+  z-index: var(--z-sticky);
+}
+
+.railList {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.railItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  min-height: 34px;
+  padding-block: var(--space-2xs);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  opacity: 0.55;
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+
+.railItem:hover {
+  opacity: 1;
+  color: var(--color-ink);
+}
+
+.railItem[data-active] {
+  opacity: 1;
+  color: var(--color-ink);
+}
+
+.railNo {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.railItem[data-active] .railNo {
+  color: var(--color-accent-2);
+}
+
+.railLabel {
+  position: relative;
+}
+
+/* 現在地は下線で示す。transform だけを動かす。 */
+.railLabel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: var(--rule-fine);
+  background: var(--color-accent-2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.railItem[data-active] .railLabel::after {
+  transform: scaleX(1);
+}
+
+/* ══ 章 ══════════════════════════════════════════ */
+
+.chapter {
+  position: relative;
+  padding-block: var(--space-3xl);
+  scroll-margin-top: var(--nav-h);
+}
+
+/* 1 画面に収まる章だけ引っかける。
+   縦方向は中央に寄せるが、**横は左揃えのまま**（中央寄せ一辺倒は禁止事項）。 */
+.chapter[data-snap] {
+  display: flex;
+  flex-direction: column;
+  /* safe を付けないと、中身が 1 画面に収まらない章で
+     上側にはみ出して章題がナビの下に隠れる。
+     safe は「はみ出すくらいなら中央寄せをやめる」という指定。 */
+  justify-content: safe center;
+  min-height: var(--chapter-min-h);
+  scroll-snap-align: start;
+}
+
+.chapterTitle {
+  margin-bottom: var(--space-lg);
+  font-size: var(--text-2xl);
+  font-variation-settings: "wdth" 85, "opsz" 40;
   letter-spacing: var(--tracking-display);
 }
 
-.nameLatin {
-  font-family: var(--font-label);
-  font-size: var(--text-sm);
-  font-weight: 400;
-  letter-spacing: var(--tracking-label);
+.chapterLede {
+  max-width: var(--measure);
+  margin-bottom: var(--space-2xl);
   color: var(--color-muted);
 }
 
-.headline {
-  max-width: var(--measure);
-  font-size: var(--text-md);
-  color: var(--color-ink-2);
+/* ══ 00 はじめに ═════════════════════════════════ */
+
+.introInner {
+  display: grid;
+  gap: var(--space-lg);
+  max-width: 58rem;
 }
 
-.links {
+.introName {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-sm) var(--space-lg);
-  padding-top: var(--space-2xs);
+  gap: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.introNameLatin {
+  color: var(--color-accent-2);
+}
+
+/* 画面で一番大きい声。1 語だけ帯が敷かれる。 */
+.statement {
+  /* 和文は 1 文字が全角ぶんの幅を食うので、欧文の感覚で大きくすると
+     4 行に割れて「1 画面 1 アイデア」が壊れる。上限を抑える。 */
+  font-size: clamp(2rem, 4vw + 0.5rem, 3.75rem);
+  font-variation-settings: "wdth" 78, "opsz" 96;
+  line-height: 1.18;
+  letter-spacing: var(--tracking-display);
+}
+
+.lede {
+  max-width: var(--measure);
+  font-size: var(--text-md);
+  color: var(--color-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-md);
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+  white-space: nowrap;
+}
+
+.chip[data-tone="accent"] {
+  border-color: var(--color-accent-2);
+  color: var(--color-accent-2);
+}
+
+.coreStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  padding-top: var(--space-xs);
+}
+
+.scrollHint {
+  position: absolute;
+  left: 0;
+  bottom: var(--space-2xl);
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
 }
 
-/* ══ セクション ═════════════════════════════════ */
-
-.section {
-  padding-bottom: var(--section-gap);
-  scroll-margin-top: calc(var(--banner-height) + var(--space-lg));
-}
-
-/* S3 · Sticky pinned。読んでいる節の見出しが視界から消えない。 */
-.sectionHead {
-  position: sticky;
-  top: var(--banner-height);
-  z-index: var(--z-sticky);
-  /* 見出しの横にラベルを置かない（Hallmark gate 54）。
-     補足は見出しの下、同じカラムに続ける。 */
+.scrollHint::after {
+  content: "";
   display: block;
-  margin-bottom: var(--space-md);
-  padding-block: var(--space-sm);
-  background: var(--color-paper);
-  border-bottom: var(--rule-fine) solid var(--color-rule-2);
+  width: var(--rule-fine);
+  height: var(--space-lg);
+  margin-top: var(--space-xs);
+  background: linear-gradient(var(--color-rule-2), transparent);
 }
 
-.sectionHead h2 {
-  font-size: var(--text-xl);
-  letter-spacing: var(--tracking-tight);
+/* ══ 01 スタック ═════════════════════════════════ */
+
+.stack {
+  display: grid;
+  gap: var(--space-lg);
 }
 
-.sectionNote {
+.stackGroup {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.stackCategory {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+/* 整列させず自然に折り返す。均一なグリッドにすると仕様書に見える。 */
+.stackItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.stackItem {
+  position: relative;
+  width: 8.25rem;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.stackItem:hover {
+  transform: translateY(-2px);
+}
+
+.stackYears {
+  position: absolute;
+  top: var(--space-2xs);
+  right: var(--space-2xs);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+/* 根拠は畳んで置く。顔に出さないが、聞かれたら答えられる並び。 */
+.evidence {
+  margin-top: var(--space-md);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  padding-top: var(--space-md);
+}
+
+.evidenceSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.evidenceSummary::-webkit-details-marker {
+  display: none;
+}
+
+.evidenceSummary::before {
+  content: "+";
+  font-size: var(--text-md);
+  line-height: 1;
+  color: var(--color-accent-2);
+}
+
+.evidence[open] .evidenceSummary::before {
+  content: "−";
+}
+
+.evidenceSummary:hover {
+  color: var(--color-ink);
+}
+
+.evidenceBody {
+  display: grid;
+  gap: var(--space-lg);
+  padding-top: var(--space-md);
+}
+
+.evidenceNote {
   max-width: var(--measure);
-  margin-bottom: var(--space-xl);
   font-size: var(--text-sm);
   color: var(--color-muted);
 }
 
-/* ══ 要約 ═══════════════════════════════════════ */
-
-/* 本文の measure を超えて広がる。ここだけリズムを破る。 */
-.facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: var(--space-md) var(--space-xl);
-  margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-lg);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
+.evidenceTable {
+  font-size: var(--text-sm);
 }
 
-.fact dt {
+.evidenceTable caption {
+  padding-bottom: var(--space-2xs);
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
-  color: var(--color-muted);
+  color: var(--color-accent-2);
+  text-align: left;
 }
 
-.fact dd {
-  margin: 0;
-  padding-top: var(--space-3xs);
-  font-size: var(--text-md);
-  line-height: var(--lh-snug);
-}
-
-.factNote {
-  display: block;
-  padding-top: var(--space-2xs);
+.evidenceTable thead th {
+  padding: var(--space-2xs) var(--space-sm) var(--space-2xs) 0;
+  border-bottom: var(--rule-fine) solid var(--color-rule-2);
+  font-family: var(--font-label);
+  font-weight: 400;
   font-size: var(--text-xs);
-  line-height: 1.7;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+  text-align: left;
+}
+
+.evidenceTable tbody th,
+.evidenceTable tbody td {
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  text-align: left;
+  vertical-align: baseline;
+  font-weight: 400;
   color: var(--color-muted);
 }
+
+.evidenceTable tbody th {
+  color: var(--color-ink);
+  width: 26%;
+}
+
+/* ══ 02 経歴 ═════════════════════════════════════ */
 
 .summary {
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   max-width: var(--measure);
+  margin-bottom: var(--space-3xl);
 }
 
 .summary li {
   position: relative;
   padding-left: var(--space-lg);
+  color: var(--color-muted);
 }
 
 .summary li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.72em;
+  top: 0.85em;
   width: var(--space-md);
   height: var(--rule-fine);
-  background: var(--color-rule-2);
+  background: var(--color-accent-2);
 }
 
-/* ══ 職務経歴 ═══════════════════════════════════ */
-
-.careerList {
+.timeline {
+  position: relative;
   display: grid;
-  gap: var(--space-3xl);
+  gap: var(--space-4xl);
 }
 
-.career {
+/* 静的な軸線 */
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 2.75rem;
+  top: 0.6rem;
+  bottom: 0;
+  width: var(--rule-hair);
+  background: var(--color-rule);
+}
+
+/* スクロールに合わせて描かれる線。対応していないブラウザでは
+   単に出ないだけで、上の静的な線は残る。 */
+.timeline::after {
+  content: "";
+  position: absolute;
+  left: 2.75rem;
+  top: 0.6rem;
+  bottom: 0;
+  width: var(--rule-hair);
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .timeline::after {
+      animation: draw-rail linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 70%;
+    }
+  }
+}
+
+@keyframes draw-rail {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.tlItem {
   display: grid;
-  gap: var(--space-lg);
+  grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr);
+  gap: var(--space-xl);
+  align-items: start;
 }
 
-.careerHead {
+.tlYear {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 0.1rem;
+}
+
+.tlYearNum {
+  font-family: var(--font-label);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.tlDot {
+  position: absolute;
+  left: 2.5rem;
+  top: 0.5rem;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.tlCard {
   display: grid;
-  gap: var(--space-2xs);
+  gap: var(--space-md);
+  min-width: 0;
 }
 
-.careerDates {
+.tlPeriod {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -180,26 +588,28 @@
   font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--tracking-label);
-  color: var(--color-accent);
+  color: var(--color-accent-2);
 }
 
-.careerDuration {
+.tlDuration {
   color: var(--color-muted);
 }
 
-.careerCompany {
-  font-size: var(--text-lg);
+.tlCompany {
+  font-size: var(--text-xl);
+  font-variation-settings: "wdth" 88, "opsz" 32;
   letter-spacing: var(--tracking-tight);
 }
 
-.careerNote {
+.tlNote {
   max-width: var(--measure);
+  margin-top: calc(-1 * var(--space-xs));
   font-size: var(--text-sm);
   color: var(--color-muted);
 }
 
-/* 役割・チーム・状況。全社で同じ位置に並ぶことが読みやすさの実体。 */
-.meta {
+/* 全社で同じ位置に同じ項目が並ぶ。ここが読みやすさの実体。 */
+.tlMeta {
   display: grid;
   gap: var(--space-xs);
   padding: var(--space-md) 0;
@@ -207,37 +617,33 @@
   border-bottom: var(--rule-hair) solid var(--color-rule);
 }
 
-.metaRow {
+.tlMeta > div {
   display: grid;
   grid-template-columns: minmax(0, 5rem) minmax(0, 1fr);
   gap: var(--space-md);
   align-items: baseline;
 }
 
-.metaRow dt {
+.tlMeta dt {
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
   color: var(--color-muted);
 }
 
-.metaRow dd {
+.tlMeta dd {
   margin: 0;
   max-width: var(--measure);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
 }
 
-.careerBody {
+.tlBlocks {
   display: grid;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
 }
 
-.careerBlock {
-  display: grid;
-  gap: var(--space-sm);
-}
-
-.blockLabel {
+.tlBlockLabel {
+  margin-bottom: var(--space-xs);
   font-family: var(--font-label);
   font-size: var(--text-xs);
   font-weight: 500;
@@ -245,36 +651,33 @@
   color: var(--color-muted);
 }
 
-.bullets {
+.tlBullets {
   display: grid;
-  gap: var(--space-xs);
+  gap: var(--space-2xs);
   max-width: var(--measure);
+  font-size: var(--text-sm);
 }
 
-.bullets li {
+.tlBullets li {
   position: relative;
   padding-left: var(--space-md);
 }
 
-.bullets li::before {
+.tlBullets li::before {
   content: "·";
   position: absolute;
   left: 0;
   color: var(--color-rule-2);
 }
 
-.outcomes {
+.tlOutcomes {
   display: grid;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   max-width: var(--measure);
+  font-size: var(--text-sm);
 }
 
-.outcome {
-  display: grid;
-  gap: var(--space-2xs);
-}
-
-.outcomeLabel {
+.tlOutcomeLabel {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -282,240 +685,210 @@
 }
 
 /* 確認できた数字だけが入る。無ければこの要素自体が出ない。 */
-.outcomeValue {
+.tlOutcomeValue {
   padding: 0 var(--space-xs);
-  border: var(--rule-hair) solid var(--color-rule-2);
+  border: var(--rule-hair) solid var(--color-accent-2);
+  border-radius: var(--radius-input);
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
+  color: var(--color-accent-2);
   white-space: nowrap;
 }
 
-.outcomeNote {
-  font-size: var(--text-sm);
-  line-height: 1.75;
+.tlOutcomeNote {
+  padding-top: var(--space-3xs);
+  font-size: var(--text-xs);
+  line-height: 1.8;
   color: var(--color-muted);
 }
 
-.stack {
+.tlStack {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xs) var(--space-md);
-  font-family: var(--font-label);
-  font-size: var(--text-xs);
-  line-height: 1.9;
-  letter-spacing: var(--tracking-label);
-  color: var(--color-neutral);
+  gap: var(--space-2xs);
 }
 
-.stackLabel {
-  color: var(--color-muted);
-}
+/* ══ 03 事例 ═════════════════════════════════════ */
 
-/* ══ スキル（F3 · Tabular spec sheet） ══════════ */
-
-.skillGroups {
+.cases {
   display: grid;
-  gap: var(--space-2xl);
-}
-
-.skillGroup {
-  display: grid;
-  gap: var(--space-sm);
-}
-
-.skillCategory {
-  font-family: var(--font-label);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  letter-spacing: var(--tracking-label);
-  color: var(--color-accent);
-}
-
-.skillTable {
-  font-size: var(--text-sm);
-}
-
-.skillTable thead th {
-  padding: var(--space-2xs) var(--space-sm) var(--space-xs) 0;
-  border-bottom: var(--rule-fine) solid var(--color-rule-2);
-  font-family: var(--font-label);
-  font-weight: 400;
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  color: var(--color-muted);
-  text-align: left;
-}
-
-.skillTable tbody th,
-.skillTable tbody td {
-  padding: var(--space-sm) var(--space-sm) var(--space-sm) 0;
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-  text-align: left;
-  vertical-align: baseline;
-}
-
-.skillName {
-  width: 30%;
-  font-weight: 500;
-}
-
-.skillLevel {
-  width: 22%;
-}
-
-.skillYears {
-  width: 10%;
-  color: var(--color-neutral);
-  white-space: nowrap;
-}
-
-.skillEvidence {
-  color: var(--color-muted);
-  line-height: 1.7;
-}
-
-.gauge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.gaugeText {
-  font-size: var(--text-xs);
-  color: var(--color-neutral);
-  white-space: nowrap;
-}
-
-.gaugeTicks {
-  display: flex;
-  gap: var(--space-3xs);
-  flex: none;
-}
-
-.tick {
-  width: 5px;
-  height: 5px;
-  background: var(--color-paper-3);
-}
-
-.tick[data-filled] {
-  background: var(--color-accent);
-}
-
-/* ══ 事例 ═══════════════════════════════════════ */
-
-.caseList {
-  display: grid;
-  gap: var(--space-3xl);
+  gap: var(--space-md);
 }
 
 .case {
-  display: grid;
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+
+.case:hover {
+  border-color: var(--color-rule-2);
+}
+
+.caseSummary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: var(--space-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  list-style: none;
+}
+
+.caseSummary::-webkit-details-marker {
+  display: none;
 }
 
 .caseHead {
   display: grid;
   gap: var(--space-2xs);
+  min-width: 0;
 }
 
 .caseTitle {
-  max-width: 30ch;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 90, "opsz" 24;
   font-size: var(--text-lg);
   line-height: var(--lh-snug);
 }
 
 .caseOneLiner {
   max-width: var(--measure);
-  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
 }
 
 .caseMeta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-xs);
   padding-top: var(--space-2xs);
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
-  color: var(--color-muted);
+  color: var(--color-accent-2);
+}
+
+.caseChevron {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  margin-top: 0.55rem;
+  border-right: 2px solid var(--color-rule-2);
+  border-bottom: 2px solid var(--color-rule-2);
+  transform: rotate(45deg);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.case[open] .caseChevron {
+  transform: rotate(225deg);
+}
+
+.caseBody {
+  display: grid;
+  gap: var(--space-lg);
+  padding: 0 var(--space-lg) var(--space-lg);
 }
 
 .caseParts {
   display: grid;
-  gap: var(--space-lg);
-  padding: var(--space-lg) 0 var(--space-lg) var(--space-lg);
-  border-left: var(--rule-fine) solid var(--color-rule);
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: var(--rule-hair) solid var(--color-rule);
 }
 
-.casePart {
+.caseParts > div {
   display: grid;
   gap: var(--space-2xs);
 }
 
-.casePart dd {
-  margin: 0;
-  max-width: var(--measure);
-}
-
-.caseLinks {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-lg);
-  font-size: var(--text-sm);
-}
-
-/* ══ 連絡先 ═════════════════════════════════════ */
-
-.contactLede {
-  max-width: var(--measure);
-  margin-bottom: var(--space-xl);
-}
-
-.contactList {
-  display: grid;
-  gap: var(--space-md);
-  max-width: 44rem;
-  margin-bottom: var(--space-xl);
-}
-
-.contactList li {
-  display: grid;
-  grid-template-columns: minmax(0, 6rem) minmax(0, 1fr);
-  gap: var(--space-xs) var(--space-md);
-  align-items: baseline;
-  padding-bottom: var(--space-md);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-}
-
-.contactLabel {
+.caseParts dt {
   font-family: var(--font-label);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
   color: var(--color-muted);
 }
 
-.contactNote {
-  grid-column: 2;
-  font-size: var(--text-xs);
-  color: var(--color-muted);
+.caseParts dd {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--text-sm);
+}
+
+.caseStack,
+.caseLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-lg);
+  align-items: baseline;
+}
+
+.caseLinks {
+  font-size: var(--text-sm);
+}
+
+/* ══ 04 連絡先 ═══════════════════════════════════ */
+
+.contactInner {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.contactLine {
+  max-width: 20ch;
+  font-size: var(--text-3xl);
+  font-variation-settings: "wdth" 82, "opsz" 64;
+  line-height: 1.32;
+  letter-spacing: var(--tracking-display);
+}
+
+.contactList {
+  display: grid;
+  gap: var(--space-xs);
+  justify-items: start;
+}
+
+.contactLink {
+  position: relative;
+  font-family: var(--font-label);
+  font-size: var(--text-md);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.contactLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: var(--rule-fine);
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.contactLink:hover {
+  color: var(--color-accent);
+}
+
+.contactLink:hover::after {
+  transform: scaleX(1);
 }
 
 .crossSell {
   max-width: var(--measure);
   font-size: var(--text-sm);
-  color: var(--color-neutral);
+  color: var(--color-muted);
 }
 
-/* ══ C3 · Typographic link ══════════════════════
-   下線は scaleX で引く。レイアウトは動かさない。 */
+/* ══ 共通のリンク ════════════════════════════════ */
 
 .textLink {
   position: relative;
-  color: inherit;
+  color: var(--color-accent);
   white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out);
 }
@@ -533,31 +906,33 @@
   transition: transform var(--dur-short) var(--ease-out);
 }
 
-.textLink:hover {
-  color: var(--color-accent);
-}
-
 .textLink:hover::after {
   transform: scaleX(1);
 }
 
-/* ══ Ft4 · コロフォン ═══════════════════════════ */
+/* ══ Ft1 · マストヘッド ══════════════════════════ */
 
-.colophon {
-  padding-top: var(--space-xl);
-  border-top: var(--rule-fine) solid var(--color-rule-2);
+.foot {
+  display: grid;
+  gap: var(--space-sm);
+  padding-block: var(--space-2xl) var(--space-3xl);
+  border-top: var(--rule-fine) solid var(--color-rule);
 }
 
-.colophon p {
-  max-width: 68ch;
+.footWordmark {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 88, "opsz" 28;
+  font-size: var(--text-lg);
+}
+
+.footMeta {
+  max-width: 70ch;
   font-family: var(--font-label);
   font-size: var(--text-xs);
   line-height: 2;
   color: var(--color-muted);
-  text-wrap: pretty;
 }
-
-/* ══ 印刷用ヘッダ（画面では非表示） ═════════════ */
 
 .printHead {
   display: none;
@@ -567,102 +942,110 @@
    レスポンシブ
    ══════════════════════════════════════════════ */
 
-@media (width < 62rem) {
-  .shell {
-    /* レールが上部バーになるので、ページ内 sticky はその下に潜らせる */
-    --banner-height: 57px;
-    grid-template-columns: minmax(0, 1fr);
+@media (width < 68rem) {
+  .page {
+    padding-left: var(--page-gutter);
   }
 
-  .doc {
-    padding-top: var(--space-2xl);
-    max-width: none;
+  /* レールは下端の横並びに移す。5 つしかない行き先を
+     ハンバーガーに畳む理由がない。 */
+  .rail {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    padding: var(--space-xs) var(--page-gutter);
+    background: color-mix(in oklab, var(--color-paper) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: var(--rule-hair) solid var(--color-rule);
   }
 
-  .name {
-    gap: var(--space-sm);
-  }
-}
-
-@media (width < 56rem) {
-  /* 4 列の表は狭い画面で成立しない。行ごとのブロックに組み替える。
-     table のセマンティクスは保ったまま表示だけを変える。 */
-  .skillTable,
-  .skillTable tbody,
-  .skillTable tr,
-  .skillTable tbody th,
-  .skillTable tbody td {
-    display: block;
-    width: auto;
+  .railList {
+    display: flex;
+    gap: var(--space-md);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .skillTable thead {
+  .railList::-webkit-scrollbar {
     display: none;
   }
 
-  .skillTable tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-2xs) var(--space-md);
-    align-items: baseline;
-    padding-block: var(--space-sm);
-    border-bottom: var(--rule-hair) solid var(--color-rule);
+  .railItem {
+    min-height: 44px;
+    gap: var(--space-2xs);
   }
 
-  .skillTable tbody th,
-  .skillTable tbody td {
-    padding: 0;
-    border: none;
+  /* 下端のレールに隠れないよう、最後の章に余白を足す */
+  .foot {
+    padding-bottom: calc(var(--space-3xl) + 3rem);
   }
 
-  .skillYears {
-    text-align: right;
-  }
-
-  .skillLevel,
-  .skillEvidence {
-    grid-column: 1 / -1;
-  }
-
-  .skillEvidence {
-    font-size: var(--text-xs);
+  .gridLines {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (width < 40rem) {
-  .metaRow,
-  .contactList li {
+@media (width < 48rem) {
+  .tlItem {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .timeline::before,
+  .timeline::after,
+  .tlDot {
+    display: none;
+  }
+
+  .timeline {
+    gap: var(--space-3xl);
+  }
+
+  .tlMeta > div {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3xs);
   }
 
-  .contactNote {
-    grid-column: 1;
+  .stackItem {
+    width: 6.5rem;
   }
 
-  .caseParts {
-    padding-left: var(--space-md);
+  .caseSummary,
+  .caseBody {
+    padding-inline: var(--space-md);
   }
 
-  .facts {
-    gap: var(--space-md);
+  .contactLine {
+    font-size: var(--text-2xl);
+  }
+}
+
+@media (width < 30rem) {
+  .stackItem {
+    width: calc(50% - var(--space-xs) / 2);
   }
 }
 
 /* ══════════════════════════════════════════════
-   印刷（A4・モノクロ）
-   採用側は白黒で刷る前提。色ではなく罫線と余白で構造を出す。
+   印刷（A4・白黒）
+   ダークで表示していても、紙は必ず白黒で出す。
+   色トークンの差し替えは print.css 側で全テーマに効かせている。
    ══════════════════════════════════════════════ */
 
 @media print {
-  .shell {
-    display: block;
-    min-height: 0;
-  }
-
-  .doc {
+  .page {
     padding: 0;
     max-width: none;
+  }
+
+  .nav,
+  .rail,
+  .gridLines,
+  .scrollHint,
+  .crossSell {
+    display: none;
   }
 
   .printHead {
@@ -675,150 +1058,146 @@
     line-height: 1.6;
   }
 
-  .masthead {
-    padding-bottom: 6mm;
+  .chapter,
+  .chapter[data-snap] {
+    display: block;
+    min-height: 0;
+    padding-block: 0 6mm;
+  }
+
+  .chapterTitle {
+    margin-bottom: 3mm;
+    padding-bottom: 1mm;
+    border-bottom: var(--rule-fine) solid var(--color-ink);
+    font-size: 12pt;
     break-after: avoid;
   }
 
-  .name {
-    font-size: 20pt;
+  .statement {
+    font-size: 17pt;
+    line-height: 1.35;
   }
 
-  .headline {
+  /* 帯は紙では邪魔なので消す */
+  .statement :global(.mark) {
+    background: none;
+    padding-inline: 0;
+    margin-inline: 0;
+  }
+
+  .lede {
     font-size: 9.5pt;
   }
 
-  /* リンクの羅列は紙では意味がない。連絡先セクションに集約する。 */
-  .masthead .links {
+  .introInner {
+    gap: 3mm;
+  }
+
+  .coreStack {
     display: none;
   }
 
-  .section {
-    padding-bottom: 6mm;
+  /* 根拠の表は紙では畳まず全部出す */
+  .evidence[open],
+  .evidence {
+    margin-top: 3mm;
+    padding-top: 2mm;
   }
 
-  /* 連絡先とスキルの行間は画面ほど空けなくていい */
-  .contactList li {
-    padding-bottom: 2mm;
+  .evidenceSummary {
+    display: none;
   }
 
-  .contactList,
-  .contactLede,
-  .facts {
-    margin-bottom: 4mm;
+  .evidenceBody {
+    display: grid !important;
+    gap: 4mm;
+    padding-top: 0;
+  }
+
+  .stack {
+    gap: 4mm;
+  }
+
+  .stackItems {
+    gap: var(--space-2xs);
+  }
+
+  .stackItem {
+    width: auto;
+  }
+
+  .stackYears {
+    display: none;
   }
 
   .summary {
     gap: 2mm;
+    margin-bottom: 5mm;
   }
 
-  .sectionHead {
-    position: static;
-    margin-bottom: 3mm;
-    padding-block: 0 1mm;
-    border-bottom: var(--rule-fine) solid var(--color-ink);
-    break-after: avoid;
-  }
-
-  .sectionHead h2 {
-    font-size: 12pt;
-  }
-
-  .career,
-  .case,
-  .skillGroup {
-    break-inside: avoid;
-  }
-
-  .careerList,
-  .caseList {
+  .timeline {
     gap: 6mm;
   }
 
-  .careerBody {
-    gap: 4mm;
+  .timeline::before,
+  .timeline::after,
+  .tlDot,
+  .tlYear {
+    display: none;
   }
 
-  .outcomes {
-    gap: 2.5mm;
+  .tlItem {
+    grid-template-columns: minmax(0, 1fr);
+    break-inside: avoid;
   }
 
-  .skillGroups {
-    gap: 4mm;
+  .tlCard {
+    gap: 2mm;
   }
 
-  /* 紙の幅は A4 固定なので、狭い画面向けのブロック組みではなく
-     4 列の表に戻す。ここを戻さないと表が縦に伸びて紙を大量に食う。 */
-  .skillTable {
-    display: table;
-    width: 100%;
-    font-size: 8.5pt;
+  .tlBlocks {
+    gap: 3mm;
   }
 
-  .skillTable thead {
-    display: table-header-group;
+  .tlOutcomes {
+    gap: 2mm;
   }
 
-  .skillTable tbody {
-    display: table-row-group;
-  }
-
-  .skillTable tr {
-    display: table-row;
-    padding-block: 0;
+  /* 事例は紙では畳めないので全部開く */
+  .case {
     border: none;
+    background: none;
+    break-inside: avoid;
   }
 
-  .skillTable tbody th,
-  .skillTable tbody td {
-    display: table-cell;
-    padding: 1.2mm 3mm 1.2mm 0;
-    border-bottom: var(--rule-hair) solid var(--color-rule);
+  .caseSummary,
+  .caseBody {
+    padding: 0;
   }
 
-  .skillTable thead th {
-    padding: 0 3mm 1mm 0;
-    border-bottom: var(--rule-fine) solid var(--color-ink);
+  .caseChevron {
+    display: none;
   }
 
-  .skillLevel,
-  .skillEvidence {
-    grid-column: auto;
+  .caseBody {
+    display: grid !important;
   }
 
-  .skillYears {
-    text-align: left;
+  .cases {
+    gap: 5mm;
   }
 
-  .skillEvidence {
-    font-size: 8pt;
+  .contactLine {
+    font-size: 12pt;
   }
 
-  .gaugeText {
-    font-size: 7.5pt;
-  }
-
-  .caseParts {
-    padding-block: 2mm;
-  }
-
-  /* 事例の外部リンクだけ URL を併記する。全リンクに付けると煩い。 */
-  .caseLinks a::after {
-    content: " (" attr(href) ")";
-    font-size: 7.5pt;
-    color: var(--color-muted);
-  }
-
+  .contactLink::after,
   .textLink::after {
     display: none;
   }
 
-  .colophon {
-    padding-top: 4mm;
+  .foot {
+    padding-block: 4mm 0;
     break-inside: avoid;
-  }
-
-  .crossSell {
-    display: none;
   }
 }

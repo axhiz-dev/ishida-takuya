@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { studioFonts } from "@/lib/fonts";
+import { fontVariables } from "@/lib/fonts";
+import { NO_JS_INIT_SCRIPT } from "@/lib/theme";
 import { ROUTES, SITE_URL } from "@/config/site";
 import "@/styles/tokens.css";
 import "@/styles/base.css";
@@ -19,10 +20,11 @@ export const metadata: Metadata = {
 
 export default function BusinessLayout({ children }: { children: React.ReactNode }) {
   return (
-    // フォント変数のクラスは data-theme と同じ要素に置く。
-    // 別々の要素に分けると [data-theme] 側から var(--font-*) を解決できず、
-    // font-family 全体が無効になって既定フォントに落ちる。
-    <html lang="ja" data-theme="studio" className={studioFonts}>
+    // 事業側の相手に切り替えを出す理由がないので、こちらはライト固定。
+    <html lang="ja" data-theme="business" className={`no-js ${fontVariables}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: NO_JS_INIT_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );
