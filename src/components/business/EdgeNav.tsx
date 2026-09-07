@@ -7,12 +7,13 @@ import { PlaceholderNotice } from "@/components/common/PlaceholderNotice";
 import styles from "./business.module.css";
 
 /**
- * N5 · 浮遊ピルのナビ。
+ * 浮遊ピルのナビ。
  *
  * 上部に浮かせて、少しスクロールしたら地色を敷いて読めるようにする。
- * 行き先はひとつだけ。事業側の相手に迷う余地を作らない。
+ * 節のリンクは狭い画面では畳んで、行き先（相談する）だけ残す。
+ * スマートフォンで見る割合が高い相手なので、ここで場所を取らない。
  */
-export function EdgeNav({ name, email }: { name: string; email: string }) {
+export function EdgeNav({ name }: { name: string }) {
   const [lifted, setLifted] = useState(false);
 
   useEffect(() => {
@@ -35,11 +36,20 @@ export function EdgeNav({ name, email }: { name: string; email: string }) {
           <Link href={ROUTES.gate.path} className={styles.wordmark}>
             {name}
           </Link>
+          <span className={styles.navRole}>業務自動化</span>
           <PlaceholderNotice />
         </div>
 
-        <a className={styles.chip} href={`mailto:${email}`}>
-          相談する
+        <nav className={styles.navLinks} aria-label="ページ内の移動">
+          {ROUTES.business.sections.map((section) => (
+            <a key={section.id} href={`#${section.id}`}>
+              {section.label}
+            </a>
+          ))}
+        </nav>
+
+        <a className={styles.chip} href={ROUTES.business.cta.href}>
+          {ROUTES.business.cta.label}
           <span aria-hidden="true">→</span>
         </a>
       </div>

@@ -108,12 +108,12 @@
 
 /* ══ 宣言 ════════════════════════════════════════ */
 
+/* 顔写真はここではなく「私について」に置く。
+   最初の画面は、相手が自分の困りごとを見つけることだけに使う。 */
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
   gap: var(--space-3xl);
-  align-items: end;
-  padding-block: var(--space-4xl) var(--space-4xl);
+  padding-block: var(--space-4xl);
 }
 
 .heroText {
@@ -137,19 +137,6 @@
   max-width: var(--measure);
   font-size: var(--text-md);
   color: var(--color-neutral);
-}
-
-.reassurance {
-  padding-left: var(--space-md);
-  border-left: 2px solid var(--color-accent-2);
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-}
-
-.heroAside {
-  justify-self: end;
-  width: 100%;
-  max-width: 18rem;
 }
 
 /* ── 顔写真（未設定のあいだはモノグラム） ── */
@@ -222,134 +209,6 @@
   color: var(--color-neutral);
 }
 
-/* ══ Feature Stack ═══════════════════════════════
-   左が固定され、右がスクロールで入れ替わる。 */
-
-.stack {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: var(--space-3xl);
-  align-items: start;
-  padding-top: var(--space-lg);
-}
-
-.claims {
-  position: sticky;
-  top: 9rem;
-  display: grid;
-  gap: var(--space-xs);
-}
-
-.claim {
-  display: grid;
-  gap: var(--space-3xs);
-  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
-  border-left: 2px solid var(--color-rule);
-  color: var(--color-muted);
-  transition:
-    border-color var(--dur-short) var(--ease-out),
-    color var(--dur-short) var(--ease-out);
-}
-
-.claim:hover {
-  color: var(--color-ink);
-}
-
-.claim[data-active] {
-  border-left-color: var(--color-accent-2);
-  color: var(--color-ink);
-}
-
-.claimTitle {
-  font-family: var(--font-display);
-  font-weight: var(--display-weight);
-  font-variation-settings: "wdth" 92, "opsz" 24;
-  font-size: var(--text-md);
-  line-height: var(--lh-snug);
-}
-
-.claimFor {
-  font-size: var(--text-xs);
-  line-height: 1.7;
-  color: var(--color-muted);
-}
-
-.proofs {
-  display: grid;
-  gap: var(--space-4xl);
-}
-
-.proofRow {
-  display: grid;
-  gap: var(--space-lg);
-  align-content: center;
-  scroll-margin-top: 9rem;
-}
-
-/* 広い画面では主張の見出しは左の固定ペインが持つので、
-   ここには本文だけを出す。 */
-.proofClaimTitle,
-.proofClaimFor {
-  display: none;
-}
-
-.proofClaimBody {
-  max-width: var(--measure);
-  color: var(--color-neutral);
-}
-
-.proof {
-  display: grid;
-  gap: var(--space-xs);
-  padding: var(--space-xl);
-  background: var(--color-paper-2);
-  border-radius: var(--radius-card);
-}
-
-.proofKind {
-  font-family: var(--font-label);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  color: var(--color-accent-2);
-}
-
-.proofTitle {
-  font-family: var(--font-display);
-  font-variation-settings: "wdth" 92, "opsz" 24;
-  font-size: var(--text-md);
-  line-height: var(--lh-snug);
-}
-
-.proofDetail {
-  font-size: var(--text-sm);
-  color: var(--color-neutral);
-}
-
-.proofFacts {
-  display: grid;
-  gap: var(--space-xs);
-  padding-top: var(--space-sm);
-  margin-top: var(--space-2xs);
-  border-top: var(--rule-hair) solid var(--color-rule);
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-}
-
-.proofFacts li {
-  position: relative;
-  padding-left: var(--space-md);
-}
-
-.proofFacts li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.85em;
-  width: 7px;
-  height: var(--rule-fine);
-  background: var(--color-accent-2);
-}
-
 /* ══ 進め方 ══════════════════════════════════════ */
 
 .steps {
@@ -402,99 +261,6 @@
   color: var(--color-muted);
 }
 
-/* ══ T1 · 引用 + 余白に出典 ══════════════════════ */
-
-.voices {
-  display: grid;
-  gap: var(--space-2xl);
-}
-
-.voice {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
-  gap: var(--space-2xl);
-  align-items: start;
-  padding-top: var(--space-lg);
-  border-top: var(--rule-hair) solid var(--color-rule);
-}
-
-.voiceQuote {
-  max-width: 46ch;
-  font-family: var(--font-display);
-  font-variation-settings: "wdth" 96, "opsz" 32;
-  font-weight: 400;
-  font-size: var(--text-lg);
-  line-height: 1.75;
-}
-
-.voiceSource {
-  display: grid;
-  gap: var(--space-3xs);
-  font-size: var(--text-sm);
-  line-height: 1.7;
-  color: var(--color-muted);
-}
-
-.voiceName {
-  color: var(--color-ink);
-}
-
-.voiceContext {
-  padding-top: var(--space-2xs);
-  font-family: var(--font-label);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  color: var(--color-accent-2);
-}
-
-/* ══ 費用の目安 ══════════════════════════════════
-   3 枚のカードを横に並べない。行として読ませる。 */
-
-.pricing {
-  display: grid;
-  max-width: 58rem;
-}
-
-.tier {
-  display: grid;
-  grid-template-columns: minmax(0, 9rem) minmax(0, 11rem) minmax(0, 1fr);
-  gap: var(--space-xs) var(--space-lg);
-  align-items: baseline;
-  padding-block: var(--space-md);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-}
-
-.tier:first-child {
-  border-top: var(--rule-fine) solid var(--color-rule-2);
-}
-
-.tierLabel {
-  font-size: var(--text-md);
-}
-
-.tierRange {
-  margin: 0;
-  font-family: var(--font-display);
-  font-variation-settings: "wdth" 90, "opsz" 32;
-  font-weight: var(--display-weight);
-  font-size: var(--text-lg);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-accent-2);
-}
-
-.tierNote {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-}
-
-.pricingNote {
-  max-width: var(--measure);
-  padding-top: var(--space-md);
-  font-size: var(--text-sm);
-  color: var(--color-neutral);
-}
-
 /* ══ よくある質問 ════════════════════════════════ */
 
 .faq {
@@ -523,31 +289,6 @@
   margin: 0;
   max-width: var(--measure);
   color: var(--color-neutral);
-}
-
-/* ══ 締め ════════════════════════════════════════
-   ボタンはひとつ。並べない。 */
-
-.cta {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-lg);
-  padding-block: var(--space-2xl) var(--space-4xl);
-}
-
-.ctaLine {
-  max-width: 20ch;
-  font-family: var(--font-display);
-  font-variation-settings: "wdth" 86, "opsz" 64;
-  font-weight: var(--display-weight);
-  font-size: var(--text-2xl);
-  line-height: var(--lh-snug);
-  letter-spacing: var(--tracking-display);
-}
-
-.ctaNote {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
 }
 
 /* ══ Ft6 · レターの結び ══════════════════════════ */
@@ -609,76 +350,908 @@
   transform: scaleX(1);
 }
 
+/* ══ ヒーローの行き先と条件 ══════════════════════ */
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* 押せるが主役ではないボタン。デモの中では逆にこちらが主役になる。 */
+.chipGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border: var(--rule-fine) solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-ink-2);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out);
+}
+
+.chipGhost:hover {
+  border-color: var(--color-accent);
+  background: var(--color-paper-2);
+}
+
+.chipGhost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 相談無料 ／ 10 万円から ／ 保守は任意。
+   ここは読ませる文ではなく、目に入ればいい条件なので小さく置く。 */
+.terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.terms li + li::before {
+  content: "／";
+  margin-right: var(--space-lg);
+  color: var(--color-rule-2);
+}
+
+/* ══ ナビの補助 ══════════════════════════════════ */
+
+.navRole {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.navLinks {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: var(--text-sm);
+}
+
+.navLinks a {
+  color: var(--color-neutral);
+  text-decoration: none;
+}
+
+.navLinks a:hover {
+  color: var(--color-accent);
+}
+
+/* ══ 節の締めの 1 行 ═════════════════════════════ */
+
+.sectionClosing {
+  max-width: var(--measure);
+  margin-top: var(--space-xl);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--color-accent-2);
+  color: var(--color-ink-2);
+}
+
+/* ══ よくある作業 ════════════════════════════════
+   自分の会社を見つけるためのリスト。読ませるのではなく
+   目で走らせるものなので、2 列に流して 1 行を短く保つ。 */
+
+.symptoms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  gap: var(--space-xs) var(--space-2xl);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.symptom {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+}
+
+.symptom::before {
+  content: "";
+  width: 0.75em;
+  height: 0.75em;
+  margin-top: 0.45em;
+  border: var(--rule-fine) solid var(--color-rule-2);
+  border-radius: 3px;
+}
+
+/* ══ デモ ════════════════════════════════════════
+   このページの中心。地色を一段変えて「読むもの」ではなく
+   「触るもの」だと形で分かるようにする。 */
+
+.demos {
+  display: grid;
+  gap: var(--space-3xl);
+}
+
+.demo {
+  display: grid;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  background: var(--color-paper-2);
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-card);
+}
+
+.demoTitle {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 92, "opsz" 32;
+  font-size: var(--text-xl);
+  line-height: var(--lh-snug);
+}
+
+.demoInvitation {
+  max-width: var(--measure);
+  color: var(--color-neutral);
+}
+
+.demoStage {
+  display: grid;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-paper);
+  border-radius: var(--radius-input);
+}
+
+.demoCompare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.demoCompareTitle {
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.demoBefore {
+  margin: 0;
+  padding-left: 1.4em;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+}
+
+.demoBefore li {
+  padding-block: var(--space-3xs);
+}
+
+.demoAfter {
+  color: var(--color-ink);
+  font-size: var(--text-md);
+  word-break: auto-phrase;
+}
+
+.demoSaving {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  color: var(--color-accent-2);
+}
+
+.demoSavingLabel {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.demoCode {
+  font-size: var(--text-sm);
+}
+
+.demoCode summary {
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.demoCode pre {
+  overflow-x: auto;
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-chip);
+  border-radius: var(--radius-input);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
+
+/* ── ファイルの受け口 ── */
+
+.dropzone {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  border: 2px dashed var(--color-rule-2);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.dropzoneLead {
+  font-size: var(--text-md);
+  color: var(--color-ink-2);
+}
+
+.dropzoneActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.dropzoneNote {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── 結果 ── */
+
+.demoResult {
+  display: grid;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+.demoStatus {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.demoError {
+  padding: var(--space-sm) var(--space-md);
+  border-left: 2px solid var(--color-accent-2);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.demoControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+
+.demoTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.demoTable th,
+.demoTable td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  text-align: left;
+}
+
+.demoTable thead th,
+.demoTable tfoot th {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.demoTable tfoot th,
+.demoTable tfoot td {
+  border-bottom: none;
+  border-top: var(--rule-fine) solid var(--color-rule-2);
+  padding-top: var(--space-sm);
+}
+
+.demoTable tfoot th {
+  text-align: right;
+}
+
+.demoTable input {
+  width: 100%;
+  min-width: 4rem;
+  padding: var(--space-2xs) var(--space-xs);
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-input);
+  background: var(--color-paper-2);
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.demoNumeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+/* ══ デモの注記と、持ち帰り ══════════════════════ */
+
+.notes {
+  display: grid;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.notes li::before {
+  content: "※ ";
+}
+
+.takeaway {
+  display: grid;
+  gap: var(--space-sm);
+  max-width: var(--measure);
+  padding: var(--space-lg);
+  border: var(--rule-fine) solid var(--color-rule-2);
+  border-radius: var(--radius-card);
+}
+
+.takeawayTitle {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 92, "opsz" 24;
+  font-size: var(--text-lg);
+}
+
+/* できないことの話。値段の話とは段落を分けてある。
+   続けて書くと、断りが売り込みの前振りに見える。 */
+.takeawayLimits {
+  display: grid;
+  gap: var(--space-3xs);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.takeawayUpsell {
+  padding-top: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+}
+
+/* ══ 対応できる作業 ══════════════════════════════ */
+
+.capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.capability {
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-chip);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+/* ══ お約束 ══════════════════════════════════════ */
+
+.promises {
+  display: grid;
+  gap: 0;
+  max-width: var(--measure);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promise {
+  padding-block: var(--space-md);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+  word-break: auto-phrase;
+}
+
+.promise:first-child {
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+/* ══ 料金 ════════════════════════════════════════
+   金額より先に「範囲」を読ませる。数字だけ大きく出すと
+   「どこから来た数字か」が立ち上がってしまう。 */
+
+/* 見出し・範囲・金額・納期の 4 行を、3 枚のカードで揃える。
+   説明文の行数がカードごとに違うので、subgrid でないと
+   「納期」の位置がずれて表として読めなくなる。 */
+.tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr));
+  grid-template-rows: auto auto auto auto;
+  gap: var(--space-lg);
+}
+
+.tier {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  align-content: start;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-card);
+}
+
+/* 金額があるときは金額、ないときは理由が同じ場所に入る */
+.tierPrice {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2xs);
+  padding-top: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.tierLabel {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-variation-settings: "wdth" 92, "opsz" 24;
+  font-size: var(--text-lg);
+}
+
+.tierScope {
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+  word-break: auto-phrase;
+}
+
+.tierAmount {
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* 金額を出さない段。空欄が「高いから書けない」に見えないよう理由を添える。 */
+.tierReason {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  word-break: auto-phrase;
+}
+
+.tierLead {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.tierLeadLabel {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.scopeLists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: var(--space-xl);
+  margin-top: var(--space-2xl);
+}
+
+.scopeTitle {
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.scopeList {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.scopeList li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-sm);
+}
+
+.scopeList li::before {
+  content: "＋";
+  color: var(--color-accent-2);
+}
+
+.scopeList[data-tone="excluded"] li::before {
+  content: "−";
+  color: var(--color-muted);
+}
+
+.addons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+.addon {
+  display: grid;
+  align-content: start;
+  gap: var(--space-xs);
+  padding: var(--space-lg);
+  background: var(--color-paper-2);
+  border-radius: var(--radius-card);
+}
+
+.addonLabel {
+  font-size: var(--text-md);
+}
+
+.addonAmount {
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.addonSummary {
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.addonList {
+  display: grid;
+  gap: var(--space-3xs);
+  margin: var(--space-xs) 0 0;
+  padding-left: 1.2em;
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.addonNote {
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  word-break: auto-phrase;
+}
+
+.monitor {
+  display: grid;
+  gap: var(--space-sm);
+  max-width: var(--measure);
+  margin-top: var(--space-2xl);
+  padding: var(--space-lg);
+  border: var(--rule-fine) solid var(--color-accent-2);
+  border-radius: var(--radius-card);
+}
+
+.monitorHead {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-accent-2);
+}
+
+.monitorBody {
+  font-size: var(--text-md);
+  color: var(--color-ink);
+}
+
+.monitorConditions {
+  margin: 0;
+  padding-left: 1.4em;
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.monitorNote {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+/* ══ 削減額の試算 ════════════════════════════════ */
+
+.calc {
+  display: grid;
+  gap: var(--space-xl);
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  align-items: start;
+}
+
+.calcInputs {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.calcField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2xs) var(--space-md);
+  align-items: baseline;
+}
+
+.calcField label {
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.calcField input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+
+.calcValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.calcTiers {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.calcTiers legend {
+  padding: 0;
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.calcTier {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-input);
+  cursor: pointer;
+}
+
+.calcTier:hover {
+  background: var(--color-paper-2);
+}
+
+.calcTier input {
+  accent-color: var(--color-accent);
+}
+
+.calcTierAmount {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.calcResult {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: var(--space-lg);
+  background: var(--color-paper-2);
+  border-radius: var(--radius-card);
+}
+
+.calcResult > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-md);
+  align-items: baseline;
+  padding-block: var(--space-sm);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+
+.calcResult > div:last-child {
+  border-bottom: none;
+}
+
+.calcResult dt {
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.calcResult dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* 買い切りなので回収期間が出せる。ここが一番見せたい数字。 */
+.calcHighlight dd {
+  font-size: var(--text-xl);
+  color: var(--color-accent-2);
+}
+
+.calcNote {
+  grid-column: 1 / -1;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+/* ══ 私について ══════════════════════════════════ */
+
+.about {
+  display: grid;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+  gap: var(--space-2xl);
+  align-items: start;
+}
+
+.aboutBody {
+  display: grid;
+  gap: var(--space-md);
+  max-width: var(--measure);
+  color: var(--color-neutral);
+}
+
+.aboutLead {
+  font-size: var(--text-md);
+  color: var(--color-ink);
+}
+
+.aboutFacts {
+  display: grid;
+  gap: 0;
+  margin: var(--space-md) 0 0;
+}
+
+.aboutFacts > div {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: var(--space-md);
+  padding-block: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.aboutFacts dt {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.aboutFacts dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+/* ══ お問い合わせ ════════════════════════════════ */
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: var(--space-lg);
+  max-width: 46rem;
+}
+
+.formField {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.formField[data-wide] {
+  grid-column: 1 / -1;
+}
+
+.formField label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+}
+
+.formField input,
+.formField select,
+.formField textarea {
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-fine) solid var(--color-rule-2);
+  border-radius: var(--radius-input);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.formField textarea {
+  resize: vertical;
+}
+
+.formRequired {
+  padding: 0 var(--space-2xs);
+  border-radius: 3px;
+  background: var(--color-mark);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  color: var(--color-ink);
+}
+
+.formActions {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-sm);
+}
+
+.formNote {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
 /* ══════════════════════════════════════════════
    レスポンシブ
+   スマートフォンで見る割合が高い相手なので、
+   ヒーローからデモまでの距離を詰めることを優先する。
    ══════════════════════════════════════════════ */
 
 @media (width < 64rem) {
-  .hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2xl);
-    align-items: start;
-    padding-block: var(--space-3xl);
-  }
-
-  .heroAside {
-    justify-self: start;
-    max-width: 14rem;
-  }
-
-  /* 固定ペインをやめ、主張 → 証拠 の縦積みに落とす。
-     狭い画面で左右に分けても読めないため。 */
-  .stack {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2xl);
-  }
-
-  .claims {
+  /* 節のリンクは畳んで、行き先（相談する）だけ残す */
+  .navLinks {
     display: none;
   }
 
-  .proofs {
-    gap: var(--space-3xl);
-  }
-
-  .proofClaimTitle {
-    display: block;
-    font-family: var(--font-display);
-    font-weight: var(--display-weight);
-    font-variation-settings: "wdth" 90, "opsz" 32;
-    font-size: var(--text-lg);
-    line-height: var(--lh-snug);
-    margin-bottom: var(--space-2xs);
-  }
-
-  .proofClaimFor {
-    display: block;
-    margin-bottom: var(--space-sm);
-    font-family: var(--font-label);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    color: var(--color-accent-2);
-  }
-
-  .voice {
+  .about {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-md);
+    gap: var(--space-xl);
   }
 
-  .voiceQuote {
-    font-size: var(--text-md);
-  }
-
-  .tier {
-    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
-  }
-
-  .tierNote {
-    grid-column: 1 / -1;
+  .portrait {
+    max-width: 14rem;
   }
 }
 
 @media (width < 40rem) {
+  .hero {
+    padding-block: var(--space-3xl);
+  }
+
+  .demo {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .demoStage {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  .dropzone {
+    padding: var(--space-lg) var(--space-md);
+  }
+
   .step {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-xs);
@@ -688,39 +1261,34 @@
     font-size: var(--text-md);
   }
 
-  .proof {
-    padding: var(--space-lg);
+  /* 表は畳まず横に流す。列を落とすと金額の対応が読めなくなる。 */
+  .demoTable {
+    display: block;
+    overflow-x: auto;
   }
 }
 
-/* このページは配布物ではないので、印刷は最低限読める状態にだけする。 */
+/* 配布物ではないので、印刷は最低限読める状態にだけする。 */
 @media print {
   .nav,
-  .cta {
+  .dropzoneActions,
+  .formActions,
+  .calcInputs {
     display: none;
   }
 
-  .claims {
-    display: none;
-  }
-
-  .stack {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .proofClaimTitle,
-  .proofClaimFor {
-    display: block;
-  }
-
-  .proofRow,
-  .voice,
+  .demo,
   .step,
-  .faqItem {
+  .faqItem,
+  .tier,
+  .addon {
     break-inside: avoid;
   }
 
-  .proof {
+  .demo,
+  .demoStage,
+  .addon,
+  .calcResult {
     background: none;
     border: var(--rule-fine) solid var(--color-rule-2);
   }

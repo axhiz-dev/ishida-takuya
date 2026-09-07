@@ -47,7 +47,7 @@ src/
 │  ├─ common/               MarkedHeading・ダミー表示
 │  ├─ icons/                ★ 技術ロゴの対応表と TechIcon
 │  ├─ engineer/             章立て・進行レール・タイムライン・テーマ切替
-│  └─ business/             Feature Stack・浮遊ナビ・顔写真
+│  └─ business/             デモ 2 つ・試算・浮遊ナビ・顔写真
 ├─ content/                 ★ 表示される文章とデータはすべてここ
 ├─ config/site.ts           ★ 定数・機能フラグ・章の一覧（環境変数ではない）
 ├─ lib/                     フォント定義・テーマ初期化・派生値・フック

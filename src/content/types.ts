@@ -143,26 +143,105 @@ export type CaseStudy = {
   links?: Link[];
 };
 
-/* ────────────────────────────── ビジネス面 ── */
+/* ──────────────────────── 業務自動化（/business） ── */
 
-/** 「できること」と、その裏づけの対。Split Studio の 1 行になる。 */
-export type Offering = {
+/*
+ * ここから下は /business 専用。読み手は従業員 20〜100 名程度の会社の
+ * 社長または事務責任者で、IT には詳しくない。
+ *
+ * 文章の決まりごと（原稿と実装で共有する）：
+ *   · 見出しは名詞。文にするのはヒーローだけ
+ *   · 抽象名詞を使わない（DX／変革／実現／最適化／伴走／寄り添う は禁止）
+ *   · 顧客が実際に口にする言葉で書く
+ *   · 誇張しない。「すべて」ではなく「たいてい」
+ *   · 技術名を前面に出さない（買い手にとってリスク要因になる）
+ *   · 「〜ではなく、〜します」の対句はページ全体で 1 回まで
+ *   · 断りの文で営業しない。値段の話は別の場所に置く
+ *
+ * 実績が公開できない段階のサイトなので、導入企業ロゴ・お客様の声・
+ * 実績件数・受賞歴は**型として持たない**。盛れないようにしてある。
+ */
+
+/** ヒーロー。和文は自動改行に任せると変な位置で折れるので行を明示する。 */
+export type BusinessHero = {
+  lines: string[];
+  /** lines のいずれかに含まれる短い語。そこだけ背後に色帯が敷かれる。 */
+  mark: string;
+  /** 見出しの下の 1 文。 */
+  lede: string;
+  /** ボタンの下に並べる条件の要約。3 つまで。 */
+  terms: string[];
+};
+
+/**
+ * ブラウザ内で完結するデモ。触れるものであり、持ち帰れるものでもある。
+ * 実績ゼロの段階で唯一機能する証拠なので、このページの中心に置く。
+ */
+export type Demo = {
   id: string;
-  /** できること。 */
   title: string;
-  /** どんな相手向けか。 */
-  forWhom: string;
+  /** 触り方の指示。1〜2 文。 */
+  invitation: string;
+  /** いま現場で起きている手順。番号付きで出る。 */
+  before: string[];
+  /** 自動にしたあとの 1 行。 */
+  after: string;
+  /** 削減の目安。「月およそ 4 時間」など、幅を持たせて書く。 */
+  saving: string;
+};
+
+/** 買い切りの 1 段。 */
+export type PriceTier = {
+  id: string;
+  label: string;
+  /**
+   * 「10 万円」。金額を決めない段は undefined にする。
+   * 空欄が「高いから書けない」に見えないよう、その場合は必ず reason を書く。
+   */
+  amount?: string;
+  /** 金額を出さない理由。amount がないときだけ使う。 */
+  reason?: string;
+  /**
+   * 試算に使う数値（円）。表示は amount の文字列を使うので、
+   * ここは計算専用。表記を変えても計算が壊れないように分けてある。
+   */
+  amountYen?: number;
+  /** 範囲。金額より先に読ませたいので、表示上はこちらが主役。 */
+  scope: string;
+  /** 納期の目安。 */
+  lead: string;
+};
+
+/** 買い切りのあとから任意で付けられるもの。 */
+export type PriceAddon = {
+  id: string;
+  label: string;
+  amount: string;
+  /** 1 行の補足。 */
+  summary: string;
+  includes?: string[];
+  /** 但し書き。高い理由など、聞かれる前に答える。 */
+  note?: string;
+};
+
+/** 実績が貯まるまでの条件つき価格。3 社に達したら消す。 */
+export type MonitorOffer = {
+  headline: string;
   body: string;
-  /** 隣に並べる証拠。 */
-  proof: {
-    /** 「実績」「成果物」など証拠の種別。 */
-    kind: string;
-    title: string;
-    detail: string;
-    /** 補足の箇条書き。 */
-    facts?: string[];
-    link?: Link;
-  };
+  conditions: string[];
+  note: string;
+};
+
+/** 削減額の試算。初期値と単価はここでだけ決める。 */
+export type SavingsConfig = {
+  /** 週あたりの作業時間（スライダー）。 */
+  hoursPerWeek: { min: number; max: number; step: number; initial: number };
+  /** 担当者の時給（スライダー）。 */
+  hourlyWage: { min: number; max: number; step: number; initial: number };
+  /** 試算に使う買い切りの段の id。 */
+  tierIds: string[];
+  /** 数字が独り歩きしないための但し書き。 */
+  disclaimer: string;
 };
 
 export type ProcessStep = {
@@ -174,23 +253,17 @@ export type ProcessStep = {
   youProvide?: string;
 };
 
-export type Testimonial = {
-  quote: string;
-  name: string;
-  role: string;
-  company: string;
-  /** どの仕事に対する声か。 */
-  context: string;
-};
-
 export type Faq = {
   q: string;
   a: string;
 };
 
-export type Pricing = {
+/** お問い合わせフォームの 1 項目。送信先はメールなので型は素朴でよい。 */
+export type ContactField = {
+  name: string;
   label: string;
-  /** 「30万円〜」など。目安であることを明示する。 */
-  range: string;
-  note: string;
+  type: "text" | "email" | "tel" | "textarea" | "select";
+  required?: boolean;
+  /** type が "select" のときの選択肢。 */
+  options?: string[];
 };
