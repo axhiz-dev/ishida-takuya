@@ -52,7 +52,7 @@ test("職務経歴ページが A4 の PDF として出力できる", async ({ pa
   });
   await page.waitForTimeout(800);
 
-  const path = "screenshots/職務経歴-石田拓也.pdf";
+  const path = "screenshots/職務経歴-石田卓也.pdf";
   await page.pdf({ path, format: "A4", printBackground: false, preferCSSPageSize: true });
 
   const pdf = await readFile(path);

@@ -84,7 +84,7 @@ test("職務経歴の PDF をレポートに添付する", async ({ page }, test
   });
   await page.waitForTimeout(800);
 
-  const path = "screenshots/職務経歴-石田拓也.pdf";
+  const path = "screenshots/職務経歴-石田卓也.pdf";
   await page.pdf({ path, format: "A4", printBackground: false, preferCSSPageSize: true });
   await testInfo.attach("職務経歴.pdf", {
     body: await readFile(path),

@@ -1,7 +1,7 @@
 import type { Profile } from "./types";
 
 export const profile: Profile = {
-  name: "石田 拓也",
+  name: "石田 卓也",
   nameLatin: "Takuya Ishida",
   role: "ソフトウェアエンジニア",
   // mark は text に含まれる短い語を指す。画面で一番大きい声はここ 1 箇所だけ。
