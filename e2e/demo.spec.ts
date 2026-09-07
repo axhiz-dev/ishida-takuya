@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { mkdirSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 
 /**
  * デモは実績の代わりに置いている証拠なので、壊れると
@@ -74,4 +76,35 @@ test("ページ内リンクの着地点が固定ナビの下に隠れない", as
   expect(nav).not.toBeNull();
   // 見出しの上端がナビの下端より下にあること
   expect(box!.y).toBeGreaterThan(nav!.y + nav!.height);
+});
+
+test("請求書デモ：10 件まとめて作ると、開ける ZIP が落ちてくる", async ({ page }) => {
+  await page.getByRole("tab", { name: /請求書/ }).click();
+  await page.getByRole("button", { name: /10 件まとめてつくる/ }).click();
+
+  await expect(panel(page).getByLabel("1 件目の請求先")).toHaveValue("株式会社サンプル商会");
+  await expect(panel(page).getByLabel("10 件目の請求先")).toHaveValue("株式会社サンプル薬品");
+
+  const wait = page.waitForEvent("download");
+  await page.getByRole("button", { name: /10 件まとめて作る/ }).click();
+  const download = await wait;
+
+  // ロケールが POSIX の環境では、Chromium が和文のファイル名を落として
+  // "download" にしてしまう（LANG=C.UTF-8 を与えると和名のまま出る）。
+  // 環境しだいの部分なので、ここは名前ではなく中身を確かめる。
+  expect(download.suggestedFilename()).toMatch(/^(請求書_\d{6}\.zip|download)$/);
+
+  mkdirSync("screenshots", { recursive: true });
+  const zip = "screenshots/invoices.zip";
+  await download.saveAs(zip);
+
+  // ZIP を自前で書いているので、本当に開けるかは外部のツールで確かめる
+  const listing = execFileSync("unzip", ["-l", zip], { encoding: "utf-8" });
+  expect(listing).toContain("株式会社サンプル商会");
+  expect(listing).toContain("10 files");
+  expect(execFileSync("unzip", ["-t", zip], { encoding: "utf-8" })).toContain("No errors");
+
+  // jsPDF は PNG を生ピクセルに戻すので、compress を外すと 1 枚 12MB になる。
+  // 気づかないまま 120MB の ZIP を配ることになるので、大きさで見張る。
+  expect(statSync(zip).size).toBeLessThan(5 * 1024 * 1024);
 });

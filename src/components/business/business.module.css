@@ -1546,3 +1546,9 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+.demoMuted {
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import type { Demo } from "@/content";
+import { downloadBlob } from "@/lib/download";
 import { DemoShell } from "./DemoShell";
 import { AggregateChart, type ChartKind, type Slice } from "./AggregateChart";
 import styles from "./business.module.css";
@@ -145,12 +146,7 @@ export function DemoAggregate({ demo }: { demo: Demo }) {
     const csv = [`${groupBy},${sumBy}`, ...totals.map(([key, value]) => `${key},${value}`)].join("\n");
     // Excel が UTF-8 と判断できるよう BOM を付ける。付けないと日本語が化ける。
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "集計.csv";
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, "集計.csv");
   };
 
   return (
