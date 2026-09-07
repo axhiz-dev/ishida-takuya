@@ -24,5 +24,4 @@ export {
   savingsConfig,
   symptoms,
   symptomsClosing,
-  takeaway,
 } from "./business";

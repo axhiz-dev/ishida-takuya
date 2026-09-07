@@ -20,14 +20,14 @@ export function DemoShell({
 }) {
   return (
     <article className={styles.demo}>
-      <h3 className={styles.demoTitle}>{demo.title}</h3>
+      {/* 名前はタブのラベルが持っているのでここには出さない */}
       <p className={styles.demoInvitation}>{demo.invitation}</p>
 
       <div className={styles.demoStage}>{children}</div>
 
       <div className={styles.demoCompare}>
         <div>
-          <h4 className={styles.demoCompareTitle}>今こうなっていませんか</h4>
+          <h3 className={styles.demoCompareTitle}>今こうなっていませんか</h3>
           <ol className={styles.demoBefore}>
             {demo.before.map((line) => (
               <li key={line}>{line}</li>
@@ -36,7 +36,7 @@ export function DemoShell({
         </div>
 
         <div>
-          <h4 className={styles.demoCompareTitle}>自動にするとこうなります</h4>
+          <h3 className={styles.demoCompareTitle}>自動にするとこうなります</h3>
           <p className={styles.demoAfter}>{demo.after}</p>
           <p className={styles.demoSaving}>
             <span className={styles.demoSavingLabel}>削減の目安</span>

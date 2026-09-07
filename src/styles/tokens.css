@@ -61,6 +61,10 @@
 
   --banner-height: 0px;
 
+  /* 固定ナビの高さぶん。ページ内リンクの着地点をこれだけ下げないと、
+     飛んだ先の見出しがナビの下に隠れる。 */
+  --nav-clearance: 6.5rem;
+
   /* ── 形 ──────────────────────────────────────── */
   --radius-card: 12px;
   --radius-pill: 999px;
@@ -185,6 +189,18 @@
   --color-focus: oklch(44% 0.17 250);
 
   --color-chip: oklch(94% 0.010 235);
+
+  /* グラフの系列色。
+     dataviz の validator に地色 #f0f6fa で通したもの
+     （CVD 最小 ΔE 9.1 / 通常視 19.6・いずれも基準以上）。
+     並び順は固定。系列が増えても色を作り足さず「その他」に畳む。 */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #008300;
+  --chart-grid: oklch(88% 0.010 235);
 
   --body-weight: 400;
   --display-weight: 500;

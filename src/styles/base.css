@@ -200,6 +200,14 @@ time {
   }
 }
 
+/* 事業側もページ内リンクで移動するので滑らせる。
+   モーション低減時は下の @media が auto に上書きする。 */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="business"] {
+    scroll-behavior: smooth;
+  }
+}
+
 /* ── モーション低減 ─────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,

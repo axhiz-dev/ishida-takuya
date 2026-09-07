@@ -3,7 +3,24 @@
 import { useId, useRef, useState } from "react";
 import type { Demo } from "@/content";
 import { DemoShell } from "./DemoShell";
+import { AggregateChart, type ChartKind, type Slice } from "./AggregateChart";
 import styles from "./business.module.css";
+
+/** 系列色は 6 つしかないので、構成比はここで畳む。棒は軸が読める範囲まで。 */
+const CAP: Record<ChartKind, number> = { donut: 6, column: 12, bar: 12, line: 24 };
+
+/**
+ * 折れ線は時間の変化にしか使えない。拠点別の売上を線でつなぐと、
+ * 拠点と拠点のあいだに中間の値があるように見えてしまう。
+ * なので「まとめる列」が日付らしいときだけ選べるようにする。
+ */
+const DATE_LIKE = /^\d{4}[-/年.]\s*\d{1,2}([-/月.]\s*\d{1,2})?日?$|^\d{1,2}月$/;
+
+function looksLikeDate(labels: string[]): boolean {
+  if (labels.length < 2) return false;
+  const hits = labels.filter((label) => DATE_LIKE.test(label.trim())).length;
+  return hits / labels.length >= 0.8;
+}
 
 type Row = Record<string, string | number>;
 
@@ -43,6 +60,7 @@ export function DemoAggregate({ demo }: { demo: Demo }) {
   const [sumBy, setSumBy] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [kind, setKind] = useState<ChartKind>("column");
 
   const columns = rows?.[0] ? Object.keys(rows[0]) : [];
 
@@ -104,6 +122,24 @@ export function DemoAggregate({ demo }: { demo: Demo }) {
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1]);
   })();
+
+  /* 上位だけを残して、あふれた分は「その他」に畳む。
+     色を作り足すと、色覚特性のある人には見分けられない色ができる。 */
+  const fold = (rows: [string, number][], cap: number): Slice[] => {
+    if (rows.length <= cap) return rows.map(([label, value]) => ({ label, value }));
+    const head = rows.slice(0, cap - 1);
+    const rest = rows.slice(cap - 1).reduce((sum, [, value]) => sum + value, 0);
+    return [...head.map(([label, value]) => ({ label, value })), { label: "その他", value: rest }];
+  };
+
+  const dated = looksLikeDate(totals.map(([label]) => label));
+  const activeKind: ChartKind = kind === "line" && !dated ? "column" : kind;
+
+  const chartData = fold(
+    // 折れ線は時間順、それ以外は大きい順。並べ替えの基準が違う。
+    activeKind === "line" ? [...totals].sort((a, b) => a[0].localeCompare(b[0], "ja")) : totals,
+    CAP[activeKind],
+  );
 
   const downloadCsv = () => {
     const csv = [`${groupBy},${sumBy}`, ...totals.map(([key, value]) => `${key},${value}`)].join("\n");
@@ -185,6 +221,32 @@ export function DemoAggregate({ demo }: { demo: Demo }) {
               </select>
             </p>
           </div>
+
+          <div className={styles.chartSwitch} role="group" aria-label="グラフの種類">
+            {(
+              [
+                ["column", "縦棒"],
+                ["bar", "横棒"],
+                ["donut", "構成比"],
+                ["line", "折れ線"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={styles.chartSwitchItem}
+                aria-pressed={activeKind === value}
+                /* 日付でない列を折れ線にすると嘘のグラフになるので押させない */
+                disabled={value === "line" && !dated}
+                title={value === "line" && !dated ? "日付の列でまとめたときに使えます" : undefined}
+                onClick={() => setKind(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <AggregateChart data={chartData} kind={activeKind} valueLabel={sumBy} />
 
           <table className={styles.demoTable}>
             <thead>

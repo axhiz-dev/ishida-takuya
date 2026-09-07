@@ -20,12 +20,12 @@ import {
   promises,
   symptoms,
   symptomsClosing,
-  takeaway,
 } from "@/content";
 import { ROUTES } from "@/config/site";
 import { MarkedHeading } from "@/components/common/MarkedHeading";
 import { EdgeNav } from "@/components/business/EdgeNav";
 import { Portrait } from "@/components/business/Portrait";
+import { DemoTabs } from "@/components/business/DemoTabs";
 import { DemoAggregate } from "@/components/business/DemoAggregate";
 import { DemoInvoice } from "@/components/business/DemoInvoice";
 import { SavingsCalculator } from "@/components/business/SavingsCalculator";
@@ -111,10 +111,10 @@ export default function BusinessPage() {
           </h2>
           <p className={styles.sectionLede}>{demoIntro}</p>
 
-          <div className={styles.demos}>
+          <DemoTabs tabs={demos.map(({ id, title }) => ({ id, title }))}>
             <DemoAggregate demo={demos[0]!} />
             <DemoInvoice demo={demos[1]!} />
-          </div>
+          </DemoTabs>
 
           <ul className={styles.notes}>
             {demoNotes.map((note) => (
@@ -122,17 +122,6 @@ export default function BusinessPage() {
             ))}
           </ul>
 
-          {/* 持ち帰り。断りの話と値段の話を段落で分けてある。 */}
-          <div className={styles.takeaway}>
-            <h3 className={styles.takeawayTitle}>{takeaway.title}</h3>
-            <p>{takeaway.body}</p>
-            <p className={styles.takeawayLimits}>
-              {takeaway.limits.map((limit) => (
-                <span key={limit}>{limit}</span>
-              ))}
-            </p>
-            <p className={styles.takeawayUpsell}>{takeaway.upsell}</p>
-          </div>
         </section>
 
         {/* ── 4. 対応できる作業 ─────────────────── */}
