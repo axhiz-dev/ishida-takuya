@@ -98,11 +98,27 @@ test("請求書デモ：10 件まとめて作ると、開ける ZIP が落ちて
   const zip = "screenshots/invoices.zip";
   await download.saveAs(zip);
 
-  // ZIP を自前で書いているので、本当に開けるかは外部のツールで確かめる
-  const listing = execFileSync("unzip", ["-l", zip], { encoding: "utf-8" });
-  expect(listing).toContain("株式会社サンプル商会");
-  expect(listing).toContain("10 files");
-  expect(execFileSync("unzip", ["-t", zip], { encoding: "utf-8" })).toContain("No errors");
+  /* ZIP を自前で書いているので、検証も自前のコードでやったら意味がない。
+     まったく別の実装（Python の zipfile）に読ませて確かめる。
+     unzip -l の出力を見るのはやめた。和文のファイル名を実行環境の
+     ロケールしだいでエスケープして出すので、CI で落ちる。
+     zipfile は UTF-8 のフラグを見るのでロケールに左右されない。 */
+  const probe = [
+    "import sys, json, zipfile",
+    "z = zipfile.ZipFile(sys.argv[1])",
+    "assert z.testzip() is None, 'CRC が合わない'", // 全件を展開して CRC を検査する
+    "print(json.dumps({'names': z.namelist(), 'heads': [z.read(n)[:8].decode('latin1') for n in z.namelist()]}))",
+  ].join("\n");
+
+  const found = JSON.parse(
+    execFileSync("python3", ["-c", probe, zip], { encoding: "utf-8" }),
+  ) as { names: string[]; heads: string[] };
+
+  expect(found.names).toHaveLength(10);
+  expect(found.names[0]).toMatch(/^請求書_\d{6}-001_株式会社サンプル商会\.pdf$/);
+  expect(found.names[9]).toMatch(/^請求書_\d{6}-010_株式会社サンプル薬品\.pdf$/);
+  // 中身が本当に PDF であること（空ファイルを 10 個入れても ZIP は通るため）
+  for (const head of found.heads) expect(head).toContain("%PDF");
 
   // jsPDF は PNG を生ピクセルに戻すので、compress を外すと 1 枚 12MB になる。
   // 気づかないまま 120MB の ZIP を配ることになるので、大きさで見張る。
