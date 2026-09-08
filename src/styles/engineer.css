@@ -1,0 +1,346 @@
+@import "tailwindcss";
+
+/* ============================================================
+   /engineer 専用のスタイル。
+   ============================================================
+
+   このファイルは (engineer)/layout.tsx からしか読み込まない。
+   ルートグループごとに <html> を持つ構成なので、Tailwind の
+   preflight（要素リセット）も含めて /engineer の中に閉じる。
+   / と /business は tokens.css + base.css + CSS Modules のまま。
+
+   公開中の https://axhiz-dev.github.io/ishida-takuya/ の
+   globals.css をそのまま持ち込んでいる。値を変えるときは
+   あちらの見え方から離れることを承知のうえで変えること。
+   ============================================================ */
+
+/* ── デザイントークン（Tailwind v4 CSS-first / @theme） ── */
+@theme {
+  /* 背景・面 */
+  --color-bg: #07070d;
+  --color-bg-alt: #0b0b14;
+  --color-surface: #101019;
+  --color-surface-2: #15151f;
+
+  /* テキスト */
+  --color-ink: #f4f4f6;
+  --color-ink-muted: #9a9aae;
+  /* 公開中のサイトは #6b6b80 だが、地の上で 3.7:1 しかなく
+     小さい文字（年・単位・会社の一言説明・コロフォン）に使われている。
+     WCAG AA の 4.5:1 に届く最も暗い値まで持ち上げてある（実測 5.0:1）。
+     e2e/contrast.spec.ts が全ページを毎回測るので、下げると落ちる。 */
+  --color-ink-faint: #82829a;
+
+  /* アクセント（サイトのアイデンティティ） */
+  --color-brand-cyan: #22d3ee;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-fuchsia: #e879f9;
+
+  /* フォント（next/font が供給する CSS 変数に接続） */
+  --font-sans: var(--font-jp-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-jp-sans), sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, monospace;
+
+  /* コンテナ */
+  --breakpoint-xs: 480px;
+}
+
+/* ── ベース ── */
+:root {
+  color-scheme: dark;
+  --brand-gradient: linear-gradient(
+    100deg,
+    var(--color-brand-cyan),
+    var(--color-brand-violet) 55%,
+    var(--color-brand-fuchsia)
+  );
+}
+
+/* clip であって hidden ではない。hidden は sticky を壊す。
+   html と body の両方に要る。片方だけだと、もう片方が
+   スクロールできる領域を作ってしまう。 */
+html {
+  overflow-x: clip;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* hidden ではなく clip。
+     入場前の要素は motion が右へ 32px ずらして置くので、狭い画面では
+     その分だけ地の右にはみ出す。hidden は「スクロールできる領域」を
+     作ったうえで隠すだけなので scrollWidth に残るが、clip は領域ごと
+     切り落とすので横スクロールが生まれない。 */
+  overflow-x: clip;
+}
+
+/* セクションのアンカーが固定ナビに隠れないように */
+[id] {
+  scroll-margin-top: 6rem;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-brand-violet) 55%, transparent);
+  color: #fff;
+}
+
+/* フォーカスリング（アクセシビリティ） */
+:focus-visible {
+  outline: 2px solid var(--color-brand-violet);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* カスタムスクロールバー */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #26263a;
+  border-radius: 999px;
+  border: 2px solid var(--color-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #34344d;
+}
+
+/* キーボードで最初に当たる本文への近道。
+   画面では見えず、フォーカスが来たときだけ出る。 */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: 999px;
+  background: var(--color-surface);
+  padding: 0.6rem 1.1rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  outline: 2px solid var(--color-brand-violet);
+  outline-offset: 2px;
+  transition: transform 0.2s ease;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ── ユーティリティ ── */
+.text-gradient {
+  background: var(--brand-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 75%);
+}
+
+.glass {
+  background: color-mix(in oklab, var(--color-bg) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* conic グラデーションの角度をアニメートするためのカスタムプロパティ */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ── キーフレーム ── */
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+.animate-shimmer {
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes float-blob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(4%, -6%, 0) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-5%, 4%, 0) scale(0.95);
+  }
+}
+.animate-blob {
+  animation: float-blob 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes bounce-cue {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+.animate-cue {
+  animation: bounce-cue 1.8s ease-in-out infinite;
+}
+
+@keyframes border-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* ── reduced-motion グローバル kill-switch ── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   印刷（PDF 出力）
+   ============================================================
+
+   画面はダーク前提だが、紙は必ず白黒の A4 で出す。
+   Tailwind のユーティリティはクラス名が意味を持たないので、
+   印刷で消したい装飾には JSX 側で data-print="hide" を付け、
+   ここではそれと構造セレクタだけを見る。クラス名を並べると
+   ユーティリティを 1 つ足すたびに印刷が壊れる。
+   ============================================================ */
+
+@page {
+  size: A4;
+  margin: 14mm 14mm 16mm;
+}
+
+/* 画面では隠しておく印刷専用ヘッダ */
+[data-print="only"] {
+  display: none;
+}
+
+@media print {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html,
+  body {
+    /* 画面用の overflow-x: clip を必ず解除する。
+       root に overflow が効いたままだと Chrome は 1 ページ目しか印刷しない。 */
+    overflow: visible;
+    height: auto;
+    background: #fff;
+    color: #000;
+    font-size: 9.5pt;
+    line-height: 1.65;
+  }
+
+  /* 地の色・影・枠線の色をまとめて紙向けに落とす。
+     Tailwind の bg-* / border-* / shadow-* を個別に打ち消すのは
+     現実的ではないので、ここで一括で当てる。 */
+  body * {
+    background-image: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    text-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* 枠のあるものだけ、細いグレーの罫線に統一する */
+  [class*="border"] {
+    border-color: #c4c4c4 !important;
+  }
+
+  /* グラデーション文字は紙では透明のままだと消える */
+  .text-gradient {
+    -webkit-text-fill-color: #000 !important;
+    color: #000 !important;
+  }
+
+  /* 装飾・操作系は紙に出さない */
+  [data-print="hide"],
+  header[data-print="hide"],
+  canvas,
+  button,
+  .skip-link {
+    display: none !important;
+  }
+
+  [data-print="only"] {
+    display: block;
+  }
+
+  /* 画面のリズム用に取ってある大きな余白は紙では無駄 */
+  section {
+    padding-top: 0 !important;
+    padding-bottom: 8mm !important;
+    min-height: 0 !important;
+    break-inside: auto;
+  }
+
+  /* 見出しの直後で改ページしない */
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+
+  /* 段落・箇条書き・カードを途中で割らない */
+  p,
+  li,
+  tr,
+  blockquote,
+  figure {
+    break-inside: avoid;
+  }
+
+  /* 経歴は左右交互の 2 段組をやめて 1 列に落とす。
+     紙は狭いので、交互配置は読み順を壊すだけになる。 */
+  [data-print="linear"] {
+    display: block !important;
+  }
+  [data-print="linear"] > * {
+    grid-column: auto !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: left !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  /* motion の入場アニメーションは紙では途中の状態で固まりうる */
+  [style*="opacity"] {
+    opacity: 1 !important;
+  }
+}

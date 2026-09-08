@@ -2,9 +2,10 @@
 
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { career, profile, skills } from "@/content";
+import { profile } from "@/content";
+import { engineerCareer, engineerSkills } from "@/content/engineer";
 import { ROUTES } from "@/config/site";
-import { coreSkills, formatDate, totalExperienceYears } from "@/lib/derive";
+import { formatDate, topSkillNames, totalExperienceYears } from "@/lib/derive";
 import { useCursorSpotlight } from "@/lib/useCursorSpotlight";
 import { PlaceholderNotice } from "@/components/common/PlaceholderNotice";
 import { MarkedHeading } from "@/components/common/MarkedHeading";
@@ -25,8 +26,9 @@ const step = (i: number) => ({ "--i": i }) as CSSProperties;
  */
 export default function GatePage() {
   const spotlight = useCursorSpotlight<HTMLDivElement>();
-  const years = totalExperienceYears(career);
-  const core = coreSkills(skills).slice(0, 3);
+  // /engineer と同じ 1 つのデータから出す。手で書くと 2 画面でずれる。
+  const years = totalExperienceYears(engineerCareer);
+  const core = topSkillNames(engineerSkills).slice(0, 3);
 
   const doors = [
     {
@@ -34,7 +36,7 @@ export default function GatePage() {
       kind: "engineer" as const,
       label: "採用・技術の方へ",
       title: "職務経歴",
-      body: "担当領域・技術スタック・判断の記録。PDF でも出せます。",
+      body: "担当領域・技術スタック・制作実績。PDF でも出せます。",
       meta: `${years} 年 / ${core.join(" · ")}`,
     },
     {

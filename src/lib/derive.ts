@@ -1,4 +1,5 @@
-import type { CareerEntry, Period, SkillGroup } from "@/content/types";
+import type { Period } from "@/content/types";
+import type { EngineerSkillCategory } from "@/content/engineer";
 
 /**
  * コンテンツから導出できる数字だけを計算する。
@@ -22,37 +23,39 @@ export const periodMonths = (period: Period, now = new Date()): number => {
   return (to.year - from.year) * 12 + (to.month - from.month);
 };
 
-/** 「2022年4月 — 現在」の形に整形する。 */
-export const formatPeriod = (period: Period): string => {
+/**
+ * 「2022.07 – 現在」の形に整形する。
+ *
+ * 表示用の文字列をデータに持たせず、期間そのものから組み立てる。
+ * 手で書くと通算年数の計算とずれても誰も気づけない。
+ */
+export const formatDotPeriod = (period: Period): string => {
+  const pad = (n: number) => String(n).padStart(2, "0");
   const from = parseYearMonth(period.from);
-  const head = `${from.year}年${from.month}月`;
-  if (period.to === "present") return `${head} — 現在`;
+  const head = `${from.year}.${pad(from.month)}`;
+  if (period.to === "present") return `${head} – 現在`;
   const to = parseYearMonth(period.to);
-  return `${head} — ${to.year}年${to.month}月`;
-};
-
-/** 「3年2か月」の形に整形する。 */
-export const formatDuration = (months: number): string => {
-  const years = Math.floor(months / 12);
-  const rest = months % 12;
-  if (years === 0) return `${rest}か月`;
-  if (rest === 0) return `${years}年`;
-  return `${years}年${rest}か月`;
+  return `${head} – ${to.year}.${pad(to.month)}`;
 };
 
 /** 経歴の期間を合算した通算年数（重複期間は考慮しない単純合算）。 */
-export const totalExperienceYears = (entries: CareerEntry[], now = new Date()): number => {
+export const totalExperienceYears = (
+  entries: { period: Period }[],
+  now = new Date(),
+): number => {
   const months = entries.reduce((sum, entry) => sum + periodMonths(entry.period, now), 0);
   return Math.floor(months / 12);
 };
 
-/** level 4（設計と技術判断ができる）のスキル名。要約の裏づけに使う。 */
-export const coreSkills = (groups: SkillGroup[]): string[] =>
-  groups.flatMap((group) => group.items.filter((s) => s.level >= 4).map((s) => s.name));
-
-/** 経歴に登場する技術の重複なし一覧。 */
-export const allStack = (entries: CareerEntry[]): string[] =>
-  Array.from(new Set(entries.flatMap((entry) => entry.stack)));
+/**
+ * 習熟度の高い順にスキル名を返す。ゲートの扉に添える 2〜3 語に使う。
+ * カテゴリをまたいで並べ替えるので、フロントエンド以外も上がってくる。
+ */
+export const topSkillNames = (categories: EngineerSkillCategory[]): string[] =>
+  categories
+    .flatMap((category) => category.skills)
+    .sort((a, b) => b.level - a.level)
+    .map((skill) => skill.name);
 
 /** "2026-07-24" → "2026年7月24日" */
 export const formatDate = (iso: string): string => {

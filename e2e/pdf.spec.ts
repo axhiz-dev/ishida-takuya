@@ -4,39 +4,70 @@ import { expect, test } from "@playwright/test";
 /**
  * 印刷まわり。今回いちばんの回帰リスクなので厚めに見る。
  *
- * ダークで表示していても紙は必ず白黒で出ること、
- * 畳んである内容（事例・根拠の表）が紙では開いていることを確認する。
+ * 画面はダーク一色だが、紙は必ず白黒の A4 で出る。
+ * Tailwind のユーティリティは 1 つ足すたびに色が増えるので、
+ * 「押さえ込めているか」を毎回ここで測る。
  */
 
-test("ダーク表示中でも、印刷は白黒で出る", async ({ page }) => {
+test("ダークで表示していても、印刷は白黒で出る", async ({ page }) => {
   await page.goto("/engineer/");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "engineer-dark");
+
+  // 画面はダーク
+  const screenBg = await page.evaluate(
+    () => getComputedStyle(document.body).backgroundColor,
+  );
+  expect(screenBg).toBe("rgb(7, 7, 13)");
 
   await page.emulateMedia({ media: "print" });
   await page.waitForTimeout(300);
 
-  const colors = await page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement);
-    return {
-      paper: root.getPropertyValue("--color-paper").trim(),
-      ink: root.getPropertyValue("--color-ink").trim(),
-      bodyBg: getComputedStyle(document.body).backgroundColor,
-    };
+  const printed = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    // 地が残っていない（＝トナーを食う面が無い）ことを、
+    // 画面いっぱいの要素をひととおり見て確かめる
+    const painted = [...document.querySelectorAll("section, main, footer, div")]
+      .map((el) => getComputedStyle(el).backgroundColor)
+      .filter((c) => c !== "rgba(0, 0, 0, 0)" && c !== "transparent");
+    return { bg: body.backgroundColor, color: body.color, painted };
   });
 
-  // print.css がテーマのトークンを上書きしていること
-  expect(colors.paper).toBe("#fff");
-  expect(colors.ink).toBe("#000");
-  expect(colors.bodyBg).toBe("rgb(255, 255, 255)");
+  expect(printed.bg).toBe("rgb(255, 255, 255)");
+  expect(printed.color).toBe("rgb(0, 0, 0)");
+  expect(printed.painted, `紙に地が残っている: ${printed.painted.join(" / ")}`).toEqual([]);
 });
 
-test("印刷ではナビ・レール・縦線が消え、印刷用ヘッダが出る", async ({ page }) => {
+test("印刷ではナビ・PDF ボタン・装飾が消え、印刷用ヘッダが出る", async ({ page }) => {
   await page.goto("/engineer/");
   await page.emulateMedia({ media: "print" });
 
-  await expect(page.getByRole("navigation", { name: "章の一覧" })).toBeHidden();
-  await expect(page.getByRole("button", { name: /テーマに切り替える/ })).toBeHidden();
+  await expect(page.getByRole("navigation", { name: "ページ内の移動" })).toBeHidden();
+  await expect(page.getByRole("button", { name: "PDF" })).toBeHidden();
+  await expect(page.locator("canvas")).toBeHidden();
   await expect(page.getByTestId("print-head")).toBeVisible();
+});
+
+test("印刷では経歴が 1 列に落ちる", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/engineer/");
+  await page.emulateMedia({ media: "print" });
+  await page.waitForTimeout(300);
+
+  // 左右交互の 2 段組は紙では読み順が壊れるので、display: block に落としている
+  const display = await page
+    .getByTestId("career-entry")
+    .first()
+    .evaluate((el) => getComputedStyle(el).display);
+  expect(display).toBe("block");
+});
+
+test("スキルの数値は紙にも文字として残る", async ({ page }) => {
+  await page.goto("/engineer/");
+  await page.emulateMedia({ media: "print" });
+  await page.waitForTimeout(300);
+
+  // バーは消えるが、隣の「95%」は読める（紙でバーは意味を持たない）
+  const bar = page.getByTestId("skill-bar").first();
+  await expect(bar).toContainText("%");
 });
 
 test("職務経歴ページが A4 の PDF として出力できる", async ({ page, browserName }) => {
@@ -44,13 +75,16 @@ test("職務経歴ページが A4 の PDF として出力できる", async ({ pa
 
   await page.goto("/engineer/");
   await page.waitForLoadState("networkidle");
-
-  // 実際の「PDF」ボタンと同じ手順を踏む。
-  // 畳んである <details> は CSS だけでは開けないので、印刷の直前に開く。
-  await page.evaluate(() => {
-    for (const el of document.querySelectorAll("details")) el.open = true;
+  // 入場アニメーションを起こしてから刷る（途中の状態で固まらせない）
+  await page.evaluate(async () => {
+    const height = document.body.scrollHeight;
+    for (let y = 0; y < height; y += window.innerHeight * 0.8) {
+      window.scrollTo({ top: y, behavior: "instant" });
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
   });
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(600);
 
   const path = "screenshots/職務経歴-石田卓也.pdf";
   await page.pdf({ path, format: "A4", printBackground: false, preferCSSPageSize: true });
@@ -65,36 +99,18 @@ test("職務経歴ページが A4 の PDF として出力できる", async ({ pa
   console.log(`PDF: ${pageCount} ページ / ${Math.round(pdf.byteLength / 1024)} KB`);
 });
 
-test("モーション低減の設定で scroll-snap が切れる", async ({ page }) => {
+test("モーション低減の設定でアニメーションが止まる", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/engineer/");
+  await page.waitForTimeout(400);
 
-  const snap = await page.evaluate(
-    () => getComputedStyle(document.documentElement).scrollSnapType,
+  // パーティクルは描かず静的グラデにフォールバックする
+  await expect(page.locator("canvas")).toHaveCount(0);
+
+  const behavior = await page.evaluate(
+    () => getComputedStyle(document.documentElement).scrollBehavior,
   );
-  expect(snap).toBe("none");
-});
-
-test("低い画面では scroll-snap が切れる", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 600 });
-  await page.goto("/engineer/");
-
-  const snap = await page.evaluate(
-    () => getComputedStyle(document.documentElement).scrollSnapType,
-  );
-  expect(snap).toBe("none");
-});
-
-test("十分な高さの画面では scroll-snap が効く", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/engineer/");
-
-  const snap = await page.evaluate(
-    () => getComputedStyle(document.documentElement).scrollSnapType,
-  );
-  // proximity は初期値なので、Chrome は "y proximity" を "y" に正規化する。
-  // 「軸が指定されている＝引っかかりが有効」であることを見る。
-  expect(snap).toBe("y");
+  expect(behavior).toBe("auto");
 });
 
 test("タッチ端末ではカーソル追従が無効になる", async ({ browser }) => {

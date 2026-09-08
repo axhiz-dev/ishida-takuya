@@ -34,23 +34,7 @@ export const ROUTES = {
     path: "/engineer",
     title: "職務経歴 — 石田卓也",
     description:
-      "石田卓也の職務経歴書。担当領域・技術スタック・意思決定の記録をこの 1 ページにまとめています。",
-    /**
-     * 章。id は各 <section> の id と一致させる。
-     *
-     * `snap: true` の章は 1 画面に収まり、スクロールで引っかかる。
-     * 中身の詰まった章（経歴・事例）は `snap: false` にして
-     * 内部を普通にスクロールさせる。ここを間違えると読者と戦うことになる。
-     *
-     * **章を足したいときはこの配列に 1 行足すだけでよい。**
-     */
-    sections: [
-      { id: "intro", no: "00", label: "はじめに", snap: true },
-      { id: "stack", no: "01", label: "スタック", snap: true },
-      { id: "work", no: "02", label: "経歴", snap: false },
-      { id: "cases", no: "03", label: "事例", snap: false },
-      { id: "contact", no: "04", label: "連絡先", snap: true },
-    ],
+      "石田卓也の職務経歴書。担当領域・技術スタック・制作実績をこの 1 ページにまとめています。",
   },
   business: {
     path: "/business",
@@ -76,6 +60,10 @@ export const ROUTES = {
 
 /** 機能フラグ。 */
 export const FEATURES = {
-  /** 職務経歴ページに「PDFで保存」ボタンを出す。 */
+  /**
+   * 職務経歴ページに「PDF」ボタンを出す。
+   * 押すとブラウザの印刷を呼ぶ（サーバーを持たないので生成は端末側）。
+   * 紙のレイアウトは src/styles/engineer.css の @media print が持つ。
+   */
   pdfExport: true,
 } as const;

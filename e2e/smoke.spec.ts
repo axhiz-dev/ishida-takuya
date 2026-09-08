@@ -96,74 +96,90 @@ test("ゲートから両方のページへ行ける", async ({ page }) => {
   // 読み手の区分は変わらない。文言を直すたびにテストが落ちるのを避ける。
   await page.getByRole("link", { name: /採用・技術の方へ/ }).click();
   await expect(page).toHaveURL(/\/engineer/);
-  await expect(page.getByRole("navigation", { name: "章の一覧" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "ページ内の移動" })).toBeVisible();
 
   await page.goto("/");
   await page.getByRole("link", { name: /お仕事のご相談の方へ/ }).click();
   await expect(page).toHaveURL(/\/business/);
 });
 
-test("職務経歴: 章のレールから各章へ飛べて、現在地が変わる", async ({ page }) => {
+test("職務経歴から入口へ戻れる", async ({ page }) => {
   await page.goto("/engineer/");
-  const rail = page.getByRole("navigation", { name: "章の一覧" });
+  await page.getByRole("link", { name: "入口へ戻る" }).click();
+  await expect(page).toHaveURL(/\/$/);
+});
 
-  await expect(rail.getByRole("link", { name: /はじめに/ })).toHaveAttribute(
-    "aria-current",
-    "true",
-  );
+test("職務経歴: ナビから各節へ飛べて、現在地が変わる", async ({ page }) => {
+  await page.goto("/engineer/");
+  const nav = page.getByRole("navigation", { name: "ページ内の移動" });
 
-  for (const label of ["スタック", "経歴", "事例", "連絡先"]) {
-    await rail.getByRole("link", { name: new RegExp(label) }).click();
+  for (const { label, id } of [
+    { label: "職務経歴", id: "career" },
+    { label: "スキル", id: "skills" },
+    { label: "制作実績", id: "projects" },
+    { label: "お問い合わせ", id: "contact" },
+  ]) {
+    // ナビには節の一覧とは別に「お問い合わせ」の CTA も入っているので、
+    // 一覧（<ul>）の中に絞ってから選ぶ。
+    await nav.getByRole("list").getByRole("link", { name: label, exact: true }).click();
     await page.waitForTimeout(700);
-    await expect(rail.getByRole("link", { name: new RegExp(label) })).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
+    await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.1 });
   }
 });
 
-test("職務経歴: テーマを切り替えられて、記憶される", async ({ page }) => {
-  await page.goto("/engineer/");
-
-  // 既定はダーク（このページはダークの見え方そのものが作品なので）
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "engineer-dark");
-
-  const toggle = page.getByRole("button", { name: /テーマに切り替える/ });
-  await toggle.click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "engineer-light");
-
-  // リロードしても選択が残る
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "engineer-light");
-
-  // 戻せる
-  await page.getByRole("button", { name: /テーマに切り替える/ }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "engineer-dark");
-});
-
-test("職務経歴: テーマの初期値がチラつかない", async ({ page }) => {
-  // ライトを記憶させた状態で読み込み、最初の描画時点で既にライトであること。
-  // <head> の同期スクリプトが効いていないとここで dark が観測される。
-  await page.addInitScript(() => {
-    try {
-      localStorage.setItem("ishida-takuya:engineer-theme", "light");
-    } catch {}
-  });
-
-  const themes: string[] = [];
-  await page.exposeFunction("recordTheme", (t: string) => themes.push(t));
-  await page.addInitScript(() => {
-    document.addEventListener("DOMContentLoaded", () => {
-      (window as unknown as { recordTheme: (t: string) => void }).recordTheme(
-        document.documentElement.dataset.theme ?? "",
-      );
-    });
-  });
-
+test("職務経歴: 経歴・スキル・実績がデータから描かれている", async ({ page }) => {
   await page.goto("/engineer/");
   await page.waitForLoadState("networkidle");
 
-  expect(themes, "DOMContentLoaded の時点でライトになっていること").toContain("engineer-light");
+  expect(await page.getByTestId("career-entry").count()).toBeGreaterThan(0);
+  expect(await page.getByTestId("skill-bar").count()).toBeGreaterThan(0);
+  expect(await page.getByTestId("project-card").count()).toBeGreaterThan(0);
+});
+
+/**
+ * 通算年数はゲートと職務経歴で同じ 1 つのデータから出している。
+ * 片方だけ手で書くと、同じサイトの中で違う年数が出る。
+ */
+test("通算年数がゲートと職務経歴で一致する", async ({ page }) => {
+  await page.goto("/");
+  const gateMeta = await page.getByRole("link", { name: /採用・技術の方へ/ }).innerText();
+  const gateYears = gateMeta.match(/(\d+)\s*年/)?.[1];
+  expect(gateYears, "ゲートの扉に年数が出ていること").toBeTruthy();
+
+  await page.goto("/engineer/");
+  await expect(page.getByText("Web 開発の経験")).toBeVisible();
+  const stat = await page
+    .getByText("Web 開発の経験")
+    .locator("xpath=preceding-sibling::div[1]")
+    .innerText();
+  expect(stat.replace(/\s/g, "")).toBe(`${gateYears}年`);
+});
+
+/**
+ * Tailwind は /engineer のルートグループにしか読ませていない。
+ *
+ * 分離は import の位置だけで保っているので、ほかのレイアウトへ
+ * src/styles/engineer.css を持っていくと静かに壊れる。
+ * ユーティリティが効くかどうかで、実際に配信された CSS を見る。
+ */
+test("Tailwind が /engineer の外へ漏れていない", async ({ page }) => {
+  const utilityWorks = () =>
+    page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.className = "hidden";
+      document.body.append(probe);
+      const applied = getComputedStyle(probe).display === "none";
+      probe.remove();
+      return applied;
+    });
+
+  await page.goto("/engineer/");
+  expect(await utilityWorks(), "/engineer では Tailwind が効くこと").toBe(true);
+
+  for (const path of ["/", "/business/"]) {
+    await page.goto(path);
+    expect(await utilityWorks(), `${path} に Tailwind が漏れている`).toBe(false);
+  }
 });
 
 test("キーボードだけで主要な導線をたどれる", async ({ page }) => {
@@ -175,16 +191,6 @@ test("キーボードだけで主要な導線をたどれる", async ({ page }) 
 
   const outline = await skip.evaluate((el) => getComputedStyle(el).outlineStyle);
   expect(outline).not.toBe("none");
-});
-
-test("事例カードが開閉でき、キーボードでも操作できる", async ({ page }) => {
-  await page.goto("/engineer/");
-
-  const first = page.locator("details").first();
-  await expect(first).not.toHaveAttribute("open", "");
-
-  await first.getByRole("group").or(first.locator("summary")).first().click();
-  await expect(first).toHaveAttribute("open", "");
 });
 
 test("画像・見出し階層・言語設定が崩れていない", async ({ page }) => {

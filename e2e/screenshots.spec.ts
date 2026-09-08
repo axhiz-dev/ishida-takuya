@@ -9,12 +9,11 @@ import { test, type Page } from "@playwright/test";
  * ブラウザ上で並べて見られる。
  */
 
-type Shot = { path: string; name: string; theme?: "dark" | "light" };
+type Shot = { path: string; name: string };
 
 const SHOTS: Shot[] = [
   { path: "/", name: "gate" },
-  { path: "/engineer/", name: "engineer-dark", theme: "dark" },
-  { path: "/engineer/", name: "engineer-light", theme: "light" },
+  { path: "/engineer/", name: "engineer" },
   { path: "/business/", name: "business" },
 ];
 
@@ -24,7 +23,7 @@ const WIDTHS = [
   { width: 390, name: "mobile" },
 ] as const;
 
-/** 章の入場を終わらせてから撮る。全章ぶん一度スクロールして起こす。 */
+/** 入場を終わらせてから撮る。ページ全体を一度スクロールして起こす。 */
 const settle = async (page: Page) => {
   await page.waitForLoadState("networkidle");
   await page.evaluate(async () => {
@@ -41,14 +40,6 @@ const settle = async (page: Page) => {
 for (const shot of SHOTS) {
   for (const size of WIDTHS) {
     test(`screenshot ${shot.name} @ ${size.name}`, async ({ page }, testInfo) => {
-      if (shot.theme) {
-        await page.addInitScript((t) => {
-          try {
-            localStorage.setItem("ishida-takuya:engineer-theme", t as string);
-          } catch {}
-        }, shot.theme);
-      }
-
       await page.setViewportSize({ width: size.width, height: 1000 });
       await page.goto(shot.path);
       await settle(page);
@@ -64,10 +55,7 @@ test("screenshot engineer @ print", async ({ page }, testInfo) => {
   // A4（210mm）から左右 14mm の余白を引いた幅で印刷レイアウトを撮る
   await page.setViewportSize({ width: 688, height: 1000 });
   await page.goto("/engineer/");
-  await page.waitForLoadState("networkidle");
-  await page.evaluate(() => {
-    for (const el of document.querySelectorAll("details")) el.open = true;
-  });
+  await settle(page);
   await page.emulateMedia({ media: "print" });
   await page.waitForTimeout(600);
 
@@ -78,11 +66,7 @@ test("screenshot engineer @ print", async ({ page }, testInfo) => {
 
 test("職務経歴の PDF をレポートに添付する", async ({ page }, testInfo) => {
   await page.goto("/engineer/");
-  await page.waitForLoadState("networkidle");
-  await page.evaluate(() => {
-    for (const el of document.querySelectorAll("details")) el.open = true;
-  });
-  await page.waitForTimeout(800);
+  await settle(page);
 
   const path = "screenshots/職務経歴-石田卓也.pdf";
   await page.pdf({ path, format: "A4", printBackground: false, preferCSSPageSize: true });

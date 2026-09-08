@@ -5,8 +5,8 @@
 | URL | 相手 | 中身 |
 | --- | --- | --- |
 | `/` | すべて | 1 画面の入口。どちらのページに進むかを選ぶ |
-| `/engineer` | 採用担当・エージェント | 職務経歴書。URL を送ればそれだけで経歴が伝わる。PDF 出力あり |
-| `/business` | 事業側の相談相手 | できることと実績。信頼性と親近感のためのページ |
+| `/engineer` | 採用担当・エージェント | 職務経歴書。URL を送ればそれだけで経歴が伝わる。PDF 出力あり（ダーク固定） |
+| `/business` | 仕事を頼みたい会社の人 | 業務の自動化。触れるデモと料金 |
 
 公開先: https://axhiz-dev.github.io/ishida-takuya/
 
@@ -40,81 +40,103 @@ CI とデプロイの仕組みは [docs/ci-cd.md](docs/ci-cd.md) にあります
 ```
 src/
 ├─ app/                     ルートグループごとに独立した root layout を持つ
-│  ├─ (gate)/               /            テーマ: gate
-│  ├─ (engineer)/engineer/  /engineer    テーマ: engineer-dark / engineer-light
-│  └─ (business)/business/  /business    テーマ: business
+│  ├─ (gate)/               /            トークン + CSS Modules
+│  ├─ (engineer)/engineer/  /engineer    Tailwind v4 + motion（ダーク固定）
+│  └─ (business)/business/  /business    トークン + CSS Modules
 ├─ components/
 │  ├─ common/               MarkedHeading・ダミー表示
-│  ├─ icons/                ★ 技術ロゴの対応表と TechIcon
-│  ├─ engineer/             章立て・進行レール・タイムライン・テーマ切替
+│  ├─ engineer/             ナビ・進捗バー・6 つの節・演出プリミティブ
 │  └─ business/             デモ 2 つ・試算・浮遊ナビ・顔写真
 ├─ content/                 ★ 表示される文章とデータはすべてここ
-├─ config/site.ts           ★ 定数・機能フラグ・章の一覧（環境変数ではない）
-├─ lib/                     フォント定義・テーマ初期化・派生値・フック
+│  ├─ profile.ts            氏名・連絡先・最終更新（3 面で共有する唯一の身元）
+│  ├─ engineer.ts           ★ /engineer の原稿・経歴・スキル・制作実績
+│  └─ business.ts           ★ /business の原稿
+├─ config/site.ts           ★ 定数・機能フラグ（環境変数ではない）
+├─ lib/                     フォント定義・派生値・フック
 └─ styles/
-   ├─ tokens.css            デザイントークンの単一の出所（4 テーマ）
-   ├─ base.css              リセット・ハイライト帯・章の入場・scroll-snap
-   └─ print.css             @page と、印刷時に全テーマを白黒へ差し替える指定
+   ├─ tokens.css            / と /business のデザイントークン
+   ├─ base.css              / と /business のリセット・入場
+   ├─ print.css             / と /business の @page
+   └─ engineer.css          ★ /engineer だけの Tailwind + トークン + 印刷
 ```
+
+### 2 系統のスタイルが同居している
+
+`/engineer` だけ **Tailwind v4 + motion**、`/` と `/business` は
+**CSS Modules + カスタムプロパティ**です。混ざっていません。
+
+`/engineer` は[公開中のサイト](https://axhiz-dev.github.io/ishida-takuya/)の
+実装をそのまま持ち込んだもので、あの見え方を再現するのが目的なので、
+配色・書体・組み方をあちらに合わせてあります。
+
+**分離は import の位置だけで保っています。** ルートグループごとに
+`<html>` を持つ構成なので、`src/styles/engineer.css` を
+`(engineer)/layout.tsx` からしか読まなければ、Tailwind の preflight は
+`/engineer` の中に閉じます。**この import をほかのレイアウトへ持っていかないこと。**
+`e2e/smoke.spec.ts` の「Tailwind が /engineer の外へ漏れていない」が
+3 ページすべてで実際にユーティリティが効くかどうかを見ているので、
+持っていくとそこで落ちます。
 
 ### 設計上の決めごと
 
 - **設定はコードに置く。** 環境変数は `NEXT_OUTPUT` / `NEXT_BASE_PATH` の 2 つだけで、
   これは GitHub Pages のデプロイ経路が要求するインフラ変数。`next.config.ts` と
   `src/config/site.ts` の中でしか読まない。
-- **色と書体はトークン経由でしか使わない。** コンポーネントの CSS に生の
-  `oklch()` や `font-family` を書かない。`src/styles/tokens.css` が唯一の出所。
-- **CSS フレームワークを入れていない。** CSS Modules + カスタムプロパティ。
-  トークンの規律をそのまま保てるため。
-- **モーションライブラリを入れていない。** 動きは章ごとの入場（1 回だけ・戻っても
-  再生しない）、現在地の追従、リンクの下線、ゲートのカーソル追従だけ。
-  スクロールで全セクションを延々とフェードインさせることはしない。
-- **数字は確認できたものだけ書く。** データ側で `value` を省略できるようにしてあり、
-  未確定の数字は表示しない。
+- **色と書体はトークン経由でしか使わない。** `/` と `/business` は
+  `src/styles/tokens.css`、`/engineer` は `src/styles/engineer.css` の `@theme` が出所。
+  コンポーネントに生の色を書かない。
+- **導出できる数字は導出する。** 通算年数は `content/engineer.ts` の在籍期間から
+  計算していて、ゲートの扉（「10 年 / …」）と `/engineer` の About に出る数字は
+  必ず一致します。手で書ける場所を作らないための決めごとです。
+- **数字は確認できたものだけ書く。** スキルの習熟度（0-100）は主観値で、
+  そのことを含めて公開中のサイトから引き継いでいます。
 
-### ページごとのテーマ
+### ページごとの見え方
 
-`<html data-theme="...">` で切り替えます。フォント変数のクラスも
-**同じ要素**に付けること（別要素に分けると `[data-theme]` から
-`var(--font-*)` を解決できず、既定フォントに落ちます）。
-
-| ページ | テーマ | 構造 | ナビ / フッター | アクセント |
+| ページ | 地 | 構造 | ナビ / フッター | アクセント |
 | --- | --- | --- | --- | --- |
-| `/engineer` | `engineer-dark`（既定）／ `engineer-light` | 1 スクロール 1 章・scroll-snap + 進行レール | 畳まるナビ / マストヘッド | 青 + 琥珀 |
-| `/business` | `business`（ライト固定） | 左が固定・右がスクロールで入れ替わる | 浮遊ピル / レターの結び | 青 + 緑 |
-| `/` | `gate` | 1 画面の分岐・カーソル追従の光 | — | 両方を 1 点ずつ |
+| `/engineer` | ほぼ黒（切り替えなし） | 6 つの節・スクロール連動のタイムライン | 固定グラスナビ / マストヘッド | シアン → 紫 → フクシア |
+| `/business` | ほぼ白 | 左が固定・右がスクロールで入れ替わる | 浮遊ピル / レターの結び | 青 + 緑 |
+| `/` | ほぼ黒 | 1 画面の分岐・カーソル追従の光 | — | 両方を 1 点ずつ |
 
-書体は全ページ共通で **Bricolage Grotesque**（見出し・可変幅）/ **Geist**（本文）/
-**JetBrains Mono**（ラベル）、和文は **Zen Kaku Gothic New** と **Noto Sans JP**。
-**共通の青**が「同じ人が作った」ことを担保し、副色でページの温度を分けています。
+書体は `/` と `/business` が **Bricolage Grotesque** / **Geist** / **JetBrains Mono** ＋
+**Zen Kaku Gothic New**、`/engineer` は **Space Grotesk** / **Noto Sans JP** /
+**JetBrains Mono** です（`src/lib/fonts.ts` と `src/lib/engineerFonts.ts`）。
 
-### `/engineer` のテーマ切り替え
+### `/engineer` の節を足す
 
-- 初回は**ダーク**。このページはダークの見え方そのものが作品なので、
-  OS のライト設定に合わせて既定を変えると設計意図が隠れてしまう
-- 一度でも切り替えたら `localStorage` に記憶して以後は必ず従う
-- `<head>` の同期スクリプトが描画前に属性を確定させるので、リロードでチラつかない
-- **印刷は常に白黒**。ダークで表示していても PDF は白黒 A4 で出る
+`src/content/engineer.ts` の `engineerNav` に 1 行足し、
+`src/app/(engineer)/engineer/page.tsx` に同じ `id` の `<section>` を置きます。
+ナビの現在地は `IntersectionObserver` が拾うので、ほかに触る場所はありません。
 
-### 1 スクロール 1 章（scroll-snap）
+### 印刷（PDF）
 
-`src/config/site.ts` の `ROUTES.engineer.sections` が章の定義です。
-**章を足したいときはこの配列に 1 行足すだけ。**
+`/engineer` の右上「PDF」はブラウザの印刷を呼ぶだけです。サーバーを持たないので
+生成は端末側に任せています。紙のレイアウトは `src/styles/engineer.css` の
+`@media print` が持ちます。
 
-`snap: true` の章は 1 画面に収まり、スクロールで引っかかります。
-中身の詰まった章（経歴・事例）は `snap: false` にして内部を普通にスクロールさせています。
-引っかかりは `proximity` に留め、**低い画面（高さ 640px 未満）とモーション低減設定では
-切れる**ようにしてあります。読者と戦わないための逃げ道です。
+Tailwind のユーティリティはクラス名が意味を持たないので、**印刷で消したい装飾には
+JSX 側で `data-print="hide"` を付けます。** 印刷用 CSS はその属性と構造セレクタしか
+見ません（クラス名を並べると、ユーティリティを 1 つ足すたびに印刷が壊れます）。
 
-### 技術ロゴ
+| 属性 | 意味 |
+| --- | --- |
+| `data-print="hide"` | 紙には出さない（ナビ・パーティクル・ぼかし・バー・ウォーターマーク） |
+| `data-print="only"` | 紙にだけ出す（氏名・連絡先・URL・最終更新のヘッダ） |
+| `data-print="linear"` | 左右交互の 2 段組を 1 列に落とす（経歴） |
 
-`src/components/icons/registry.ts` が唯一の対応表です。**ロゴを足すときはここだけ触ります。**
+**ダークで表示していても紙は必ず白黒の A4 で出ます。** 文字は画像化されないので
+検索とコピーができます（実測 4 ページ）。`e2e/pdf.spec.ts` が毎回測っています。
 
-- `simple-icons`（MIT）をバンドルして自前配信。外部リクエストは発生しません
-- AWS・Java・Oracle・Playwright は商標上の理由で simple-icons が配布していないので、
-  **偽のロゴを描かず**、色つきのテキストチップとして出しています
-- 地の明暗で沈むロゴ（Next.js の黒など）に備えて、ライト用とダーク用の色を別々に持てます
-- 対応表に無い名前は汎用色のチップになるので、`content` に何を書いても表示は壊れません
+### コントラスト
 
-デザインの選定根拠は各ページの CSS Module 冒頭のコメントと
+`e2e/contrast.spec.ts` が 3 ページすべての文字を実測し、WCAG の 4.5:1 / 3:1 に
+届かないものがあれば落とします。半透明の面はきちんと下地に重ねてから測るので、
+`bg-white/[0.02]` のような面も正しく評価されます。
+
+公開中のサイトから 1 つだけ値を変えているのが `--color-ink-faint` です。
+`#6b6b80` は地の上で 3.7:1 しかなく、小さい文字に使われていたので
+`#82829a`（実測 5.0:1）まで持ち上げました。
+
+デザインの選定根拠は各ページの CSS のコメントと
 `.hallmark/log.json` に記録してあります。

@@ -1,8 +1,9 @@
 /**
  * コンテンツの型定義。
  *
- * ここのデータを書き換えて push すれば、CI が GitHub Pages を
- * 更新するので職務経歴書が最新になる。
+ * ここに置くのは 3 面（/ · /engineer · /business）で共有する型だけ。
+ * /engineer の職務経歴・スキル・制作実績の型は、あのページでしか
+ * 使わないので ./engineer.ts に同居させてある。
  *
  * 設計上の要点：**数値は任意**にしてある。
  * 「p95 を 40% 改善」のような未確認の数字を埋めるくらいなら
@@ -65,82 +66,6 @@ export type Profile = {
   photo?: string;
   /** 最終更新日 "YYYY-MM-DD"。印刷ヘッダとコロフォンに出る。 */
   updatedAt: string;
-};
-
-/* ────────────────────────────── 職務経歴 ── */
-
-export type Outcome = {
-  /** 何をしたか。 */
-  label: string;
-  /**
-   * 定量的な結果。**確認できた数字だけ**入れる。
-   * 未確定なら省略する（数字のない行としてそのまま出る）。
-   */
-  value?: string;
-  /** 数字の出どころや前提。 */
-  note?: string;
-};
-
-export type CareerEntry = {
-  id: string;
-  company: string;
-  /** 事業内容の 1 行説明。読み手はたいてい社名を知らない。 */
-  companyNote: string;
-  period: Period;
-  role: string;
-  /** 関わったチームの人数。 */
-  teamSize?: number;
-  /** 置かれていた状況。成果の意味はここで決まる。 */
-  context: string;
-  responsibilities: string[];
-  outcomes: Outcome[];
-  stack: string[];
-};
-
-/* ────────────────────────────── スキル ── */
-
-/** 1=触れた / 2=業務で使える / 3=主戦場 / 4=設計と判断ができる */
-export type SkillLevel = 1 | 2 | 3 | 4;
-
-export type Skill = {
-  name: string;
-  level: SkillLevel;
-  /** 実務で使った年数。 */
-  years?: number;
-  /** 「どこで使ったか」。自己申告だけにしないための根拠。 */
-  evidence?: string;
-  /**
-   * ロゴの差し替え。通常は name から自動で引けるので不要。
-   * 表示名と対応表のキーがずれるときだけ指定する。
-   * 対応表は src/components/icons/registry.ts。
-   */
-  icon?: string;
-};
-
-export type SkillGroup = {
-  category: string;
-  items: Skill[];
-};
-
-/* ────────────────────────────── 事例 ── */
-
-export type CaseStudy = {
-  id: string;
-  title: string;
-  /** 1 行での要約。 */
-  oneLiner: string;
-  role: string;
-  period: string;
-  /** 何が問題だったか。 */
-  problem: string;
-  /** 何をしたか。 */
-  approach: string;
-  /** なぜその手を選んだか。技術的な判断力が出るのはここ。 */
-  reasoning: string;
-  /** どうなったか。数字がなければ質的に書く。 */
-  result: string;
-  stack: string[];
-  links?: Link[];
 };
 
 /* ──────────────────────── 業務自動化（/business） ── */

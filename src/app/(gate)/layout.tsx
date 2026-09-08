@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { fontVariables } from "@/lib/fonts";
-import { NO_JS_INIT_SCRIPT } from "@/lib/theme";
+import { NO_JS_INIT_SCRIPT } from "@/lib/noJs";
 import { ROUTES, SITE_URL } from "@/config/site";
 import "@/styles/tokens.css";
 import "@/styles/base.css";
