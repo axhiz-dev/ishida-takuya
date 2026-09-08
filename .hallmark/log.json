@@ -1,0 +1,43 @@
+[
+  {
+    "date": "2026-07-25",
+    "macrostructure": "Feature Stack",
+    "theme": "custom（明るい紙 + 共通の青 + 緑）",
+    "theme_axes": "light / expressive-variable-sans / cool-blue + green",
+    "nav": "N5 Floating pill",
+    "footer": "Ft6 Letter close",
+    "enrichment": "none",
+    "brief": "石田拓也 · ビジネス相手向け（第 2 版・リッチ路線）/business"
+  },
+  {
+    "date": "2026-07-25",
+    "macrostructure": "章立て（Manifesto 系・1 スクロール 1 章）",
+    "theme": "custom（ほぼ黒 + 共通の青 + 琥珀）· studied-DNA 由来の構造",
+    "theme_axes": "dark / expressive-variable-sans / cool-blue + amber",
+    "nav": "N10 Scroll-morph",
+    "footer": "Ft1 Mast-headed",
+    "enrichment": "none（技術ロゴはコンテンツが持つ色）",
+    "studied": "parizval.github.io / ashutoshhathidara.com（画像モード・構造のみ）",
+    "brief": "石田拓也 · エンジニア向け職務経歴書（第 2 版・リッチ路線）/engineer"
+  },
+  {
+    "date": "2026-07-24",
+    "macrostructure": "Split Studio",
+    "theme": "Studio",
+    "theme_axes": "light / high-contrast-serif / chromatic-green",
+    "nav": "N9 Edge-aligned minimal",
+    "footer": "Ft5 Statement",
+    "enrichment": "none",
+    "brief": "第 1 版 /business（硬すぎたため作り直し）"
+  },
+  {
+    "date": "2026-07-24",
+    "macrostructure": "Long Document",
+    "theme": "Almanac",
+    "theme_axes": "light / grotesk-sans / cool",
+    "nav": "N3 Side-rail",
+    "footer": "Ft4 Dense typographic",
+    "enrichment": "none",
+    "brief": "第 1 版 /engineer（1 画面あたりの情報量が多すぎたため作り直し）"
+  }
+]

@@ -1,0 +1,12 @@
+.blank {
+  /* 親が grid のことがあるので、伸びないよう自分で幅を決める */
+  justify-self: start;
+  display: inline-block;
+  padding: 0 var(--space-2xs);
+  border: var(--rule-fine) dashed currentColor;
+  border-radius: 3px;
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  /* 未入力であることが目に飛び込むよう、本文とは違う色を当てる */
+  color: var(--color-accent-2);
+}

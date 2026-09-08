@@ -1,0 +1,261 @@
+/* Hallmark · gate page（章立てを持たない入口）· genre: editorial
+ * theme: 自前の配色（暗色 + 共通の青 + 予告としての緑）
+ * audience: 訪問者すべて · use: 2 つの入口のどちらかを選ばせる · tone: quiet / crafted
+ * enrichment: カーソル追従のスポットライト（HP3）
+ * motion: ロード時の入場 · カーソル追従 · リンクの下線
+ * pre-emit critique: P5 H5 E4 S4 R5 V5
+ *
+ * 2 つの扉は、その先のページのテーマ（ダーク / ライト）を予告する役割も持つ。
+ */
+
+.stage {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ══ カーソル追従のスポットライト ════════════════
+   「進みたいほうに光を当てる」という意味を持たせている。
+   追従が無効なとき（タッチ・モーション低減）は静的な光になる。 */
+
+.light {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    38rem 38rem at 50% 30%,
+    color-mix(in oklab, var(--color-accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
+.stage[data-spotlight] .light {
+  background: radial-gradient(
+    32rem 32rem at var(--mx, 50%) var(--my, 40%),
+    color-mix(in oklab, var(--color-accent) 20%, transparent),
+    transparent 68%
+  );
+}
+
+/* ══ 骨格 ════════════════════════════════════════ */
+
+.gate {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-2xl);
+  min-height: 100svh;
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--space-2xl) var(--page-gutter) var(--space-xl);
+}
+
+/* ══ 名前と宣言 ══════════════════════════════════ */
+
+.head {
+  display: grid;
+  gap: var(--space-lg);
+  max-width: 46rem;
+}
+
+.name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.nameLatin {
+  color: var(--color-accent-2);
+}
+
+.statement {
+  font-size: clamp(1.75rem, 3.2vw + 0.5rem, 3.25rem);
+  font-variation-settings: "wdth" 82, "opsz" 72;
+  line-height: 1.32;
+  letter-spacing: var(--tracking-display);
+}
+
+/* ══ 2 つの扉 ════════════════════════════════════ */
+
+.doors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+  align-content: center;
+  align-items: stretch;
+}
+
+.door {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  border: var(--rule-fine) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: color-mix(in oklab, var(--color-paper-2) 70%, transparent);
+  backdrop-filter: blur(6px);
+  transition:
+    border-color var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out);
+}
+
+.door:hover {
+  border-color: var(--color-rule-2);
+  background: var(--color-paper-2);
+  transform: translateY(-2px);
+}
+
+.door:active {
+  transform: translateY(0);
+}
+
+.doorLabel {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+}
+
+.doorTitle {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+.doorBody {
+  max-width: 30ch;
+  padding-block: var(--space-2xs) var(--space-lg);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.doorFoot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.doorMeta {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+/* 矢印だけが動く。カード全体を拡大しない。 */
+.doorArrow {
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.door:hover .doorArrow {
+  transform: translateX(5px);
+}
+
+/* ── 扉 1：ダークの予告（青） ── */
+
+.door[data-kind="engineer"] .doorLabel,
+.door[data-kind="engineer"] .doorArrow {
+  color: var(--color-accent);
+}
+
+.door[data-kind="engineer"] .doorTitle {
+  font-variation-settings: "wdth" 80, "opsz" 40;
+  font-size: var(--text-2xl);
+}
+
+/* ── 扉 2：ライトの予告（緑） ── */
+
+.door[data-kind="business"] .doorLabel,
+.door[data-kind="business"] .doorArrow {
+  color: var(--color-accent-2);
+}
+
+.door[data-kind="business"] .doorTitle {
+  font-variation-settings: "wdth" 100, "opsz" 32;
+  font-size: var(--text-xl);
+}
+
+/* ══ 足元 ════════════════════════════════════════ */
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.updated {
+  font-variant-numeric: tabular-nums;
+}
+
+.textLink {
+  position: relative;
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.textLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: var(--rule-fine);
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.textLink:hover {
+  color: var(--color-ink);
+}
+
+.textLink:hover::after {
+  transform: scaleX(1);
+}
+
+@media (width < 52rem) {
+  .gate {
+    gap: var(--space-xl);
+    padding-top: var(--space-xl);
+  }
+
+  .doors {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-md);
+  }
+
+  .door {
+    padding: var(--space-lg);
+  }
+
+  .doorBody {
+    padding-bottom: var(--space-md);
+  }
+}
+
+@media print {
+  .light {
+    display: none;
+  }
+}

@@ -1,0 +1,72 @@
+import type { Link } from "@/content/types";
+
+/**
+ * リンク種別ごとの SVG アイコン（画像ファイルは使わない）。
+ *
+ * 種別はリンク先の URL から機械的に決める。content 側に
+ * 「これは GitHub」と書かせると、URL を変えたときにずれる。
+ */
+export type SocialKind = "github" | "x" | "zenn" | "linkedin" | "mail" | "link";
+
+export const socialKind = (href: string): SocialKind => {
+  if (href.startsWith("mailto:")) return "mail";
+  if (/(^|\/\/)([^/]*\.)?github\.com/.test(href)) return "github";
+  if (/(^|\/\/)([^/]*\.)?(x|twitter)\.com/.test(href)) return "x";
+  if (/(^|\/\/)([^/]*\.)?zenn\.dev/.test(href)) return "zenn";
+  if (/(^|\/\/)([^/]*\.)?linkedin\.com/.test(href)) return "linkedin";
+  return "link";
+};
+
+/** 外部リンクかどうか（mailto と相対リンクは別扱いにしたいので分ける）。 */
+export const isExternal = (href: string) => href.startsWith("http");
+
+export const linkKind = (link: Link) => socialKind(link.href);
+
+export function SocialIcon({ kind }: { kind: SocialKind }) {
+  const common = {
+    width: 20,
+    height: 20,
+    viewBox: "0 0 24 24",
+    "aria-hidden": true as const,
+    fill: "currentColor",
+  };
+  switch (kind) {
+    case "github":
+      return (
+        <svg {...common}>
+          <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z" />
+        </svg>
+      );
+    case "x":
+      return (
+        <svg {...common}>
+          <path d="M17.53 3H20.5l-6.49 7.42L21.75 21h-5.98l-4.68-6.12L5.7 21H2.73l6.94-7.93L2.25 3h6.13l4.23 5.6L17.53 3Zm-1.05 16.2h1.65L7.6 4.72H5.83L16.48 19.2Z" />
+        </svg>
+      );
+    case "zenn":
+      return (
+        <svg {...common}>
+          <path d="M.6 20.4h4.02c.28 0 .53-.14.67-.38L16.1 3.6a.34.34 0 0 0-.29-.53h-3.9c-.3 0-.57.15-.72.4L.32 19.9a.34.34 0 0 0 .28.5Zm16.62-.02h3.9c.32 0 .6-.16.76-.43l2.06-3.3a.36.36 0 0 0-.3-.55h-3.86c-.3 0-.58.15-.74.4l-2.1 3.34a.34.34 0 0 0 .28.54Z" />
+        </svg>
+      );
+    case "linkedin":
+      return (
+        <svg {...common}>
+          <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.44-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0Z" />
+        </svg>
+      );
+    case "mail":
+      return (
+        <svg {...common}>
+          <path d="M2 5.5C2 4.67 2.67 4 3.5 4h17c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5v-13Zm2.2.5 7.8 5.62L19.8 6H4.2ZM20 7.66l-7.42 5.34a1 1 0 0 1-1.16 0L4 7.66V18h16V7.66Z" />
+        </svg>
+      );
+    case "link":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M10 13a5 5 0 0 0 7.07 0l3-3A5 5 0 0 0 13 3l-1.5 1.5" />
+          <path d="M14 11a5 5 0 0 0-7.07 0l-3 3A5 5 0 0 0 11 21l1.5-1.5" />
+        </svg>
+      );
+  }
+}
