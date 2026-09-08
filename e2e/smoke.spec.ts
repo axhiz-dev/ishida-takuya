@@ -9,6 +9,9 @@ const ROUTES = [
   { path: "/", name: "ゲート" },
   { path: "/engineer/", name: "職務経歴" },
   { path: "/business/", name: "ご相談" },
+  { path: "/business/profile/", name: "プロフィール" },
+  { path: "/business/legal/", name: "特商法の表記" },
+  { path: "/business/privacy/", name: "プライバシーポリシー" },
 ] as const;
 
 /** Hallmark の非交渉ライン。この 4 幅で横スクロールが出てはいけない。 */
@@ -89,12 +92,14 @@ for (const route of ROUTES) {
 test("ゲートから両方のページへ行ける", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("link", { name: /職務経歴/ }).click();
+  // 見出しではなく「誰向けか」の札で選ぶ。見出しは扱う商売が変われば変わるが、
+  // 読み手の区分は変わらない。文言を直すたびにテストが落ちるのを避ける。
+  await page.getByRole("link", { name: /採用・技術の方へ/ }).click();
   await expect(page).toHaveURL(/\/engineer/);
   await expect(page.getByRole("navigation", { name: "章の一覧" })).toBeVisible();
 
   await page.goto("/");
-  await page.getByRole("link", { name: /できることと実績/ }).click();
+  await page.getByRole("link", { name: /お仕事のご相談の方へ/ }).click();
   await expect(page).toHaveURL(/\/business/);
 });
 
@@ -204,4 +209,39 @@ test("画像・見出し階層・言語設定が崩れていない", async ({ pa
     );
     expect(missingAlt).toBe(0);
   }
+});
+
+/**
+ * 法定の表記に空欄が残ったまま公開されるのを止める。
+ *
+ * ダミー表示を切る（IS_PLACEHOLDER_CONTENT = false）ということは
+ * 「中身が入った」という宣言なので、そのとき未入力が残っていたら落とす。
+ * 特商法の表記で所在地が空のまま公開されるのがいちばんまずい。
+ */
+test("中身を入れたと宣言したら、未入力が残っていない", async ({ page }) => {
+  const { IS_PLACEHOLDER_CONTENT } = await import("../src/config/site");
+  test.skip(IS_PLACEHOLDER_CONTENT, "まだダミー表示のままなので、未入力があってよい");
+
+  for (const path of ["/business/", "/business/profile/", "/business/legal/", "/business/privacy/"]) {
+    await page.goto(path);
+    await expect(page.getByText("未入力"), `${path} に未入力が残っている`).toHaveCount(0);
+    await expect(page.locator("body"), `${path} に穴埋めの括弧が残っている`).not.toContainText("［");
+  }
+});
+
+test("下層ページから、法定の表記に行き来できる", async ({ page }) => {
+  await page.goto("/business/");
+
+  await page.getByRole("link", { name: "特定商取引法に基づく表記" }).click();
+  await expect(page).toHaveURL(/\/business\/legal/);
+  await expect(page.getByRole("heading", { name: "特定商取引法に基づく表記", level: 1 })).toBeVisible();
+
+  await page.getByRole("link", { name: "プライバシーポリシー" }).click();
+  await expect(page).toHaveURL(/\/business\/privacy/);
+
+  await page.getByRole("link", { name: "プロフィール" }).click();
+  await expect(page).toHaveURL(/\/business\/profile/);
+
+  await page.getByRole("link", { name: /トップへ/ }).click();
+  await expect(page).toHaveURL(/\/business\/?$/);
 });

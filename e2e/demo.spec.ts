@@ -16,8 +16,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("集計デモ：サンプルを読み、グラフを切り替えられる", async ({ page }) => {
-  await page.getByRole("button", { name: "試すファイルがない方はこちら" }).click();
-  await expect(page.getByText("サンプル 3 拠点から 6 行を読みました。")).toBeVisible();
+  await expect(page.getByText(/3 拠点・6 件/)).toBeVisible();
 
   for (const kind of ["縦棒", "横棒", "構成比"]) {
     await page.getByRole("button", { name: kind, exact: true }).click();
@@ -29,17 +28,23 @@ test("集計デモ：サンプルを読み、グラフを切り替えられる",
   }
 
   // 拠点別を折れ線にすると、拠点のあいだに中間の値があるように見える。
-  // 日付の列でまとめたときだけ押せること。
   await expect(page.getByRole("button", { name: "折れ線", exact: true })).toBeDisabled();
+
+  // 日付の列でまとめる見本に切り替えると使えるようになる
+  await page.getByRole("button", { name: "月別の売上" }).click();
+  await expect(page.getByRole("button", { name: "折れ線", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "折れ線", exact: true }).click();
+  await expect(panel(page).locator("svg polyline")).toBeVisible();
 });
 
 test("デモ：タブを行き来しても入力が消えない", async ({ page }) => {
-  await page.getByRole("button", { name: "試すファイルがない方はこちら" }).click();
-  await expect(page.getByText(/6 行を読みました/)).toBeVisible();
+  await page.getByRole("button", { name: "月別の売上" }).click();
+  await expect(page.getByText(/12 か月/)).toBeVisible();
 
   await page.getByRole("tab", { name: /請求書/ }).click();
   await page.getByRole("tab", { name: /エクセル/ }).click();
-  await expect(page.getByText(/6 行を読みました/)).toBeVisible();
+  // 見本の選択が残っていること
+  await expect(page.getByText(/12 か月/)).toBeVisible();
 });
 
 test("請求書デモ：プリセット・行削除・支払期日", async ({ page }) => {

@@ -41,9 +41,9 @@ export default function GatePage() {
       href: ROUTES.business.path,
       kind: "business" as const,
       label: "お仕事のご相談の方へ",
-      title: "できることと実績",
-      body: "何を頼めて、どう進んで、いくらくらいかかるのか。",
-      meta: "初回 30 分の相談は無料",
+      title: "業務の自動化",
+      body: "エクセルへの打ち直しや、毎月おなじ書類を作る作業をなくします。",
+      meta: "買い切り 10 万円から / 相談は無料",
     },
   ];
 

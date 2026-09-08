@@ -1,5 +1,6 @@
 export * from "./types";
 export { profile } from "./profile";
+export * from "./legal";
 export { career } from "./career";
 export { skills } from "./skills";
 export { cases } from "./cases";
@@ -19,6 +20,7 @@ export {
   priceExcludes,
   priceIncludes,
   priceTiers,
+  profilePage,
   processSteps,
   promises,
   savingsConfig,

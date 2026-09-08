@@ -17,6 +17,8 @@
 | `src/content/skills.ts` | スキル一覧（習熟度・年数・根拠） | `/engineer` |
 | `src/content/cases.ts` | 深掘り事例（課題・打ち手・判断・結果） | `/engineer` |
 | `src/content/business.ts` | 症状リスト・デモの説明・進め方・お約束・料金・試算・FAQ | `/business` |
+| `src/content/legal.ts` | 特商法の表記・プライバシーポリシー | `/business/legal` `/business/privacy` |
+| `src/config/owner.ts` | 事業者の情報（住所・電話・登録番号） | 上記すべて |
 | `src/config/site.ts` | サイト全体の定数と機能フラグ | 全ページ |
 
 型は `src/content/types.ts` にあります。必須項目を書き忘れると
@@ -226,3 +228,23 @@ npm run test:e2e
 
 既存フォーマットの職務経歴書を求められた場合は、この PDF を渡せば足ります。
 サイト側はそのぶん自由に作ってあります。
+
+---
+
+## まだ決まっていない項目
+
+住所・電話番号・インボイスの登録番号のように、**本人しか埋められないもの**は
+`src/config/owner.ts` に `PLACEHOLDER` として置いてあります。
+
+画面には赤い「未入力」の札が出るので、埋め忘れたまま公開しても気づけます。
+さらに E2E が、`IS_PLACEHOLDER_CONTENT` を `false` にした状態で
+`PLACEHOLDER` や `［　］` が残っていたら落とします。
+**ダミー表示を切るのは「中身が入った」という宣言**、という約束です。
+
+埋める順番はこうなります。
+
+1. `src/config/owner.ts` の住所・電話・登録番号・対応地域
+2. `src/content/business.ts` の `about.career`（経歴）
+3. `src/content/legal.ts` の `policyUpdatedAt`（最終改定日）
+4. `src/content/profile.ts` の `photo`（顔写真のパス）
+5. `src/config/site.ts` の `IS_PLACEHOLDER_CONTENT` を `false` に

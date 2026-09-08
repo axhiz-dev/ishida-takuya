@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   about,
   capabilities,
@@ -8,7 +7,6 @@ import {
   demoNotes,
   demos,
   faqs,
-  footerLine,
   hero,
   monitorOffer,
   priceAddons,
@@ -21,9 +19,9 @@ import {
   symptoms,
   symptomsClosing,
 } from "@/content";
-import { ROUTES } from "@/config/site";
 import { MarkedHeading } from "@/components/common/MarkedHeading";
 import { EdgeNav } from "@/components/business/EdgeNav";
+import { BusinessFooter } from "@/components/business/BusinessFooter";
 import { Portrait } from "@/components/business/Portrait";
 import { DemoTabs } from "@/components/business/DemoTabs";
 import { DemoAggregate } from "@/components/business/DemoAggregate";
@@ -335,17 +333,7 @@ export default function BusinessPage() {
         </section>
       </main>
 
-      {/* ── 12. フッター ──────────────────────── */}
-      <footer className={styles.footer}>
-        <p className={styles.footerLine}>{footerLine}</p>
-        <p className={styles.footerSign}>— {profile.name}</p>
-        <div className={styles.footerMeta}>
-          <Link className={styles.textLink} href={ROUTES.engineer.path}>
-            エンジニアとしての経歴はこちら
-            <span aria-hidden="true"> →</span>
-          </Link>
-        </div>
-      </footer>
+      <BusinessFooter />
     </>
   );
 }
