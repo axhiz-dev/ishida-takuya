@@ -8,14 +8,12 @@ import {
   engineerLinks,
   engineerSideWorks,
   engineerSkills,
-  engineerStats,
   engineerSummary,
   type CareerProject,
   type EngineerCareerEntry,
 } from "@/content/engineer";
 import { FEATURES } from "@/config/site";
 import { formatDotPeriod, skillLevel } from "@/lib/derive";
-import { CountUp } from "./CountUp";
 import { PrintButton } from "./PrintButton";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
@@ -132,11 +130,14 @@ function CareerBlock({
   activeFilter,
   openSet,
   onToggle,
+  isLast,
 }: {
   entry: EngineerCareerEntry;
   activeFilter: Filter | null;
   openSet: Set<string>;
   onToggle: (name: string) => void;
+  /** Reveal で包んでいるので last: が効かない。最後の会社かどうかは親から渡す */
+  isLast: boolean;
 }) {
   const visibleProjects = activeFilter ? entry.projects.filter(activeFilter.match) : entry.projects;
   const dimmed = activeFilter !== null && visibleProjects.length === 0;
@@ -145,7 +146,7 @@ function CareerBlock({
     <Reveal>
       <div
         data-testid="career-entry"
-        className={`relative pb-12 pl-8 transition-opacity duration-300 last:pb-0 ${dimmed ? "opacity-50" : ""}`}
+        className={`relative pl-8 transition-opacity duration-300 ${isLast ? "" : "pb-14"} ${dimmed ? "opacity-50" : ""}`}
       >
         <span className="tl-line absolute top-1.5 bottom-0 left-0 w-px bg-accent/25" />
         <span className="absolute top-1.5 -left-[5.5px] size-3 rounded-full border-2 border-accent bg-paper" />
@@ -192,7 +193,7 @@ function CareerBlock({
 /* ===== 画面全体 ===== */
 
 /** 職務経歴の画面版。紙は ResumeDocument が別に持つ。 */
-export function EngineerScreen({ years }: { years: number }) {
+export function EngineerScreen() {
   const [activeFilterId, setActiveFilterId] = useState<string | null>(null);
   const [openSet, setOpenSet] = useState<Set<string>>(new Set());
 
@@ -202,7 +203,6 @@ export function EngineerScreen({ years }: { years: number }) {
     [],
   );
   const allOpen = openSet.size >= allProjects.length;
-  const stats = [{ value: `${years}年`, label: "エンジニア経験" }, ...engineerStats];
 
   const toggleProject = (name: string) => {
     setOpenSet((prev) => {
@@ -261,16 +261,6 @@ export function EngineerScreen({ years }: { years: number }) {
             </ul>
           </div>
 
-          <dl className="intro intro-5 mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-4">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col-reverse bg-white p-5">
-                <dt className="mt-1 text-[11px] text-ink-faint">{stat.label}</dt>
-                <dd className="text-3xl font-bold tracking-tight text-accent">
-                  <CountUp value={stat.value} />
-                </dd>
-              </div>
-            ))}
-          </dl>
         </header>
 
         <Section id="summary" number="01" eyebrow="Summary" title="職務要約">
@@ -324,8 +314,9 @@ export function EngineerScreen({ years }: { years: number }) {
             </div>
           </div>
 
-          {engineerCareer.map((entry) => (
+          {engineerCareer.map((entry, i) => (
             <CareerBlock
+              isLast={i === engineerCareer.length - 1}
               key={entry.company + entry.period.from}
               entry={entry}
               activeFilter={activeFilter}
@@ -336,8 +327,9 @@ export function EngineerScreen({ years }: { years: number }) {
         </Section>
 
         <Section id="side-works" number="03" eyebrow="Side Works" title="副業・業務委託">
-          {engineerSideWorks.map((entry) => (
+          {engineerSideWorks.map((entry, i) => (
             <CareerBlock
+              isLast={i === engineerSideWorks.length - 1}
               key={entry.company + entry.period.from}
               entry={entry}
               activeFilter={activeFilter}
@@ -374,6 +366,20 @@ export function EngineerScreen({ years }: { years: number }) {
             ))}
           </div>
         </Section>
+
+        {FEATURES.pdfExport && (
+          <Reveal className="mt-24">
+            <div className="rounded-md border border-line bg-white px-6 py-10 text-center">
+              <p className="text-sm font-bold">このページの内容は、そのまま職務経歴書として保存できます</p>
+              <p className="mt-2 text-xs text-ink-soft">
+                A4 の書類の体裁で出力されます。絞り込みの状態にかかわらず、全案件が載ります。
+              </p>
+              <div className="mt-6">
+                <PrintButton variant="footer" />
+              </div>
+            </div>
+          </Reveal>
+        )}
       </main>
 
       <footer className="mt-20 border-t border-line">
@@ -382,7 +388,6 @@ export function EngineerScreen({ years }: { years: number }) {
         </div>
       </footer>
 
-      {FEATURES.pdfExport && <PrintButton />}
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { profile } from "@/content";
-import { ROUTES } from "@/config/site";
+import { FEATURES, ROUTES } from "@/config/site";
+import { PrintButton } from "./PrintButton";
 
 /** ページ上部の細いナビ。スクロールすると背景が締まる。 */
 export function SiteHeader() {
@@ -31,21 +32,24 @@ export function SiteHeader() {
         >
           {profile.name}
         </Link>
-        <nav aria-label="サイト内の移動" className="flex items-center gap-6 text-xs">
-          <Link
-            href={ROUTES.engineer.path}
-            aria-current="page"
-            className="relative pb-0.5 font-semibold text-accent after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-accent"
-          >
-            職務経歴
-          </Link>
-          <Link
-            href={ROUTES.business.path}
-            className="link-underline pb-0.5 text-ink-soft transition-colors hover:text-accent"
-          >
-            お仕事のご相談
-          </Link>
-        </nav>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <nav aria-label="サイト内の移動" className="flex items-center gap-4 text-xs sm:gap-6">
+            <Link
+              href={ROUTES.engineer.path}
+              aria-current="page"
+              className="relative pb-0.5 font-semibold text-accent after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-accent"
+            >
+              職務経歴
+            </Link>
+            <Link
+              href={ROUTES.business.path}
+              className="link-underline pb-0.5 text-ink-soft transition-colors hover:text-accent"
+            >
+              お仕事のご相談
+            </Link>
+          </nav>
+          {FEATURES.pdfExport && <PrintButton variant="header" />}
+        </div>
       </div>
     </header>
   );

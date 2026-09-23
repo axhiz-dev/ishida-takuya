@@ -32,22 +32,6 @@ export const engineerLinks = [
   { label: "LiveDriver（個人開発）", href: "https://livedriver.app" },
 ];
 
-export type Stat = {
-  /** "15+" や "2案件" のように、先頭の数字だけカウントアップされる。 */
-  value: string;
-  label: string;
-};
-
-/**
- * ヘッダの数字。**経験年数はここに書かない。** 経歴の期間から導出して、
- * 入口ページと同じ 1 つの数字を使う（lib/derive.ts の engineeringYears）。
- */
-export const engineerStats: Stat[] = [
-  { value: "15+", label: "携わったプロジェクト" },
-  { value: "2案件", label: "PMとして完遂" },
-  { value: "3年", label: "法人営業の経験" },
-];
-
 /* ────────────────────────────── 職務経歴 ── */
 
 export type CareerProject = {

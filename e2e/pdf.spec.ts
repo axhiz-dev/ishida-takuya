@@ -14,7 +14,9 @@ test("画面では紙版が出ず、印刷では画面版が消えて紙版だ�
   await page.goto("/engineer/");
 
   await expect(page.getByTestId("resume-document")).toBeHidden();
-  await expect(page.getByRole("button", { name: "PDF出力" })).toBeVisible();
+  // PDF のボタンはヘッダの右上と、ページの末尾の 2 か所
+  await expect(page.getByRole("banner").getByRole("button", { name: "PDF出力" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "この職務経歴書をPDFで保存" })).toHaveCount(1);
 
   await page.emulateMedia({ media: "print" });
 
@@ -22,6 +24,7 @@ test("画面では紙版が出ず、印刷では画面版が消えて紙版だ�
   await expect(page.getByRole("navigation", { name: "サイト内の移動" })).toBeHidden();
   await expect(page.getByRole("toolbar", { name: "技術で案件を絞り込む" })).toBeHidden();
   await expect(page.getByRole("button", { name: "PDF出力" })).toBeHidden();
+  await expect(page.getByRole("button", { name: "この職務経歴書をPDFで保存" })).toBeHidden();
 });
 
 test("紙版には、画面で絞り込んでいても全案件が載る", async ({ page }) => {

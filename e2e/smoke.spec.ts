@@ -158,22 +158,6 @@ test("職務経歴: カードを開閉できる", async ({ page }) => {
 });
 
 /**
- * 通算年数はゲートと職務経歴で同じ 1 つのデータから出している。
- * 片方だけ手で書くと、同じサイトの中で違う年数が出る。
- */
-test("通算年数がゲートと職務経歴で一致する", async ({ page }) => {
-  await page.goto("/");
-  const gateMeta = await page.getByRole("link", { name: /採用・技術の方へ/ }).innerText();
-  const gateYears = gateMeta.match(/(\d+)\s*年/)?.[1];
-  expect(gateYears, "ゲートの扉に年数が出ていること").toBeTruthy();
-
-  await page.goto("/engineer/");
-  const stat = page.getByText("エンジニア経験", { exact: true }).locator("xpath=following-sibling::dd[1]");
-  // カウントアップが終わるのを待つ
-  await expect(stat).toHaveText(`${gateYears}年`);
-});
-
-/**
  * Tailwind は / と /engineer のルートグループにしか読ませていない。
  *
  * 分離は import の位置だけで保っているので、(business) のレイアウトへ

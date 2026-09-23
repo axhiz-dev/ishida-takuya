@@ -1,5 +1,3 @@
-import { engineerCareer } from "@/content/engineer";
-import { engineeringYears } from "@/lib/derive";
 import { EngineerScreen } from "@/components/engineer/EngineerScreen";
 import { ResumeDocument } from "@/components/engineer/ResumeDocument";
 
@@ -11,15 +9,12 @@ import { ResumeDocument } from "@/components/engineer/ResumeDocument";
  * 中身はどちらも src/content/engineer.ts から描く。
  */
 export default function EngineerPage() {
-  // 入口ページと同じ 1 つのデータから出す。手で書くと 2 画面でずれる。
-  const years = engineeringYears(engineerCareer);
-
   return (
     <>
       <a className="skip-link" href="#main">
         本文へ移動
       </a>
-      <EngineerScreen years={years} />
+      <EngineerScreen />
       <ResumeDocument />
     </>
   );
