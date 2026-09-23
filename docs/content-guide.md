@@ -13,7 +13,7 @@
 | ファイル | 中身 | 出るページ |
 | --- | --- | --- |
 | `src/content/profile.ts` | 氏名・肩書き・状況・要約・連絡先・最終更新日 | 全ページ |
-| `src/content/engineer.ts` | 職務経歴・スキル・制作実績・`/engineer` の原稿 | `/engineer` `/`（数字だけ） |
+| `src/content/engineer.ts` | 職務要約・職務経歴・副業・スキル・経歴書のリンク | `/engineer` `/`（年数とスキル名だけ） |
 | `src/content/business.ts` | 症状リスト・デモの説明・進め方・お約束・料金・試算・FAQ | `/business` |
 | `src/content/legal.ts` | 特商法の表記・プライバシーポリシー | `/business/legal` `/business/privacy` |
 | `src/config/owner.ts` | 事業者の情報（住所・電話・登録番号） | 上記すべて |
@@ -28,96 +28,71 @@
 
 ### 経歴を 1 社増やす
 
-`src/content/engineer.ts` の `engineerCareer` の**先頭**に追加します
-（新しい順に並べる決まり）。
+`src/content/engineer.ts` の `engineerCareer`（本業）または
+`engineerSideWorks`（副業・業務委託）の**先頭**に追加します（新しい順に並べる決まり）。
 
 ```ts
 {
   period: { from: "2026-08", to: "present" },   // 在籍中は "present"
   company: "株式会社◯◯",
-  companyNote: "何をしている会社かを 1 行で。読み手は社名を知りません。",
+  employmentType: "正社員",
   role: "テックリード",
-  summary: "何をした期間か。1〜2 文。",
-  highlights: ["やったこと", "やったこと"],
-  tech: ["TypeScript", "React"],
+  summary: "何をした期間か。1 文。",               // 任意
+  projects: [
+    {
+      name: "◯◯の開発",
+      role: "リード",                            // 任意
+      teamSize: "5名",                           // 任意
+      description: "何をしたか。2〜3 文。",
+      highlights: ["やったこと・数字で言える成果"],
+      tech: ["TypeScript", "React"],             // 技術タグの絞り込みにも使われる
+    },
+  ],
 },
 ```
 
-画面に出る「2026.08 – 現在」は `period` から組み立てられます。
+画面と PDF に出る「2026.08 – 現在」は `period` から組み立てられます。
 **表示用の文字列を書く場所はありません。** 手で書けるようにすると、
 下で説明する通算年数とずれても誰も気づけないためです。
 
+エンジニア職ではない経歴（営業など）には `kind: "sales"` を付けます。
+経歴には載りますが、通算年数には数えません。
+
 ### 通算年数について
 
-`/` の扉に出る「10 年 / TypeScript · React · Next.js」と、`/engineer` の
-About に出る「10 年 / Web 開発の経験」は、**どちらも `engineerCareer` の
-在籍期間から計算しています。** 書き換える場所はありません。
+`/` の左パネルに出る「6 年 / React · TypeScript · JavaScript」の年数は、
+**`engineerCareer` の在籍期間（`kind: "sales"` を除く）から計算しています。**
+書き換える場所はありません。日付が進めば自動で増えます。
 
-「40+ 手掛けたプロジェクト」「15+ 関わったチーム」は導出できないので
-`engineerStats` に手で書いてあります。ここは実数に直してください。
+### 技術タグの絞り込みを増やす・変える
 
-### スキルを足す・習熟度を変える
+`/engineer` の職務経歴の上に並ぶチップは
+`src/components/engineer/EngineerScreen.tsx` の `FILTERS` が持っています。
+各案件の `tech` に書いた文字列を部分一致で拾うので、案件側に新しい技術を
+書けばチップの件数も自動で変わります。
+
+### スキルを足す・経験年数を変える
 
 `src/content/engineer.ts` の `engineerSkills` を編集します。
-`level` は 0-100 の**主観的な**習熟度で、バーの長さと数値になります。
 
 ```ts
-{ name: "Svelte", level: 70 },
+{ name: "Svelte", years: "1年以上" },
 ```
 
-上位 3 つ（`level` の高い順）が `/` の扉に出ます。カテゴリをまたいで
-並べ替えるので、フロントエンド以外も上がってきます。
+`years` は `"5年以上"` `"3年以上"` `"1年以上"` `"1年"` のどれかで書きます。
+バーの長さはここから決まり、経験の長い順の上位 3 つが `/` に出ます
+（同じ段階なら書いた順）。
 
-### 制作実績を足す
+### PDF の中身
 
-`src/content/engineer.ts` の `engineerProjects` に追加します。
-
-```ts
-{
-  title: "◯◯の開発",
-  category: "フルスタック / 0→1",
-  year: "2026",
-  description: "何を作って、何が難しくて、どう解いたか。",
-  tech: ["Next.js", "PostgreSQL"],
-  accent: "from-cyan-400 to-violet-500",   // カードのグロー（Tailwind のクラス断片）
-  links: [{ label: "GitHub", href: "https://..." }],   // 任意
-},
-```
-
-`links` の `href` が `http` で始まっていれば別タブで開きます。
-アイコンはリンク先の URL から自動で決まる（GitHub / X / Zenn / LinkedIn /
-メール / それ以外）ので、種別を書く場所はありません。
-
-### 冒頭の宣言と、強調する 1 語を変える
-
-`src/content/profile.ts` の `headline` は 2 つの値を持ちます。
-
-```ts
-headline: {
-  text: "手ざわりのいい画面を、ちゃんと動く形でつくります。",
-  mark: "手ざわり",   // ← text に含まれる短い語。ここだけ背後に色帯が敷かれる
-},
-```
-
-`mark` が `text` に含まれていなければ帯は出ません（壊れません）。
-**画面で一番大きい声は 1 箇所だけ**にするための仕掛けなので、短い語を選んでください。
-
-### `/engineer` の節を足す
-
-`src/content/engineer.ts` の `engineerNav` に 1 行足します。
-
-```ts
-{ id: "writing", label: "書いたもの", labelEn: "Writing" },
-```
-
-そのうえで `src/app/(engineer)/engineer/page.tsx` に同じ `id` の
-`<section>` を追加します。ナビの現在地は `IntersectionObserver` が
-拾うので、ほかに触る場所はありません。
+PDF（印刷）は `src/components/engineer/ResumeDocument.tsx` が描きます。
+中身は画面と同じ `src/content/engineer.ts` から読むので、データを直せば両方変わります。
+画面の見た目を変えても PDF のレイアウトは変わりません。
 
 ### 最終更新日を変える
 
 `src/content/profile.ts` の `updatedAt` を `"YYYY-MM-DD"` 形式で更新します。
-ページ下部のマストヘッドと、印刷したときのヘッダに出ます。
+PDF（印刷）のヘッダに出ます。
 
 ### 顔写真を入れる
 
@@ -145,17 +120,10 @@ headline: {
 導出できる数字（通算年数）はコードが計算します。**手で書ける場所を
 作っていないのは、2 か所に書くと必ずずれるから**です。
 
-### スキルの数値は主観だと分かる形で
-
-`engineerSkills` の `level` は 0-100 の自己申告です。公開中のサイトが
-その形なのでそのまま引き継いでいますが、**根拠のない精度に見える**という
-弱点は残ります。数字を疑われたくない場面では、`highlights` 側に
-「どこで使ったか」を書いて裏づけてください。
-
 ### 見出しの改行は自分で決められる
 
 `/business` のヒーローは行を明示的に持ちます。和文は自動折り返しに
-任せると文節の途中で折れるためです。`mark` は `/engineer` と同じ仕組みで、
+任せると文節の途中で折れるためです。`mark` は、
 いずれかの行に含まれる語の背後に帯を敷きます。
 
 ```ts
@@ -197,12 +165,11 @@ export const hero: BusinessHero = {
 
 ## 見た目について
 
-`/engineer` はダーク固定、`/business` と `/` はそれぞれ地の色が決まっていて、
-切り替えは持ちません。`/engineer` は[公開中のサイト](https://axhiz-dev.github.io/ishida-takuya/)の
-実装をそのまま持ち込んだもので、ダークの見え方そのものが中身だからです。
+`/` と `/engineer` はオフホワイトの紙に藍の差し色、`/business` は独自の配色で、
+どれも切り替えは持ちません。
 
-**`/engineer` だけ Tailwind で組まれています。** 色を触るときは
-`src/styles/engineer.css` の `@theme`、`/` と `/business` は
+**`/` と `/engineer` は Tailwind で組まれています。** 色を触るときは
+`src/styles/engineer.css` の `@theme`、`/business` は
 `src/styles/tokens.css` を見てください。
 
 ## 手元で確認する
@@ -230,19 +197,16 @@ npm run test:e2e
 
 ## PDF として保存する
 
-`/engineer` の右上にある「PDF」を押すと、ブラウザの印刷ダイアログが開きます。
+`/engineer` のヘッダ右上の「PDF出力」か、ページ末尾の「この職務経歴書をPDFで保存」を押すと、ブラウザの印刷ダイアログが開きます。
 送信先で「PDF として保存」を選んでください。
 
-- **ダークで表示していても、紙は必ず白黒で出ます**（印刷時に地と影をまとめて落とし、
-  文字を黒に固定しています）
-- ナビ・パーティクル・ぼかし・スキルのバー・ウォーターマークは消え、代わりに
-  氏名・連絡先・サイト URL・最終更新日のヘッダが 1 行入ります
-- 経歴の左右交互の 2 段組は、紙では 1 列に落ちます（交互配置は読み順を壊すため）
-- スキルの数値は文字として残ります（紙でバーは意味を持たないため）
-- 文字は画像化されないので、PDF 上でも検索とコピーができます（実測 4 ページ）
+- 紙には画面とは別の、職務経歴書の体裁のレイアウトが出ます（A4、白地に藍の差し色）
+- 画面で技術タグを絞り込んでいても、紙には全案件が載ります
+- ナビ・絞り込み・ボタンは紙に出ません
+- 案件の箱やスキルの箱の途中では改ページしません
+- 文字は画像化されないので、PDF 上でも検索とコピーができます（実測 5 ページ）
 
 既存フォーマットの職務経歴書を求められた場合は、この PDF を渡せば足ります。
-サイト側はそのぶん自由に作ってあります。
 
 ---
 

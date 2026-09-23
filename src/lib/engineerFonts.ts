@@ -1,12 +1,8 @@
-import { JetBrains_Mono, Noto_Sans_JP, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Noto_Sans_JP } from "next/font/google";
 
 /**
- * /engineer のフォント。
- *
- * このページは公開中のサイトの見た目をそのまま採っているので、
- * 書体もあちらに合わせる（見出し = Space Grotesk / 本文 = Noto Sans JP /
- * ラベル = JetBrains Mono）。/ と /business の Bricolage + Geist とは別系統で、
- * 混ぜないために lib/fonts.ts とはファイルを分けてある。
+ * / と /engineer のフォント（本文 = Noto Sans JP / 年月・数字 = JetBrains Mono）。
+ * /business の書体とは別系統なので、lib/fonts.ts とはファイルを分けてある。
  *
  * CSS 変数名は Tailwind の @theme（src/styles/engineer.css）と対になっている。
  * mono だけ `--font-mono-face` と別名にしているのは、Tailwind v4 の
@@ -26,25 +22,13 @@ export const engineerJpSans = Noto_Sans_JP({
   preload: false,
 });
 
-export const engineerDisplay = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "700"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-  adjustFontFallback: false,
-});
-
 export const engineerMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
   variable: "--font-mono-face",
   display: "swap",
   adjustFontFallback: false,
 });
 
 /** <html> に付ける。 */
-export const engineerFontVariables = [
-  engineerDisplay.variable,
-  engineerMono.variable,
-  engineerJpSans.variable,
-].join(" ");
+export const engineerFontVariables = [engineerMono.variable, engineerJpSans.variable].join(" ");

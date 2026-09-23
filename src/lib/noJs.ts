@@ -8,7 +8,7 @@
  * <head> の中で **同期的に** 外すのが肝。React が動くのを待つと
  * 一瞬だけ非表示の状態が描かれる。
  *
- * /engineer はここを使わない。あちらは Tailwind + motion で、
- * 入場は motion 側が持っている。
+ * / と /engineer はここを使わない。あちらの入場は engineer.css の
+ * CSS アニメーションが持っている。
  */
 export const NO_JS_INIT_SCRIPT = `(function(){try{document.documentElement.classList.remove('no-js')}catch(e){}})();`;

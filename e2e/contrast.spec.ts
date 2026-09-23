@@ -3,16 +3,14 @@ import { expect, test } from "@playwright/test";
 /**
  * すべての文字要素について、実際に描画される背景とのコントラスト比を測る。
  *
- * /engineer はダーク一色で、ダークはライトより落ちやすい。
- * 今回の最大の品質リスクなので目視ではなく計測で押さえる。
+ * 小さい注記の淡い灰色がいちばん落ちやすいので、目視ではなく計測で押さえる。
  *
  * 測らないのは 2 つだけ：
  *
  * · aria-hidden の中。ウォーターマークのように意図的に地へ沈めた
  *   飾り文字は読ませるためのものではなく、支援技術からも外してある
  * · background-clip: text の文字。地の色ではなくグラデーションで
- *   塗られるので、computed color（transparent）を測っても意味がない。
- *   代わりにグラデーションの各止め色を下のテストで直接見る
+ *   塗られるので、computed color（transparent）を測っても意味がない
  */
 
 const CASES = [
@@ -124,51 +122,3 @@ for (const item of CASES) {
     expect(problems, `コントラスト不足:\n${report.join("\n")}`).toHaveLength(0);
   });
 }
-
-/**
- * グラデーションで塗る見出しは、いちばん暗い止め色でも読めること。
- *
- * background-clip: text の要素は computed color が transparent なので
- * 上のテストでは測れない。止め色を直接見るしかない。
- * 大きい文字にしか使っていないので必要なのは 3:1。
- */
-test("コントラスト: グラデーション文字の止め色", async ({ page }) => {
-  await page.goto("/engineer/");
-  await page.waitForLoadState("networkidle");
-
-  const worst = await page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement);
-    const read = (name: string) => root.getPropertyValue(name).trim();
-
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = 1;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
-    const rgb = (c: string): [number, number, number] => {
-      ctx.clearRect(0, 0, 1, 1);
-      ctx.fillStyle = "#000";
-      ctx.fillStyle = c;
-      ctx.fillRect(0, 0, 1, 1);
-      const d = ctx.getImageData(0, 0, 1, 1).data;
-      return [d[0]!, d[1]!, d[2]!];
-    };
-    const lum = ([r, g, b]: [number, number, number]) => {
-      const f = (v: number) => {
-        const s = v / 255;
-        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-      };
-      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
-    };
-
-    const bg = lum(rgb(read("--color-bg")));
-    const stops = ["--color-brand-cyan", "--color-brand-violet", "--color-brand-fuchsia"];
-    return stops
-      .map((name) => {
-        const l = lum(rgb(read(name)));
-        const [hi, lo] = [l, bg].sort((a, b) => b - a);
-        return { name, ratio: Math.round(((hi! + 0.05) / (lo! + 0.05)) * 100) / 100 };
-      })
-      .sort((a, b) => a.ratio - b.ratio)[0]!;
-  });
-
-  expect(worst.ratio, `いちばん暗い止め色は ${worst.name}（${worst.ratio}）`).toBeGreaterThanOrEqual(3);
-});

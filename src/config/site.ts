@@ -61,9 +61,9 @@ export const ROUTES = {
 /** 機能フラグ。 */
 export const FEATURES = {
   /**
-   * 職務経歴ページに「PDF」ボタンを出す。
+   * 職務経歴ページに「PDF出力」ボタンを出す。
    * 押すとブラウザの印刷を呼ぶ（サーバーを持たないので生成は端末側）。
-   * 紙のレイアウトは src/styles/engineer.css の @media print が持つ。
+   * 紙のレイアウトは src/components/engineer/ResumeDocument.tsx が持つ。
    */
   pdfExport: true,
 } as const;
