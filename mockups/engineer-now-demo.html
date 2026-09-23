@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Now セクション案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  /* /engineer（src/styles/engineer.css）と同じトークン */
+  :root {
+    --paper: #fafaf8;
+    --ink: #1a1a1a;
+    --ink-soft: #55554f;
+    --ink-faint: #6e6e67;
+    --accent: #1e3a5f;
+    --accent-soft: #eef2f7;
+    --line: #e5e4de;
+    --sans: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "palt";
+  }
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 0 16px 64px; }
+  @media (min-width: 640px) { .wrap { padding: 0 24px 64px; } }
+
+  .demo-note {
+    background: #fff8e1; border-bottom: 1px solid #f0e2b0; color: #6b5a1e;
+    font-size: 12px; padding: 10px 16px; text-align: center; line-height: 1.6;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(30,58,95,.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30,58,95,.055) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+  header.hero { margin: 0 -16px; padding: 56px 16px 40px; }
+  @media (min-width: 640px) { header.hero { margin: 0 -24px; padding: 56px 24px 40px; } }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .3em; color: var(--accent); text-transform: uppercase; }
+  .hero h1 { font-size: 44px; font-weight: 700; letter-spacing: -.01em; margin-top: 14px; }
+  .hero .sub { margin-top: 12px; font-size: 14px; color: var(--ink-soft); }
+
+  /* ===== Section 見出し（Section.tsx と同じ構成） ===== */
+  section { margin-top: 88px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; }
+  .sec-num { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink-faint); }
+  .sec-title { margin-top: 8px; font-size: 32px; font-weight: 700; letter-spacing: -.01em; }
+  @media (min-width: 640px) { .sec-title { font-size: 36px; } }
+  .sec-rule { margin-top: 20px; height: 1px; background: var(--line); }
+  .sec-body { margin-top: 32px; }
+
+  /* ===== 01 職務要約 ===== */
+  .summary p { max-width: 48rem; font-size: 14px; line-height: 2; color: var(--ink-soft); }
+  .summary p + p { margin-top: 16px; }
+  .summary strong { color: var(--ink); font-weight: 700; }
+
+  /* ===== 02 Now ===== */
+  .now-lead {
+    display: grid; gap: 28px; align-items: end;
+    border: 1px solid var(--line); background: #fff; border-radius: 6px;
+    padding: 28px; position: relative; overflow: hidden;
+  }
+  .now-lead::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+  @media (min-width: 800px) { .now-lead { grid-template-columns: 1.4fr 1fr; } }
+  .now-company { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .now-company h3 { font-size: 20px; font-weight: 700; }
+  .live {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--accent);
+    background: var(--accent-soft); border-radius: 999px; padding: 3px 9px;
+  }
+  .live::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: #2f7d5b;
+    box-shadow: 0 0 0 0 rgba(47,125,91,.5); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 6px rgba(47,125,91,0); } 100% { box-shadow: 0 0 0 0 rgba(47,125,91,0); } }
+  @media (prefers-reduced-motion: reduce) { .live::before { animation: none; } }
+  .thesis { margin-top: 18px; font-size: 22px; line-height: 1.6; font-weight: 700; letter-spacing: -.005em; }
+  .thesis .mk { background: linear-gradient(transparent 62%, var(--accent-soft) 62%); }
+  .now-desc { margin-top: 14px; font-size: 13px; line-height: 1.9; color: var(--ink-soft); }
+  .meta { font-size: 12px; color: var(--ink-soft); display: grid; gap: 10px; }
+  .meta div { display: grid; grid-template-columns: 5.5em 1fr; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+  .meta dt { color: var(--ink-faint); font-size: 11px; }
+  .meta dd { color: var(--ink); line-height: 1.6; }
+  .mono { font-family: var(--mono); }
+
+  .kpis { margin-top: 20px; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; grid-template-columns: 1fr 1fr; }
+  @media (min-width: 800px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: #fff; padding: 18px 18px 16px; }
+  .kpi .v { font-family: var(--mono); font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: var(--accent); letter-spacing: -.02em; white-space: nowrap; }
+  .kpi .v small { font-size: 13px; font-weight: 500; }
+  .kpi .l { margin-top: 6px; font-size: 11px; line-height: 1.6; color: var(--ink-soft); }
+
+  .sub-h { margin-top: 56px; display: flex; align-items: baseline; gap: 12px; }
+  .sub-h h4 { font-size: 15px; font-weight: 700; }
+  .sub-h span { font-size: 11px; color: var(--ink-faint); }
+
+  .issues { margin-top: 16px; display: grid; gap: 12px; }
+  @media (min-width: 800px) { .issues { grid-template-columns: repeat(3, 1fr); } }
+  .issue { border: 1px solid var(--line); border-radius: 6px; padding: 18px; background: #fff; }
+  .issue .q { font-size: 14px; font-weight: 700; line-height: 1.6; }
+  .issue p { margin-top: 8px; font-size: 12px; line-height: 1.8; color: var(--ink-soft); }
+  .issue .to { margin-top: 12px; font-size: 11px; color: var(--accent); font-weight: 600; }
+
+  /* 事例カード */
+  .cases { margin-top: 16px; display: grid; gap: 20px; }
+  .case { border: 1px solid var(--line); border-radius: 6px; background: #fff; overflow: hidden; }
+  .case-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 22px 24px 0; }
+  .case-no { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+  .case-head h5 { font-size: 17px; font-weight: 700; }
+  .case-head .role { font-size: 11px; color: var(--ink-faint); }
+  .case-grid { display: grid; gap: 0; padding: 18px 24px 22px; }
+  @media (min-width: 800px) { .case-grid { grid-template-columns: 1fr 15rem; gap: 28px; } }
+  .steps { display: grid; gap: 12px; }
+  .step { display: grid; grid-template-columns: 4.2em 1fr; gap: 10px; font-size: 13px; line-height: 1.8; }
+  .step dt { font-size: 11px; font-weight: 700; color: var(--ink-faint); padding-top: 3px; letter-spacing: .05em; }
+  .step dd ul { list-style: none; display: grid; gap: 4px; }
+  .step dd li { position: relative; padding-left: 12px; }
+  .step dd li::before { content: ""; position: absolute; left: 0; top: .8em; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .step.judge dd {
+    background: var(--accent-soft); border-radius: 4px; padding: 8px 12px; color: var(--accent); font-weight: 500;
+  }
+  .step.judge dt { color: var(--accent); }
+  .result {
+    margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  @media (min-width: 800px) { .result { margin-top: 0; border-top: 0; padding-top: 0; border-left: 1px solid var(--line); padding-left: 24px; } }
+  .result .rl { font-size: 10px; font-weight: 700; letter-spacing: .2em; color: var(--ink-faint); }
+  .result .big { margin-top: 8px; font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--accent); line-height: 1.25; letter-spacing: -.02em; }
+  .result .big.jp { font-family: var(--sans); font-size: 18px; line-height: 1.5; letter-spacing: 0; }
+  .result p { margin-top: 8px; font-size: 12px; line-height: 1.7; color: var(--ink-soft); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 24px 22px; }
+  .tag { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; }
+
+  /* 進行中 */
+  .ongoing { margin-top: 16px; display: grid; gap: 12px; }
+  @media (min-width: 800px) { .ongoing { grid-template-columns: 1fr 1fr; } }
+  .og { border: 1px dashed #b9c3d0; border-radius: 6px; padding: 20px; background: #fff; }
+  .og-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .og h5 { font-size: 15px; font-weight: 700; }
+  .og .period { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
+  .og .q { margin-top: 12px; font-size: 12px; line-height: 1.8; color: var(--ink-soft); }
+  .og ul { margin-top: 10px; list-style: none; display: grid; gap: 6px; }
+  .og li { font-size: 12.5px; line-height: 1.7; padding-left: 12px; position: relative; }
+  .og li::before { content: ""; position: absolute; left: 0; top: .75em; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .og .status { margin-top: 14px; font-size: 12px; background: var(--paper); border-radius: 4px; padding: 8px 10px; }
+  .og .status b { color: var(--accent); font-size: 10px; letter-spacing: .15em; margin-right: 6px; }
+
+  /* その他 */
+  .others { margin-top: 16px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+  .others div { display: grid; grid-template-columns: 6em 1fr; gap: 12px; padding: 12px 18px; font-size: 12.5px; line-height: 1.7; }
+  .others div + div { border-top: 1px solid var(--line); }
+  .others dt { font-size: 11px; font-weight: 700; color: var(--ink-faint); padding-top: 2px; }
+  .foot-stat { margin-top: 12px; font-size: 12px; color: var(--ink-faint); text-align: right; }
+  .foot-stat b { font-family: var(--mono); color: var(--ink); font-weight: 600; }
+
+  /* 03 職務経歴（文脈として少しだけ） */
+  .tl { position: relative; padding-left: 32px; }
+  .tl::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 0; width: 1px; background: rgba(30,58,95,.25); }
+  .tl-item { position: relative; padding-bottom: 44px; }
+  .tl-item::before { content: ""; position: absolute; left: -37.5px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); background: var(--paper); }
+  .tl-item .p { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+  .tl-item h3 { margin-top: 4px; font-size: 20px; font-weight: 700; }
+  .tl-item .r { margin-top: 2px; font-size: 14px; color: var(--ink-soft); font-weight: 500; }
+  .tl-item .s { margin-top: 8px; font-size: 14px; line-height: 1.8; color: var(--ink-soft); max-width: 42rem; }
+  .jump { margin-top: 14px; display: inline-flex; gap: 8px; align-items: center; font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 5px 12px; text-decoration: none; background: #fff; }
+  .jump:hover { background: var(--accent); color: #fff; }
+  .ghost-card { margin-top: 16px; border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 18px 20px; font-size: 13px; color: var(--ink-faint); }
+  .fade { opacity: .45; }
+
+  .anno {
+    display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 700;
+    color: #8a5a00; background: #fff3cd; border: 1px solid #f0d98a; border-radius: 3px; padding: 1px 6px; vertical-align: middle;
+    letter-spacing: 0; font-family: var(--sans);
+  }
+</style>
+</head>
+<body>
+<div class="demo-note">見た目の確認用デモです（静的HTML）。黄色のラベル <span class="anno" style="margin:0">注</span> は設計意図のメモで、本番には出しません。</div>
+
+<main class="wrap">
+  <header class="hero bg-grid">
+    <p class="eyebrow">Curriculum Vitae</p>
+    <h1>石田 卓也</h1>
+    <p class="sub">Takuya Ishida — プロダクトエンジニア</p>
+  </header>
+
+  <!-- ============ 01 職務要約 ============ -->
+  <section id="summary">
+    <div class="sec-head"><span class="sec-num">01</span><p class="eyebrow">Summary</p></div>
+    <h2 class="sec-title">職務要約 <span class="anno">注：現行と同じ4段落の分量</span></h2>
+    <div class="sec-rule"></div>
+    <div class="sec-body summary">
+      <p>エンジニア歴6年のプロダクトエンジニアです。受託開発・自社SaaS・副業を通じて、React / TypeScript / Go を中心に、フロントエンドからバックエンド、インフラまで領域を問わず実装してきました。</p>
+      <p>現職の株式会社HRBrainでは人事データ活用SaaSを担当し、<strong>仕様が固まっていない要求を論点に分解し、フルスタックで実装し、本番リリースまで仕切る</strong>役割を担っています。主力機能「クロス集計」の案件オーナーや、4万人規模テナントの日次バッチ改善（約2時間 → 約1分）を経て、2026年7月からはユニットリーダー・技術リードとして、後継機能の技術方針とAI前提の開発プロセス設計を担当しています。</p>
+      <p>前職までは受託開発でPMとエンジニアを兼ね、要件定義・顧客折衝からインフラ構築まで一気通貫で担ってきました。新卒で入社したDELLでのインサイドセールス経験から、機能を考える起点は常に「売りにつながるか／解約を止めるか」に置いています。</p>
+      <p>AIは、プロダクトと開発現場の両方に安全に組み込むことをテーマにしています。社内向けSlack MCPサーバーの自作・展開、Claude Code の社内推進に加え、個人開発サービス「LiveDriver」ではローンチからマーケティング・営業まで自ら行っています。</p>
+    </div>
+  </section>
+
+  <!-- ============ 02 Now ============ -->
+  <section id="now">
+    <div class="sec-head"><span class="sec-num">02</span><p class="eyebrow">Now @ HRBrain</p></div>
+    <h2 class="sec-title">いま取り組んでいること</h2>
+    <div class="sec-rule"></div>
+    <div class="sec-body">
+
+      <!-- リード：主張 + 役割 -->
+      <div class="now-lead">
+        <div>
+          <div class="now-company"><h3>株式会社HRBrain</h3><span class="live">NOW</span></div>
+          <p class="thesis">決まっていないことを<span class="mk">決めて、作って、</span><br />使われるところまで持っていく。</p>
+          <p class="now-desc">人事データ活用SaaSで、「ほしい」の一言から始まる要求を論点に分解し、仕様・実装・リリース判断まで自分で握っています。職務要約で挙げた成果の中身を、課題と判断の順に紹介します。</p>
+        </div>
+        <dl class="meta">
+          <div><dt>期間</dt><dd class="mono">2025.04 – 現在</dd></div>
+          <div><dt>役割</dt><dd>プロダクトエンジニア<br />→ 2026.07〜 ユニットリーダー・技術リード</dd></div>
+          <div><dt>チーム</dt><dd>エンジニア2〜4名／PdM・QA・デザイナー各1名</dd></div>
+          <div><dt>主な技術</dt><dd>Go, TypeScript, React, gRPC, PostgreSQL, BigQuery, GCP</dd></div>
+        </dl>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpis">
+        <div class="kpi"><div class="v">2h<small> → </small>1min</div><div class="l">4万人規模テナントの<br />日次バッチ処理時間</div></div>
+        <div class="kpi"><div class="v">−98<small>%</small></div><div class="l">同バッチの<br />GCPコスト</div></div>
+        <div class="kpi"><div class="v">60<small> PR</small></div><div class="l">主力機能「クロス集計」を<br />予定通りリリース</div></div>
+        <div class="kpi"><div class="v">345<small> / </small>372</div><div class="l">18か月の作成PR数<br />／レビュー参加数</div></div>
+      </div>
+
+      <!-- 課題意識 -->
+      <div class="sub-h"><h4>課題意識</h4><span>日々の開発で向き合っている3つの問い<span class="anno">注：職務要約の「強み」を、問いの形で言い換える</span></span></div>
+      <div class="issues">
+        <div class="issue">
+          <p class="q">仕様は「ほしい」の一言で降りてくる</p>
+          <p>曖昧なまま作ると手戻りし、決めないまま待つと止まる。誰かが論点に分解して期日ごと握る必要がある。</p>
+          <p class="to">→ Case 01・Ongoing</p>
+        </div>
+        <div class="issue">
+          <p class="q">人事データは多く、権限は細かい</p>
+          <p>4万人規模のデータを、速く・正しく・閲覧者の権限どおりに集計しないと、顧客の信頼を失う。</p>
+          <p class="to">→ Case 01・02</p>
+        </div>
+        <div class="issue">
+          <p class="q">AI活用は、目的化とリスクが隣り合う</p>
+          <p>便利さと引き換えに読めてはいけないものが読める。生産性施策も手段が目的になりやすい。</p>
+          <p class="to">→ Case 03・Ongoing</p>
+        </div>
+      </div>
+
+      <!-- 事例 -->
+      <div class="sub-h"><h4>主な取り組み</h4><span>課題 → 判断 → アクション → 結果<span class="anno">注：「判断」を独立させて強調</span></span></div>
+      <div class="cases">
+
+        <article class="case">
+          <div class="case-head">
+            <span class="case-no">CASE 01</span>
+            <h5>主力機能「クロス集計」の仕様策定〜リリース</h5>
+            <span class="role">案件オーナー ・ 2025.12 – 2026.06</span>
+          </div>
+          <div class="case-grid">
+            <dl class="steps">
+              <div class="step"><dt>課題</dt><dd>競合比で欠けていた機能。仕様は「ほしい」の一言のみで、期中に設計担当が退職した。</dd></div>
+              <div class="step judge"><dt>判断</dt><dd>待たずに自分がオーナーになる。仕様検討MTGを主催し、項目タイプ・上限・権限の扱いを先に決め切る。</dd></div>
+              <div class="step"><dt>行動</dt><dd><ul>
+                <li>9つの項目タイプ・上限・権限の扱いを定義</li>
+                <li>テーブル仮想化とN階層ヘッダー（FE）、集計エンジンと閲覧者ロールでの権限伝播（BE）を実装</li>
+                <li>残バグ18件・24pt・ベロシティから完了日を逆算し、期日を自分から提示</li>
+              </ul></dd></div>
+            </dl>
+            <div class="result">
+              <p class="rl">RESULT</p>
+              <p class="big jp">予定通りリリース。<br />当日から営業の武器に</p>
+              <p>約60PR。リリース当日に営業がデモ環境へ組み込み、4つのユースケースがクロスセル資産になった。</p>
+            </div>
+          </div>
+          <div class="tags"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Go</span><span class="tag">PostgreSQL</span></div>
+        </article>
+
+        <article class="case">
+          <div class="case-head">
+            <span class="case-no">CASE 02</span>
+            <h5>4万人規模テナントの日次バッチ不全解消</h5>
+            <span class="role">単独担当 ・ 2025.07 – 2025.09</span>
+          </div>
+          <div class="case-grid">
+            <dl class="steps">
+              <div class="step"><dt>課題</dt><dd>大手顧客の日次バッチが失敗し続け、復旧に数日かかる状態。解約リスクに直結していた。</dd></div>
+              <div class="step judge"><dt>判断</dt><dd>「全企業をCloud Run Jobsへ移すか」をコスト試算で比較し、「通常企業は現行維持」と自ら結論。</dd></div>
+              <div class="step"><dt>行動</dt><dd><ul>
+                <li>本番デバッグ用ワークフローを自作して原因を特定し、即日報告</li>
+                <li>gRPCのストリーミング化、メンバー変更反映処理の高速化</li>
+              </ul></dd></div>
+            </dl>
+            <div class="result">
+              <p class="rl">RESULT</p>
+              <p class="big">約2時間<br />→ 約1分</p>
+              <p>該当バッチのGCPコストを約98%削減。</p>
+            </div>
+          </div>
+          <div class="tags"><span class="tag">Go</span><span class="tag">gRPC</span><span class="tag">Cloud Run Jobs</span><span class="tag">Workflows</span></div>
+        </article>
+
+        <article class="case">
+          <div class="case-head">
+            <span class="case-no">CASE 03</span>
+            <h5>社内AI活用基盤：Slack MCPサーバーの自作・展開</h5>
+            <span class="role">設計・実装・展開 ・ 2026.01 – 2026.07</span>
+          </div>
+          <div class="case-grid">
+            <dl class="steps">
+              <div class="step"><dt>課題</dt><dd>Slackに埋もれた解決事例をAIから検索したいが、既製のコネクタではDMまで読めてしまう。</dd></div>
+              <div class="step judge"><dt>判断</dt><dd>プロンプトではなく権限で塞ぐ。監査は「ログ基盤は断念し、IP制限＋ローカルログで許容」と、残るリスクまで書いて合意を取る。</dd></div>
+              <div class="step"><dt>行動</dt><dd><ul>
+                <li>OAuth scope をパブリックチャンネル限定に＋公開ツールを読み取り系のみに限定する2層設計</li>
+                <li>非エンジニア向けのインストーラーを用意</li>
+              </ul></dd></div>
+            </dl>
+            <div class="result">
+              <p class="rl">RESULT</p>
+              <p class="big jp">2026.07<br />社内で解禁</p>
+              <p>非エンジニアも導入できる社内のAI活用基盤として展開し、運用も継続して担当。</p>
+            </div>
+          </div>
+          <div class="tags"><span class="tag">MCP</span><span class="tag">OAuth</span><span class="tag">Slack API</span><span class="tag">Claude Code</span></div>
+        </article>
+      </div>
+
+      <!-- 進行中 -->
+      <div class="sub-h"><h4>進行中</h4><span>技術リードとして、いま動かしているもの</span></div>
+      <div class="ongoing">
+        <div class="og">
+          <div class="og-top"><h5>後継機能「グラフパーツ」の技術リード</h5><span class="live">NOW</span></div>
+          <p class="period">2026.07 –</p>
+          <p class="q">既存BIプロダクトを主力へ統合するにあたり、「何を再現し、何を諦めるか」が未決だった。</p>
+          <ul>
+            <li>最大の論点を「結論 → 理由3点 → 段階案 → 決めるべき問い5点」で提案し、意思決定を前進</li>
+            <li>基盤チームへ受け入れ基準つきでAPIを依頼。性能はSLOで数値提示（42,000人で上限12秒）</li>
+            <li>体制変動（想定5名 → 実態3名）に合わせて計画を3回引き直し、11月末の1stリリースで合意</li>
+          </ul>
+          <p class="status"><b>STATUS</b>ADR承認済み。最小構成を端から端まで通す実装に着手</p>
+        </div>
+        <div class="og">
+          <div class="og-top"><h5>AI前提の開発プロセス設計</h5><span class="live">NOW</span></div>
+          <p class="period">2026.07 –</p>
+          <p class="q">レビュー短縮やE2E拡充といった生産性施策が、目的化しやすい状況だった。</p>
+          <ul>
+            <li>「顧客価値 ← 開発の加速 ← レビュー短縮 ← E2Eによる品質下限の保証」と目的から逆算して着手順を決定</li>
+            <li>仕様を着手前に握り、実装はAIに任せるフローをSkill群として整備</li>
+            <li>E2Eを「QAでも書ける」自律生成基盤として構築</li>
+          </ul>
+          <p class="status"><b>STATUS</b>リポジトリ内で稼働し、グラフパーツ開発と並行運用中</p>
+        </div>
+      </div>
+
+      <!-- その他 -->
+      <div class="sub-h"><h4>その他の取り組み</h4></div>
+      <dl class="others">
+        <div><dt>新機能</dt><dd>「テンプレート生成」を起案〜全社展開（2026.09）。社内IP限定で有効化できるFeatureFlagの仕組みを新設</dd></div>
+        <div><dt>障害対応</dt><dd>約3年潜在したデータ不整合を混入PR単位で特定し、289社を復旧</dd></div>
+        <div><dt>新機能</dt><dd>データセットコピー機能を、BE〜FE〜リリースまで単独で担当（2025.11）</dd></div>
+        <div><dt>インフラ</dt><dd>Cloud Run / Cloud Functions のCI/CDを新規構築、PAMによる本番権限取得フローを整備</dd></div>
+        <div><dt>AI推進</dt><dd>AI Committeeメンバー。AIツールの利用可否判定、問い合わせ初動調査Skillを他チームへ展開</dd></div>
+      </dl>
+      <p class="foot-stat">18か月で作成PR <b>345</b>件（マージ <b>256</b>件）・レビュー参加 <b>372</b>件</p>
+    </div>
+  </section>
+
+  <!-- ============ 03 職務経歴（文脈として） ============ -->
+  <section id="career">
+    <div class="sec-head"><span class="sec-num">03</span><p class="eyebrow">Career</p></div>
+    <h2 class="sec-title">職務経歴 <span class="anno">注：HRBrainは要約だけにして02へ送る</span></h2>
+    <div class="sec-rule"></div>
+    <div class="sec-body">
+      <div class="tl">
+        <div class="tl-item">
+          <p class="p">2025.04 – 現在</p>
+          <h3>株式会社HRBrain <span style="font-size:12px;color:var(--ink-faint);font-weight:400">正社員</span></h3>
+          <p class="r">プロダクトエンジニア → ユニットリーダー・技術リード</p>
+          <p class="s">人事データ活用SaaSの仕様策定・フルスタック実装・リリースを担当。主力機能の案件オーナー、大規模バッチ改善、社内AI活用基盤の構築など。</p>
+          <a class="jump" href="#now">詳細は「02 Now」へ ↑</a>
+        </div>
+        <div class="tl-item fade">
+          <p class="p">2022.01 – 2025.03</p>
+          <h3>株式会社pluszero</h3>
+          <p class="r">PM・フルスタックエンジニア</p>
+          <div class="ghost-card">自動車CADファイルOCRシステム …（以下、現行のカード8件）</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
