@@ -1,5 +1,5 @@
 import type { Period } from "@/content/types";
-import type { EngineerSkillCategory } from "@/content/engineer";
+import type { EngineerCareerEntry, EngineerSkillCategory } from "@/content/engineer";
 
 /**
  * コンテンツから導出できる数字だけを計算する。
@@ -48,13 +48,34 @@ export const totalExperienceYears = (
 };
 
 /**
- * 習熟度の高い順にスキル名を返す。ゲートの扉に添える 2〜3 語に使う。
- * カテゴリをまたいで並べ替えるので、フロントエンド以外も上がってくる。
+ * エンジニア職としての通算年数。営業職（kind: "sales"）は数えない。
+ * 入口ページと /engineer のヘッダは必ずこれを使う。
+ */
+export const engineeringYears = (entries: EngineerCareerEntry[], now = new Date()): number =>
+  totalExperienceYears(
+    entries.filter((entry) => entry.kind !== "sales"),
+    now,
+  );
+
+/**
+ * 経験年数の表記（"5年以上" など）を 0-100 の段階に直す。
+ * スキルバーの長さと並び順に使う。
+ */
+export const skillLevel = (years: string): number => {
+  if (years.startsWith("5年")) return 100;
+  if (years.startsWith("3年")) return 72;
+  if (years.startsWith("1年以上")) return 46;
+  return 26;
+};
+
+/**
+ * 経験年数の長い順にスキル名を返す。入口ページに添える 2〜3 語に使う。
+ * 同じ段階の中では content/engineer.ts に書いた順を保つ。
  */
 export const topSkillNames = (categories: EngineerSkillCategory[]): string[] =>
   categories
     .flatMap((category) => category.skills)
-    .sort((a, b) => b.level - a.level)
+    .sort((a, b) => skillLevel(b.years) - skillLevel(a.years))
     .map((skill) => skill.name);
 
 /** "2026-07-24" → "2026年7月24日" */

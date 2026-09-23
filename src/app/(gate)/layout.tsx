@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { fontVariables } from "@/lib/fonts";
-import { NO_JS_INIT_SCRIPT } from "@/lib/noJs";
+import { engineerFontVariables } from "@/lib/engineerFonts";
 import { ROUTES, SITE_URL } from "@/config/site";
-import "@/styles/tokens.css";
-import "@/styles/base.css";
-import "@/styles/print.css";
+import "@/styles/engineer.css";
+
+/**
+ * 入口（/）のルートレイアウト。/engineer と同じスタイル（Tailwind）と書体を使う。
+ */
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,10 +21,7 @@ export const metadata: Metadata = {
 
 export default function GateLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" data-theme="gate" className={`no-js ${fontVariables}`}>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: NO_JS_INIT_SCRIPT }} />
-      </head>
+    <html lang="ja" className={engineerFontVariables}>
       <body>{children}</body>
     </html>
   );

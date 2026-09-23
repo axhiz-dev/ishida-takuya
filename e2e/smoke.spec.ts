@@ -64,8 +64,9 @@ for (const route of ROUTES) {
       const targets = [...document.querySelectorAll("button, nav a, header a, footer a")];
       return targets
         .filter((el) => {
-          // 複数行を前提にしたブロック（ゲートの扉・Feature Stack の主張）は対象外
+          // 複数行を前提にしたブロック（Feature Stack の主張・職務経歴の開閉カード）は対象外
           if (getComputedStyle(el).display === "grid") return false;
+          if (el.hasAttribute("data-multiline")) return false;
 
           const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
           const tops: number[] = [];
@@ -96,7 +97,7 @@ test("ゲートから両方のページへ行ける", async ({ page }) => {
   // 読み手の区分は変わらない。文言を直すたびにテストが落ちるのを避ける。
   await page.getByRole("link", { name: /採用・技術の方へ/ }).click();
   await expect(page).toHaveURL(/\/engineer/);
-  await expect(page.getByRole("navigation", { name: "ページ内の移動" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "サイト内の移動" })).toBeVisible();
 
   await page.goto("/");
   await page.getByRole("link", { name: /お仕事のご相談の方へ/ }).click();
@@ -105,26 +106,8 @@ test("ゲートから両方のページへ行ける", async ({ page }) => {
 
 test("職務経歴から入口へ戻れる", async ({ page }) => {
   await page.goto("/engineer/");
-  await page.getByRole("link", { name: "入口へ戻る" }).click();
+  await page.getByRole("banner").getByRole("link", { name: "石田 卓也" }).click();
   await expect(page).toHaveURL(/\/$/);
-});
-
-test("職務経歴: ナビから各節へ飛べて、現在地が変わる", async ({ page }) => {
-  await page.goto("/engineer/");
-  const nav = page.getByRole("navigation", { name: "ページ内の移動" });
-
-  for (const { label, id } of [
-    { label: "職務経歴", id: "career" },
-    { label: "スキル", id: "skills" },
-    { label: "制作実績", id: "projects" },
-    { label: "お問い合わせ", id: "contact" },
-  ]) {
-    // ナビには節の一覧とは別に「お問い合わせ」の CTA も入っているので、
-    // 一覧（<ul>）の中に絞ってから選ぶ。
-    await nav.getByRole("list").getByRole("link", { name: label, exact: true }).click();
-    await page.waitForTimeout(700);
-    await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.1 });
-  }
 });
 
 test("職務経歴: 経歴・スキル・実績がデータから描かれている", async ({ page }) => {
@@ -134,6 +117,44 @@ test("職務経歴: 経歴・スキル・実績がデータから描かれてい
   expect(await page.getByTestId("career-entry").count()).toBeGreaterThan(0);
   expect(await page.getByTestId("skill-bar").count()).toBeGreaterThan(0);
   expect(await page.getByTestId("project-card").count()).toBeGreaterThan(0);
+});
+
+test("職務経歴: 技術タグで案件を絞り込める", async ({ page }) => {
+  await page.goto("/engineer/");
+  const toolbar = page.getByRole("toolbar", { name: "技術で案件を絞り込む" });
+  const cards = page.getByTestId("project-card");
+  const total = await cards.count();
+
+  // チップに出ている件数と、絞り込んだあとに残るカードの数が一致する
+  for (const label of ["Go", "PM経験", "AWS"]) {
+    const chip = toolbar.getByRole("button", { name: new RegExp(`^${label} \\d+$`) });
+    const expected = Number((await chip.innerText()).match(/(\d+)$/)![1]);
+
+    await chip.click();
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(cards).toHaveCount(expected);
+    // 絞り込んだ案件は詳細まで開いている
+    await expect(page.locator('[data-testid="project-card"] [aria-expanded="true"]')).toHaveCount(expected);
+  }
+
+  await toolbar.getByRole("button", { name: /^すべて \d+$/ }).click();
+  await expect(cards).toHaveCount(total);
+});
+
+test("職務経歴: カードを開閉できる", async ({ page }) => {
+  await page.goto("/engineer/");
+  const toolbar = page.getByRole("toolbar", { name: "技術で案件を絞り込む" });
+  const expanded = page.locator('[data-testid="project-card"] [aria-expanded="true"]');
+  const total = await page.getByTestId("project-card").count();
+
+  await expect(expanded).toHaveCount(0);
+  await page.getByTestId("project-card").first().getByRole("button").click();
+  await expect(expanded).toHaveCount(1);
+
+  await toolbar.getByRole("button", { name: "すべて開く" }).click();
+  await expect(expanded).toHaveCount(total);
+  await toolbar.getByRole("button", { name: "すべて閉じる" }).click();
+  await expect(expanded).toHaveCount(0);
 });
 
 /**
@@ -147,22 +168,19 @@ test("通算年数がゲートと職務経歴で一致する", async ({ page }) 
   expect(gateYears, "ゲートの扉に年数が出ていること").toBeTruthy();
 
   await page.goto("/engineer/");
-  await expect(page.getByText("Web 開発の経験")).toBeVisible();
-  const stat = await page
-    .getByText("Web 開発の経験")
-    .locator("xpath=preceding-sibling::div[1]")
-    .innerText();
-  expect(stat.replace(/\s/g, "")).toBe(`${gateYears}年`);
+  const stat = page.getByText("エンジニア経験", { exact: true }).locator("xpath=following-sibling::dd[1]");
+  // カウントアップが終わるのを待つ
+  await expect(stat).toHaveText(`${gateYears}年`);
 });
 
 /**
- * Tailwind は /engineer のルートグループにしか読ませていない。
+ * Tailwind は / と /engineer のルートグループにしか読ませていない。
  *
- * 分離は import の位置だけで保っているので、ほかのレイアウトへ
+ * 分離は import の位置だけで保っているので、(business) のレイアウトへ
  * src/styles/engineer.css を持っていくと静かに壊れる。
  * ユーティリティが効くかどうかで、実際に配信された CSS を見る。
  */
-test("Tailwind が /engineer の外へ漏れていない", async ({ page }) => {
+test("Tailwind が /business へ漏れていない", async ({ page }) => {
   const utilityWorks = () =>
     page.evaluate(() => {
       const probe = document.createElement("div");
@@ -173,13 +191,13 @@ test("Tailwind が /engineer の外へ漏れていない", async ({ page }) => {
       return applied;
     });
 
-  await page.goto("/engineer/");
-  expect(await utilityWorks(), "/engineer では Tailwind が効くこと").toBe(true);
-
-  for (const path of ["/", "/business/"]) {
+  for (const path of ["/", "/engineer/"]) {
     await page.goto(path);
-    expect(await utilityWorks(), `${path} に Tailwind が漏れている`).toBe(false);
+    expect(await utilityWorks(), `${path} では Tailwind が効くこと`).toBe(true);
   }
+
+  await page.goto("/business/");
+  expect(await utilityWorks(), "/business に Tailwind が漏れている").toBe(false);
 });
 
 test("キーボードだけで主要な導線をたどれる", async ({ page }) => {

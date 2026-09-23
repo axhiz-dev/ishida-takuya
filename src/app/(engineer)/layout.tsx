@@ -6,13 +6,10 @@ import "@/styles/engineer.css";
 /**
  * /engineer のルートレイアウト。
  *
- * このルートグループだけが Tailwind（src/styles/engineer.css）を読む。
- * / と /business は tokens.css + base.css + CSS Modules のままなので、
- * Tailwind の preflight がそちらに漏れない。**ここに書いた import を
- * 別のレイアウトへ持っていかないこと。**
- *
- * テーマは切り替えを持たないダーク固定。公開中のサイトがそうであり、
- * このページはダークの見え方そのものが中身だから。
+ * Tailwind（src/styles/engineer.css）を読むのは / と /engineer だけ。
+ * /business は tokens.css + base.css + CSS Modules のままなので、
+ * Tailwind の preflight がそちらに漏れない。**この import を
+ * (business) のレイアウトへ持っていかないこと。**
  */
 
 export const metadata: Metadata = {
