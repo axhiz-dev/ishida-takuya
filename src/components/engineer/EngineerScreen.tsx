@@ -9,11 +9,13 @@ import {
   engineerSideWorks,
   engineerSkills,
   engineerSummary,
+  engineerTechTopics,
   type CareerProject,
   type EngineerCareerEntry,
 } from "@/content/engineer";
 import { FEATURES } from "@/config/site";
-import { formatDotPeriod, skillLevel } from "@/lib/derive";
+import { formatDotPeriod, skillLevel, withEngineeringYears } from "@/lib/derive";
+import { NowSection } from "./NowSection";
 import { PrintButton } from "./PrintButton";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
@@ -140,7 +142,8 @@ function CareerBlock({
   isLast: boolean;
 }) {
   const visibleProjects = activeFilter ? entry.projects.filter(activeFilter.match) : entry.projects;
-  const dimmed = activeFilter !== null && visibleProjects.length === 0;
+  // 詳細を別の節に置いた会社は、案件カードを持たないので絞り込みで薄くしない
+  const dimmed = activeFilter !== null && visibleProjects.length === 0 && !entry.seeAlso;
 
   return (
     <Reveal>
@@ -157,7 +160,7 @@ function CareerBlock({
         <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h3 className="text-xl font-bold tracking-tight">{entry.company}</h3>
           <span className="text-xs text-ink-faint">{entry.employmentType}</span>
-          {activeFilter && !dimmed && (
+          {activeFilter && !dimmed && !entry.seeAlso && (
             <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-semibold text-accent">
               {visibleProjects.length}件
             </span>
@@ -166,6 +169,21 @@ function CareerBlock({
         <p className="mt-0.5 text-sm font-medium text-ink-soft">{entry.role}</p>
         {!dimmed && entry.summary && (
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">{entry.summary}</p>
+        )}
+        {entry.tech && entry.tech.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {entry.tech.map((tech) => (
+              <Tag key={tech}>{tech}</Tag>
+            ))}
+          </div>
+        )}
+        {entry.seeAlso && (
+          <a
+            href={entry.seeAlso.href}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-accent bg-white px-3 py-1 text-xs text-accent transition-colors hover:bg-accent hover:text-white"
+          >
+            詳細は「{entry.seeAlso.label}」へ ↑
+          </a>
         )}
 
         {!dimmed && visibleProjects.length > 0 && (
@@ -202,6 +220,8 @@ export function EngineerScreen() {
     () => Object.fromEntries(FILTERS.map((f) => [f.id, allProjects.filter(f.match).length])),
     [],
   );
+  // 該当する案件がないチップは押しても何も出ないので並べない
+  const visibleFilters = FILTERS.filter((f) => (filterCounts[f.id] ?? 0) > 0);
   const allOpen = openSet.size >= allProjects.length;
 
   const toggleProject = (name: string) => {
@@ -267,13 +287,17 @@ export function EngineerScreen() {
           <Reveal stagger className="max-w-3xl space-y-4">
             {engineerSummary.map((paragraph) => (
               <p key={paragraph.slice(0, 20)} className="text-sm leading-loose text-ink-soft">
-                {paragraph}
+                {withEngineeringYears(paragraph, engineerCareer)}
               </p>
             ))}
           </Reveal>
         </Section>
 
-        <Section id="career" number="02" eyebrow="Career" title="職務経歴">
+        <Section id="now" number="02" eyebrow="Now @ HRBrain" title="現職での取り組み">
+          <NowSection />
+        </Section>
+
+        <Section id="career" number="03" eyebrow="Career" title="職務経歴">
           {/* フィルタ。スクロールしても上に張り付く */}
           <div
             role="toolbar"
@@ -289,7 +313,7 @@ export function EngineerScreen() {
               >
                 すべて {allProjects.length}
               </button>
-              {FILTERS.map((filter) => {
+              {visibleFilters.map((filter) => {
                 const active = activeFilterId === filter.id;
                 return (
                   <button
@@ -326,7 +350,7 @@ export function EngineerScreen() {
           ))}
         </Section>
 
-        <Section id="side-works" number="03" eyebrow="Side Works" title="副業・業務委託">
+        <Section id="side-works" number="04" eyebrow="Side Works" title="副業・業務委託">
           {engineerSideWorks.map((entry, i) => (
             <CareerBlock
               isLast={i === engineerSideWorks.length - 1}
@@ -339,7 +363,41 @@ export function EngineerScreen() {
           ))}
         </Section>
 
-        <Section id="skills" number="04" eyebrow="Skills" title="スキル">
+        <Section id="topics" number="05" eyebrow="Tech Topics" title="技術トピック">
+          <div className="grid gap-3.5 md:grid-cols-2">
+            {engineerTechTopics.map((topic) => {
+              const body = (
+                <>
+                  <p className="text-[10px] font-bold tracking-[0.15em] text-ink-faint uppercase">
+                    {topic.source} ・ {formatDotPeriod(topic.period)}
+                  </p>
+                  <h3 className="mt-1.5 text-[15px] leading-relaxed font-bold">{topic.title}</h3>
+                  <p className="mt-2 flex-1 text-[13px] leading-[1.8] text-ink-soft">{topic.summary}</p>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {topic.tech.map((tech) => (
+                      <Tag key={tech}>{tech}</Tag>
+                    ))}
+                  </div>
+                  {topic.href && <span className="mt-3 text-xs font-semibold text-accent">詳しく →</span>}
+                </>
+              );
+              const cardClass = "flex h-full flex-col rounded-md border border-line bg-white p-5";
+              return (
+                <Reveal key={topic.title}>
+                  {topic.href ? (
+                    <a href={topic.href} target="_blank" rel="noreferrer" className={`${cardClass} card-hover`}>
+                      {body}
+                    </a>
+                  ) : (
+                    <article className={cardClass}>{body}</article>
+                  )}
+                </Reveal>
+              );
+            })}
+          </div>
+        </Section>
+
+        <Section id="skills" number="06" eyebrow="Skills" title="スキル">
           <div className="grid gap-4 sm:grid-cols-2">
             {engineerSkills.map((category) => (
               <Reveal key={category.title}>

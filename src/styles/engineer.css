@@ -201,6 +201,65 @@ body {
 }
 
 /* ===== モーション低減 ===== */
+/* ===== 現職での取り組み（components/engineer/NowSection） ===== */
+
+/* 主張の最後の行にだけ、下半分に色帯を敷く */
+.now-mark {
+  background: linear-gradient(transparent 62%, var(--color-accent-soft) 62%);
+}
+
+/* 「NOW」の前で脈打つ点 */
+.now-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #2f7d5b;
+  animation: now-pulse 2s infinite;
+}
+@keyframes now-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(47, 125, 91, 0.5); }
+  70%, 100% { box-shadow: 0 0 0 6px rgba(47, 125, 91, 0); }
+}
+
+/* カルーセルの横スクロール。バーは出さず、タブと矢印で位置を示す */
+.now-track {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.now-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* 状況 → 取りに行ったこと → 結果。広い画面では縦線で区切って横に並べる */
+.now-beat-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+.now-beat-take {
+  border-radius: 4px;
+  background: var(--color-accent-soft);
+  padding: 10px 14px;
+}
+@media (min-width: 768px) {
+  .now-beat {
+    padding: 4px 20px;
+  }
+  .now-beat:first-child {
+    padding-left: 0;
+  }
+  .now-beat + .now-beat {
+    border-left: 1px solid var(--color-line);
+  }
+  .now-beat-take {
+    border-radius: 0;
+    background: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -220,6 +279,12 @@ body {
   }
   .skill-bar {
     width: var(--w) !important;
+  }
+  .now-track {
+    scroll-behavior: auto;
+  }
+  .now-live::before {
+    animation: none;
   }
 }
 

@@ -126,7 +126,7 @@ test("職務経歴: 技術タグで案件を絞り込める", async ({ page }) =
   const total = await cards.count();
 
   // チップに出ている件数と、絞り込んだあとに残るカードの数が一致する
-  for (const label of ["Go", "PM経験", "AWS"]) {
+  for (const label of ["Python", "PM経験", "AWS"]) {
     const chip = toolbar.getByRole("button", { name: new RegExp(`^${label} \\d+$`) });
     const expected = Number((await chip.innerText()).match(/(\d+)$/)![1]);
 
@@ -139,6 +139,32 @@ test("職務経歴: 技術タグで案件を絞り込める", async ({ page }) =
 
   await toolbar.getByRole("button", { name: /^すべて \d+$/ }).click();
   await expect(cards).toHaveCount(total);
+});
+
+test("現職での取り組み: タブと矢印で 1 枚ずつ切り替えられる", async ({ page }) => {
+  await page.goto("/engineer/");
+  const carousel = page.locator('[aria-roledescription="carousel"]');
+  const tabs = carousel.getByRole("tab");
+  const count = await tabs.count();
+  expect(count).toBeGreaterThan(1);
+
+  // 最初は 1 枚目。前へは押せない
+  await expect(tabs.first()).toHaveAttribute("aria-selected", "true");
+  await expect(carousel.getByRole("button", { name: "前の取り組み" })).toBeDisabled();
+
+  // 矢印を続けて押しても、押した回数ぶん進む
+  const next = carousel.getByRole("button", { name: "次の取り組み" });
+  await next.click();
+  await next.click();
+  await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+
+  // タブで最後の 1 枚へ飛ぶと、表示中のスライドも最後になる
+  await tabs.last().click();
+  await expect(tabs.last()).toHaveAttribute("aria-selected", "true");
+  await expect(next).toBeDisabled();
+  // 縦位置はクリックに伴うスクロールで変わるので、横方向の位置だけを比べる
+  const left = async (locator: typeof carousel) => (await locator.boundingBox())?.x ?? NaN;
+  await expect.poll(async () => Math.abs((await left(page.getByTestId("now-slide").last())) - (await left(carousel)))).toBeLessThan(2);
 });
 
 test("職務経歴: カードを開閉できる", async ({ page }) => {
