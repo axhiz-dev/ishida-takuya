@@ -298,7 +298,7 @@
 
       <div class="carousel" aria-roledescription="carousel" aria-label="HRBrainでの取り組み">
         <div class="car-bar">
-          <div class="ctabs" role="tablist"><button type="button" class="ctab" data-i="0" aria-controls="slide-1">クロス集計</button><button type="button" class="ctab" data-i="1" aria-controls="slide-2">テンプレート生成</button><button type="button" class="ctab" data-i="2" aria-controls="slide-3">Slack MCP</button><button type="button" class="ctab is-now" data-i="3" aria-controls="slide-4">AI駆動開発</button><button type="button" class="ctab is-now" data-i="4" aria-controls="slide-5">グラフパーツ</button></div>
+          <div class="ctabs" role="tablist"><button type="button" class="ctab" data-i="0" aria-controls="slide-1">クロス集計</button><button type="button" class="ctab" data-i="1" aria-controls="slide-2">テンプレート生成</button><button type="button" class="ctab" data-i="2" aria-controls="slide-3">Slack MCP</button><button type="button" class="ctab is-now" data-i="3" aria-controls="slide-4">AI駆動開発</button><button type="button" class="ctab is-now" data-i="4" aria-controls="slide-5">ユニットリーダー</button></div>
           <div class="car-ctrl">
             <span class="car-count mono"><b id="car-cur">1</b> / 5</span>
             <button type="button" class="car-btn" id="car-prev" aria-label="前へ">←</button>
@@ -323,12 +323,12 @@
           </article>
           <article class="slide" id="slide-4" role="group" aria-roledescription="slide" aria-label="4 / 5：AI駆動開発の仕組みづくり">
             <div class="own-top"><span class="st st-now">進行中</span><h5>AI駆動開発の仕組みづくり</h5><span class="role">ユニットリーダー ・ 2026.07 –</span></div>
-            <div class="flow"><p class="beat"><span class="bl">状況</span>レビュー短縮やE2E拡充といった生産性施策が、それ自体目的になりやすかった。</p><p class="beat take"><span class="bl">取りに行ったこと</span>「顧客価値 ← 開発の加速 ← レビュー短縮 ← E2Eによる品質下限の保証」と目的から逆算して着手順を決めた。仕様を着手前に握り、実装はAIに任せるフローをSkill群として整備し、E2Eを「QAでも書ける」自律生成基盤として構築した。</p><p class="beat now"><span class="bl">現在</span>リポジトリ内で稼働し、グラフパーツ開発と並行して運用中。</p></div>
+            <div class="flow"><p class="beat"><span class="bl">状況</span>AIによって開発スピードは上がったが、レビューが追い付かずボトルネックになっていた。</p><p class="beat take"><span class="bl">取りに行ったこと</span>「レビューを速くするには、まずE2Eで品質の下限を保証する必要がある」と逆算して着手順を決めた。仕様を着手前に握り、実装はAIに任せるフローをSkill群として整備し、E2Eを「QAでも書ける」自律生成基盤として構築した。</p><p class="beat now"><span class="bl">現在</span>リポジトリ内で稼働し、日々の開発で運用中。</p></div>
             <div class="stags"><span class="tag">Claude Code</span><span class="tag">E2E</span></div>
           </article>
-          <article class="slide" id="slide-5" role="group" aria-roledescription="slide" aria-label="5 / 5：後継機能「グラフパーツ」の技術リード">
-            <div class="own-top"><span class="st st-now">進行中</span><h5>後継機能「グラフパーツ」の技術リード</h5><span class="role">技術リード ・ 2026.07 –</span></div>
-            <div class="flow"><p class="beat"><span class="bl">状況</span>既存BIプロダクトを主力へ統合するにあたり、「何を再現し、何を諦めるか」が決まっていなかった。</p><p class="beat take"><span class="bl">取りに行ったこと</span>最大の論点を「結論 → 理由 → 段階案 → 決めるべき問い」の形で提案し、意思決定を前に進めた。体制変動（想定5名 → 実態3名）に合わせて計画を3回引き直した。</p><p class="beat now"><span class="bl">現在</span>技術方針のADR承認済み。11月末の1stリリースに向けて実装中。</p></div>
+          <article class="slide" id="slide-5" role="group" aria-roledescription="slide" aria-label="5 / 5：プロダクト統合プロジェクトの技術リード">
+            <div class="own-top"><span class="st st-now">進行中</span><h5>プロダクト統合プロジェクトの技術リード</h5><span class="role">技術リード ・ 2026.07 –</span></div>
+            <div class="flow"><p class="beat"><span class="bl">状況</span>別プロダクトの機能を主力プロダクトへ統合する案件。「何を再現し、何を諦めるか」が決まらないまま、体制も想定の5名から3名に縮んだ。</p><p class="beat take"><span class="bl">取りに行ったこと</span>止まっていた最大の論点を「結論 → 理由 → 段階案 → 決めるべき問い」の形で提案し、意思決定を前に進めた。他チームへの依頼は受け入れ基準と性能目標を数値で渡し、計画は体制に合わせて3回引き直した。</p><p class="beat now"><span class="bl">現在</span>技術方針の承認と、11月末の1stリリースの合意まで取り付け、実装に着手。</p></div>
             <div class="stags"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Go</span><span class="tag">BigQuery</span></div>
           </article>
         </div>
