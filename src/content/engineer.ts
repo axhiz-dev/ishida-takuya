@@ -78,7 +78,7 @@ export const engineerCareer: EngineerCareerEntry[] = [
           "仕様に疑問を感じた際は簡易PoCを実装してPdMに提案するなど、プロダクトファーストな開発を実践",
           "Claude Code の積極活用・社内推進による開発サイクルの高速化",
         ],
-        tech: ["TypeScript", "Go", "GCP", "PostgreSQL", "GitHub Actions"],
+        tech: ["React", "TypeScript", "Go", "GCP", "PostgreSQL", "GitHub Actions"],
       },
     ],
   },
