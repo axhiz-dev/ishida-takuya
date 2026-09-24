@@ -34,12 +34,24 @@ test("紙版には、画面で絞り込んでいても全案件が載る", async
   // 画面で絞り込んだまま印刷しても、紙は職務経歴書として全部載せる
   await page
     .getByRole("toolbar", { name: "技術で案件を絞り込む" })
-    .getByRole("button", { name: /^Go \d+$/ })
+    .getByRole("button", { name: /^AWS \d+$/ })
     .click();
   await page.emulateMedia({ media: "print" });
 
   const printed = page.getByTestId("resume-document").locator('[data-print="keep"] h4');
   await expect(printed).toHaveCount(total);
+});
+
+test("紙版には、画面ではカルーセルに隠れている取り組みも全件載る", async ({ page }) => {
+  await page.goto("/engineer/");
+  const slides = await page.getByTestId("now-slide").count();
+  await page.emulateMedia({ media: "print" });
+
+  const doc = page.getByTestId("resume-document");
+  for (const title of await page.getByTestId("now-slide").locator("h4").allInnerTexts()) {
+    await expect(doc.getByText(title, { exact: true })).toBeVisible();
+  }
+  expect(slides).toBeGreaterThan(1);
 });
 
 test("紙の地は白で、待遇の情報が載っていない", async ({ page }) => {

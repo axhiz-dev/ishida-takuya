@@ -57,6 +57,13 @@ export const engineeringYears = (entries: EngineerCareerEntry[], now = new Date(
     now,
   );
 
+/** 職務要約などに書いた `{years}` を、エンジニア職の通算年数に置き換える。 */
+export const withEngineeringYears = (
+  text: string,
+  entries: EngineerCareerEntry[],
+  now = new Date(),
+): string => text.replaceAll("{years}", String(engineeringYears(entries, now)));
+
 /**
  * 経験年数の表記（"5年以上" など）を 0-100 の段階に直す。
  * スキルバーの長さと並び順に使う。

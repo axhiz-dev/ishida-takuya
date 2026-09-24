@@ -14,15 +14,20 @@ import type { Period } from "./types";
 /* ────────────────────────────── ヘッダ ── */
 
 export const engineerHero = {
-  role: "フルスタックエンジニア",
+  role: "プロダクトエンジニア",
 } as const;
 
-/** 職務要約。段落ごとに配列の 1 要素。 */
+/**
+ * 職務要約。段落ごとに配列の 1 要素。
+ *
+ * `{years}` は通算年数（engineerCareer の在籍期間から計算）に置き換わる。
+ * 年数を手で書くと、日付が進んだときに入口ページの年数とずれるため。
+ */
 export const engineerSummary: string[] = [
-  "エンジニア歴5年のフルスタックエンジニアです。フロントエンドは React、バックエンドは Node.js / Go をメインとして、領域を問わず実装します。",
-  "「本当にユーザーへ価値を届けられる仕様とは何か？」を常に考え、仕様に疑問を感じた際は簡易PoCを実装してPdMに提案するなど、より良いプロダクトにするためのコミュニケーションや開発を心がけています。",
-  "現職ではHR系SaaSのノーコードツール・ダッシュボードの2プロダクトを主に担当し、設計から保守運用まで一貫してフルスタックで携わっています。また、Claude Code を積極活用・社内推進するなど開発サイクルの高速化にも取り組んでいます。",
-  "直近では「LiveDriver」という個人開発サービスをローンチし、開発だけでなくマーケティング・営業まで自ら行っています。前職（DELL）での営業経験も活かしながら、エンジニアとビジネスの両軸で動ける人材を目指しています。",
+  "エンジニア歴{years}年のプロダクトエンジニアです。受託開発・自社SaaS・副業を通じて、React / TypeScript / Go を中心に、フロントエンドからバックエンド、インフラまで領域を問わず実装してきました。",
+  "現職の株式会社HRBrainでは人事データ活用SaaSを担当し、仕様が固まっていない要求を論点に分解し、フルスタックで実装し、本番リリースまで仕切る役割を担っています。主力機能「クロス集計」の案件オーナーや、4万人規模テナントの日次バッチ改善（約2時間 → 約1分）を経て、2026年7月からはユニットリーダー・技術リードとして、プロダクト統合の技術方針とAI前提の開発プロセス設計を担当しています。",
+  "前職までは受託開発でPMとエンジニアを兼ね、要件定義・顧客折衝からインフラ構築まで一気通貫で担ってきました。新卒で入社したDELLでのインサイドセールス経験から、機能を考える起点は常に「売りにつながるか／解約を止めるか」に置いています。",
+  "AIは、プロダクトと開発現場の両方に安全に組み込むことをテーマにしています。社内向けSlack MCPサーバーの自作・展開、Claude Code の社内推進に加え、個人開発サービス「LiveDriver」ではローンチからマーケティング・営業まで自ら行っています。",
 ];
 
 /** 経歴書の外部リンク。profile.ts のリンクとは別に、経歴書に載せたいものだけ。 */
@@ -30,6 +35,159 @@ export const engineerLinks = [
   // TODO: GitHub アカウントの URL をご自身のものに変更してください
   { label: "GitHub", href: "https://github.com/axhiz-dev" },
   { label: "LiveDriver（個人開発）", href: "https://livedriver.app" },
+];
+
+/* ────────────────────────────── 現職での取り組み ── */
+
+/**
+ * 現職の取り組み 1 件。画面ではカルーセルの 1 枚、紙では縦に並ぶ箱になる。
+ * 「状況 → 取りに行ったこと → 結果」の順で読ませる。技術の中身はここに書かず、
+ * 技術トピック（engineerTechTopics）へ回す。
+ */
+export type NowInitiative = {
+  /** カルーセルのタブに出る短い名前。 */
+  tab: string;
+  title: string;
+  /** 「案件オーナー」など、この件での立場。 */
+  role: string;
+  period: Period;
+  /** "ongoing" は進行中。3 段目の見出しが「現在」になり、緑の印が付く。 */
+  status: "released" | "ongoing";
+  situation: string;
+  action: string;
+  /** released なら結果、ongoing ならいまの状況。 */
+  outcome: string;
+  tech: string[];
+};
+
+export type EngineerNow = {
+  company: string;
+  period: Period;
+  /** 大きく出す主張。行ごとに配列の 1 要素（和文は自動改行に任せると変な位置で折れる）。 */
+  thesis: string[];
+  description: string;
+  role: string;
+  team: string;
+  initiatives: NowInitiative[];
+};
+
+export const engineerNow: EngineerNow = {
+  company: "株式会社HRBrain",
+  period: { from: "2025-04", to: "present" },
+  thesis: ["顧客価値を最速で提供するために、", "必要なことをすべてやります。"],
+  description:
+    "人事データ活用SaaS開発において、セールス・CS・PdMと協議し、仕様策定・実装・リリース判断までを行っています。ユニットリーダー任命後は、AI駆動開発のスキル整備やE2Eテストの拡充を行い、より早く顧客価値を提供するための施策を実行しています。",
+  role: "プロダクトエンジニア → 2026.07〜 ユニットリーダー",
+  team: "エンジニア2〜4名／PdM・QA・デザイナー各1名",
+  initiatives: [
+    {
+      tab: "クロス集計",
+      title: "主力機能「クロス集計」",
+      role: "案件オーナー",
+      period: { from: "2025-12", to: "2026-06" },
+      status: "released",
+      situation: "失注要因になっていた機能。仕様は「ほしい」の一言だけで、期中に設計担当が退職した。",
+      action:
+        "案件オーナーとして引き取り、仕様検討MTGを主催して項目・上限・権限を決め切った。完了日も残バグから逆算し、自分から提示した。",
+      outcome: "予定通りリリース。当日から営業がデモに組み込み、クロスセルの武器になった。",
+      tech: ["React", "TypeScript", "Go", "PostgreSQL"],
+    },
+    {
+      tab: "テンプレート生成",
+      title: "新機能「テンプレート生成」",
+      role: "起案〜全社展開",
+      period: { from: "2026-06", to: "2026-09" },
+      status: "released",
+      situation: "顧客オンボーディングのたびに、アプリを手作業でゼロから組み立てていた。",
+      action:
+        "自ら起案し、PoCで価値を見せて本実装へ。顧客に出さずに実運用で試せるよう、社内IP限定で有効化できる仕組みも新設した。",
+      outcome: "2026.09に全社展開。社内IP限定リリースの仕組みはプロダクト全体の資産になった。",
+      // TODO: 技術タグを確認してください（仮置き）
+      tech: ["React", "TypeScript", "Go", "FeatureFlag"],
+    },
+    {
+      tab: "Slack MCP",
+      title: "社内AI活用基盤「Slack MCPサーバー」",
+      role: "起案・設計・実装・展開",
+      period: { from: "2026-01", to: "2026-07" },
+      status: "released",
+      situation:
+        "Slackに埋もれた解決事例をAIから引きたいが、既製のコネクタでは読める範囲が広すぎて導入できなかった。",
+      action: "自作すると決め、権限設計から監査要件の合意、非エンジニア向けのインストーラーまで一人で用意した。",
+      outcome: "2026.07に社内で解禁。その後の運用も継続して担当している。",
+      tech: ["MCP", "OAuth", "Slack API"],
+    },
+    {
+      tab: "AI駆動開発",
+      title: "AI駆動開発の仕組みづくり",
+      role: "ユニットリーダー",
+      period: { from: "2026-07", to: "present" },
+      status: "ongoing",
+      situation: "AIによって開発スピードは上がったが、レビューが追い付かずボトルネックになっていた。",
+      action:
+        "「レビューを速くするには、まずE2Eで品質の下限を保証する必要がある」と逆算して着手順を決めた。仕様を着手前に握り、実装はAIに任せるフローをSkill群として整備し、E2Eを「QAでも書ける」自律生成基盤として構築した。",
+      outcome: "リポジトリ内で稼働し、日々の開発で運用中。",
+      // TODO: 技術タグを確認してください（仮置き）
+      tech: ["Claude Code", "E2E"],
+    },
+    {
+      tab: "ユニットリーダー",
+      title: "プロダクト統合プロジェクトの技術リード",
+      role: "技術リード",
+      period: { from: "2026-07", to: "present" },
+      status: "ongoing",
+      situation:
+        "別プロダクトの機能を主力プロダクトへ統合する案件。「何を再現し、何を諦めるか」が決まらないまま、体制も想定の5名から3名に縮んだ。",
+      action:
+        "止まっていた最大の論点を「結論 → 理由 → 段階案 → 決めるべき問い」の形で提案し、意思決定を前に進めた。他チームへの依頼は受け入れ基準と性能目標を数値で渡し、計画は体制に合わせて3回引き直した。",
+      outcome: "技術方針の承認と、11月末の1stリリースの合意まで取り付け、実装に着手。",
+      // TODO: 技術タグを確認してください（仮置き）
+      tech: ["React", "TypeScript", "Go", "BigQuery"],
+    },
+  ],
+};
+
+/* ────────────────────────────── 技術トピック ── */
+
+/**
+ * 技術レベルの裏付けになる話題。現職での取り組み（engineerNow）が
+ * 「どう動いたか」を書くのに対し、ここは「何を作ったか」を書く。
+ * 記事を書いたら href を足すと、カードがリンクになる。
+ */
+export type TechTopic = {
+  source: string;
+  period: Period;
+  title: string;
+  summary: string;
+  tech: string[];
+  href?: string;
+};
+
+export const engineerTechTopics: TechTopic[] = [
+  {
+    source: "HRBrain",
+    period: { from: "2025-07", to: "2025-09" },
+    title: "4万人規模テナントの日次バッチを、約2時間から約1分へ",
+    summary:
+      "本番デバッグ用ワークフローで原因を特定し、gRPCのストリーミング化とメンバー変更反映の高速化で解消。全企業のCloud Run Jobs移行はコスト試算で見送り、該当バッチのコストは約98%削減。",
+    tech: ["Go", "gRPC", "Cloud Run Jobs", "Workflows"],
+  },
+  {
+    source: "HRBrain",
+    period: { from: "2025-12", to: "2026-06" },
+    title: "クロス集計：テーブル仮想化とN階層ヘッダー、権限を伝播する集計エンジン",
+    summary:
+      "9つの項目タイプを扱う集計を、FEは仮想化とN階層ヘッダーで、BEは閲覧者ロールでの権限伝播つきの集計エンジンで実装。約60PR。",
+    tech: ["React", "TypeScript", "Go", "PostgreSQL"],
+  },
+  {
+    source: "HRBrain",
+    period: { from: "2026-01", to: "2026-07" },
+    title: "プロンプトではなく権限で塞ぐ、MCPサーバーの2層設計",
+    summary:
+      "OAuth scopeをパブリックチャンネル限定にし、公開ツールも読み取り系のみに限定。監査はIP制限＋ローカルログで、残るリスクまで明記して合意。",
+    tech: ["MCP", "OAuth", "Slack API"],
+  },
 ];
 
 /* ────────────────────────────── 職務経歴 ── */
@@ -55,6 +213,13 @@ export type EngineerCareerEntry = {
    */
   kind?: "engineering" | "sales";
   summary?: string;
+  /**
+   * 案件カードの代わりに出す技術タグ。詳細を別の節に置いた会社（現職）で使う。
+   * 絞り込みの件数には数えない。
+   */
+  tech?: string[];
+  /** 詳細を別の節に置いたときの案内。画面ではその節へのリンク、紙では参照の一文になる。 */
+  seeAlso?: { label: string; href: string };
   projects: CareerProject[];
 };
 
@@ -64,23 +229,11 @@ export const engineerCareer: EngineerCareerEntry[] = [
     period: { from: "2025-04", to: "present" },
     company: "株式会社HRBrain",
     employmentType: "正社員",
-    role: "フルスタックエンジニア",
-    summary:
-      "HR系SaaSの複数プロダクト（ノーコードツール・ダッシュボード）のフルスタックな設計・開発・保守運用",
-    projects: [
-      {
-        name: "ノーコードツール / ダッシュボードツールの並行開発",
-        description:
-          "自社開発の2プロダクトを並行でフルスタック開発（設計〜保守運用まで一貫担当）。仕様策定の上流から関わり、リリース後の運用まで担当。",
-        highlights: [
-          "フロントエンド／バックエンド／インフラを横断した設計・実装、技術選定・アーキテクチャ設計",
-          "PdMと密に連携し「プロダクトとして本当にユーザーに価値を届けられる仕様は何か？」を議論しながら開発に落とし込む",
-          "仕様に疑問を感じた際は簡易PoCを実装してPdMに提案するなど、プロダクトファーストな開発を実践",
-          "Claude Code の積極活用・社内推進による開発サイクルの高速化",
-        ],
-        tech: ["React", "TypeScript", "Go", "GCP", "PostgreSQL", "GitHub Actions"],
-      },
-    ],
+    role: "プロダクトエンジニア → ユニットリーダー",
+    summary: "人事データ活用SaaSの仕様策定・フルスタック実装・リリース判断を担当。",
+    tech: ["React", "TypeScript", "Go", "GCP", "PostgreSQL", "GitHub Actions"],
+    seeAlso: { label: "現職での取り組み", href: "#now" },
+    projects: [],
   },
   {
     // TODO: 在籍期間を確認してください（Offers の表記から推定）
