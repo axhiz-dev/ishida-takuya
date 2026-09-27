@@ -254,3 +254,18 @@
   --font-body: var(--font-geist), var(--font-jp-sans), ui-sans-serif, system-ui, sans-serif;
   --font-label: var(--font-mono), var(--font-jp-sans), ui-monospace, monospace;
 }
+
+/* Approved interactive business tour. Scoped so the existing subpages keep their theme. */
+[data-theme="business"] {
+ --tour-paper: #ffffff;
+ --tour-ink: #12283f;
+ --tour-muted: #506278;
+ --tour-accent: #005b70;
+ --tour-tint: #edf5f7;
+ --tour-line: #cad8e2;
+ --tour-soft: #f7f9fb;
+ --tour-warning: #845119;
+ --tour-warning-bg: #fff6e8;
+ --tour-scrim: #12283f88;
+ --tour-shadow: 0 12px 40px #12283f24;
+}

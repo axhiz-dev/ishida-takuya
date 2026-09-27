@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function BusinessLayout({ children }: { children: React.ReactNode }) {
   return (
     // 事業側の相手に切り替えを出す理由がないので、こちらはライト固定。
-    <html lang="ja" data-theme="business" className={`no-js ${fontVariables}`}>
+    <html suppressHydrationWarning lang="ja" data-theme="business" className={`no-js ${fontVariables}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_JS_INIT_SCRIPT }} />
       </head>

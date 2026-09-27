@@ -1,4 +1,4 @@
-import { owner, PLACEHOLDER } from "@/config/owner";
+import { owner } from "@/config/owner";
 
 /**
  * 法定の表記。文言はここで完結させる。
@@ -29,7 +29,7 @@ export const tradeLawRows: LegalRow[] = [
   { label: "営業時間", value: owner.businessHours, note: "時間外はメールでお受けします。" },
   {
     label: "役務の対価",
-    value: "10 万円から（税別）",
+    value: "買い切り 10 万円から（税別）。シンプルな機能は 3 万円から（税別）",
     note: "作業の範囲によって変わります。金額はお見積もりでご提示し、合意のうえで着手します。",
   },
   {
@@ -96,7 +96,7 @@ export const privacySections: PolicySection[] = [
     body: [
       "アクセス解析は使っていません。Cookie による追跡もしていません。",
       "このページのデモで読み込んだファイルは、お使いのブラウザの中だけで処理されます。どこにも送信されず、当方も見ることはできません。",
-      "お問い合わせフォームは、入力した内容をメールの下書きとして開くだけの作りです。送信ボタンを押した時点でこのサイトにデータが届くことはありません。",
+      "お問い合わせフォームはFormspreeを利用します。送信した情報は同サービスを経由して当方に届き、お問い合わせへの対応のために使用します。",
     ],
   },
   {
@@ -112,4 +112,4 @@ export const privacySections: PolicySection[] = [
 ];
 
 /** 最終改定日。内容を変えたらここも直す。 */
-export const policyUpdatedAt = PLACEHOLDER;
+export const policyUpdatedAt = "2026-09-27";

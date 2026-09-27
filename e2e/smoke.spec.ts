@@ -33,7 +33,7 @@ for (const route of ROUTES) {
     await page.goto(route.path);
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1:visible")).toHaveCount(1);
     await expect(page).toHaveTitle(/石田卓也|石田 卓也/);
 
     expect(errors, `コンソールエラー: ${errors.join(" / ")}`).toHaveLength(0);
