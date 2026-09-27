@@ -132,4 +132,4 @@ Tailwind の preflight は `/business` に届きません。
 
 ## 業務自動化ツアー
 
-実装・フォーム接続手順は [docs/business-tour.md](docs/business-tour.md)、画面の確認結果は [design-qa.md](design-qa.md) を参照してください。
+実装・フォーム接続手順は [docs/business-tour.md](docs/business-tour.md) を参照してください。
