@@ -11,6 +11,7 @@ import type { NextConfig } from "next";
  * 直接読まず src/config/site.ts 経由で参照すること。
  */
 const nextConfig: NextConfig = {
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   output: process.env.NEXT_OUTPUT === "export" ? "export" : undefined,
   basePath: process.env.NEXT_BASE_PATH || undefined,
 

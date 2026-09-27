@@ -1,0 +1,11 @@
+.business-fonts {
+  --font-bricolage: "Bricolage Grotesque Variable";
+  --font-jp-display: "Zen Kaku Gothic New";
+  --font-geist: "Geist";
+  --font-jp-sans: "Noto Sans JP";
+  --font-mono: "JetBrains Mono";
+}
+.engineer-fonts {
+  --font-jp-sans: "Noto Sans JP";
+  --font-mono-face: "JetBrains Mono";
+}

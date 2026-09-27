@@ -13,6 +13,8 @@ export type InvoiceItem = { name: string; qty: number; price: number };
 export type Invoice = {
   /** 通し番号。手で採番すると必ず飛ぶので機械で振る。 */
   no: string;
+  /** デモでは実請求と混同しない見本表記にする。 */
+  sample?: boolean;
   to: string;
   issuedOn: string;
   dueOn: string;
@@ -45,7 +47,8 @@ const MM = 8;
 const PAGE = { w: 210, h: 297 };
 
 function draw(ctx: CanvasRenderingContext2D, invoice: Invoice, family: string) {
-  const font = (size: number, weight = 400) => `${weight} ${size * MM}px ${family}, sans-serif`;
+  const font = (size: number, weight = 400) =>
+    `${weight} ${size * MM}px ${family}, sans-serif`;
   const at = (mm: number) => mm * MM;
 
   const subtotal = subtotalOf(invoice.items);
@@ -60,7 +63,11 @@ function draw(ctx: CanvasRenderingContext2D, invoice: Invoice, family: string) {
 
   ctx.font = font(9, 600);
   ctx.textAlign = "center";
-  ctx.fillText("請 求 書", at(105), at(28));
+  ctx.fillText(
+    invoice.sample ? "請 求 書（見本）" : "請 求 書",
+    at(105),
+    at(28),
+  );
 
   ctx.textAlign = "left";
   ctx.font = font(4.5);
@@ -77,9 +84,17 @@ function draw(ctx: CanvasRenderingContext2D, invoice: Invoice, family: string) {
   ctx.fillText(`請求日　　　${ja(invoice.issuedOn)}`, at(190), at(48));
   ctx.fillText(`支払期日　　${ja(invoice.dueOn)}`, at(190), at(54));
   ctx.font = font(3.6);
-  ctx.fillText(ISSUER.name, at(190), at(64));
+  ctx.fillText(
+    invoice.sample ? "デモ用の架空データ" : ISSUER.name,
+    at(190),
+    at(64),
+  );
   ctx.font = font(3.2);
-  ctx.fillText(ISSUER.registration, at(190), at(70));
+  ctx.fillText(
+    invoice.sample ? "実際の請求書ではありません" : ISSUER.registration,
+    at(190),
+    at(70),
+  );
 
   ctx.textAlign = "left";
   ctx.font = font(3.6);
@@ -145,8 +160,9 @@ function draw(ctx: CanvasRenderingContext2D, invoice: Invoice, family: string) {
 async function ready(): Promise<string> {
   await document.fonts.ready;
   return (
-    getComputedStyle(document.documentElement).getPropertyValue("--font-jp-sans").trim() ||
-    "sans-serif"
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--font-jp-sans")
+      .trim() || "sans-serif"
   );
 }
 

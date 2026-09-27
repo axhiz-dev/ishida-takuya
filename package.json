@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "next build",
     "build:export": "NEXT_OUTPUT=export next build",
     "start": "next start",
@@ -13,6 +13,12 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource/geist": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/noto-sans-jp": "^5.3.0",
+    "@fontsource/zen-kaku-gothic-new": "^5.3.0",
+    "@phosphor-icons/react": "^2.1.10",
     "jspdf": "^4.2.1",
     "next": "15.5.4",
     "react": "19.1.1",
