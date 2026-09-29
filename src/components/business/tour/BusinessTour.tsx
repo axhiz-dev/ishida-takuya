@@ -14,11 +14,12 @@ import {
   CheckCircle,
 } from "@phosphor-icons/react";
 import { tasks, type TaskId } from "./data";
-import { AggregateDemo, OtherDemo } from "./Demos";
+import { SkillDemo } from "./SkillDemo";
+import { pricing } from "./skillScenarios";
 import { contactConfig } from "./config";
 import { BASE_PATH } from "@/config/site";
 import s from "./tour.module.css";
-const steps = ["困りごとを見つける", "体験する", "費用を確認", "導入・相談"];
+const steps = ["困りごとを見つける", "体験する", "進め方と費用", "導入・相談"];
 export default function BusinessTour() {
   const [step, setStep] = useState(0),
     [task, setTask] = useState<TaskId>("aggregate"),
@@ -67,10 +68,10 @@ export default function BusinessTour() {
       </a>
       <header className={s.header}>
         <Link href="/" className={s.brand}>
-          しごとの自動化マップ
+          しごとのAI活用ガイド
         </Link>
         <span className={s.owner}>
-          石田 卓也 <small>業務自動化</small>
+          石田 卓也 <small>AI活用・伴走支援</small>
         </span>
         <button onClick={() => openContact("相談")} className={s.textButton}>
           直接相談する <ArrowRight />
@@ -80,15 +81,13 @@ export default function BusinessTour() {
         {step === 0 && (
           <section className={s.map} aria-label="困りごとの入口">
             <div className={s.intro}>
-              <h1>気になる業務から、できることと費用をご案内します。</h1>
-              <p>
-                人物にカーソルを合わせるか、タップして困りごとを見てみましょう。
-              </p>
+              <h1>いつもの仕事を、AIに任せる手順に。</h1>
+              <p>気になる業務を選んで、AIとの会話を体験してみませんか。</p>
             </div>
             <div className={s.scene}>
               <Image
                 src={`${BASE_PATH}/business/office.webp`}
-                alt="集計に悩む担当者、請求書を確認する担当者、問い合わせに対応する担当者がいるオフィス"
+                alt="集計に悩む担当者、書類を確認する担当者、問い合わせに対応する担当者がいるオフィス"
                 fill
                 sizes="100vw"
                 priority
@@ -164,7 +163,7 @@ export default function BusinessTour() {
                   )}
                 </div>
                 <p className={s.note}>
-                  今のファイルや業務のルールに合わせて作ります。
+                  御社の仕事の進め方を、一緒にAIの手順へ整理します。
                 </p>
                 <button className={s.primary} onClick={() => navigate(1)}>
                   体験する <ArrowRight />
@@ -173,53 +172,94 @@ export default function BusinessTour() {
             )}
           </section>
         )}
-        <section hidden={step !== 1} aria-label="自動化を体験する">
+        <section hidden={step !== 1} aria-label="AIとの会話を体験する">
           <div hidden={task !== "aggregate"}>
-            <AggregateDemo onComplete={finish} />
+            <SkillDemo
+              task="aggregate"
+              active={step === 1 && task === "aggregate"}
+              onComplete={finish}
+                onExit={() => navigate(0)}
+            />
           </div>
           <div hidden={task !== "invoice"}>
-            <OtherDemo task="invoice" onComplete={finish} />
+            <SkillDemo
+              task="invoice"
+              active={step === 1 && task === "invoice"}
+              onComplete={finish}
+                onExit={() => navigate(0)}
+            />
           </div>
           <div hidden={task !== "inquiry"}>
-            <OtherDemo task="inquiry" onComplete={finish} />
+            <SkillDemo
+              task="inquiry"
+              active={step === 1 && task === "inquiry"}
+              onComplete={finish}
+                onExit={() => navigate(0)}
+            />
           </div>
         </section>
         {step === 2 && (
           <section className={s.slide}>
-            <h1>
-              {selected.demo} <span>｜費用の目安</span>
-            </h1>
-            <div className={s.pricing}>
-              <div>
-                <h2>買い切り</h2>
+            <h1>進め方と費用</h1>
+            <p>一緒に作り、社内で使い続けられる形に。</p>
+            <div className={s.supportPricing}>
+              <div className={s.recommended}>
+                <span className={s.eyebrow}>おすすめ</span>
+                <h2>AI活用・自動化の伴走支援</h2>
                 <p className={s.price}>
-                  10<span>万円〜</span>
+                  <span>月</span>
+                  {pricing.accompaniment}
+                  <span>万円〜</span>
                   <small>（税別）</small>
                 </p>
-                <p>必要な機能を、あなたの業務に合わせて。</p>
-                <div className={s.simple}>
-                  <p>もっとシンプルな機能なら</p>
-                  <strong>
-                    3万円〜<small>（税別）</small>
-                  </strong>{" "}
-                  のご案内もあります。
-                </div>
+                <p>普段の仕事を、繰り返し使えるAIの手順に。</p>
+                <ul>
+                  <li>月1回〜の打ち合わせ・チャット相談</li>
+                  <li>業務に合う指示文・スキルづくりと見本での確認</li>
+                  <li>社内ルールの整備・使いながらの改善</li>
+                </ul>
+                <p className={s.note}>
+                  3か月から。社内の担当者さまを1名お決めください。
+                </p>
               </div>
-              <div className={s.terms}>
-                <section>
-                  <h2>保守サポートは任意</h2>
-                  <p>ご希望の場合は、別途費用がかかります。</p>
-                </section>
-                <section>
-                  <h2>ご要望に合わせて調整</h2>
-                  <p>
-                    独自の要件やカスタマイズの内容により、金額が増減する場合があります。
-                  </p>
-                </section>
+              <div>
+                <h2>自動化ツールの実装</h2>
+                <p className={s.price}>
+                  {pricing.implementation}
+                  <span>万円〜</span>
+                  <small>（税別・要お見積もり）</small>
+                </p>
+                <p>業務が決まっていて、すぐ形にしたい方へ。</p>
+                <ul>
+                  <li>御社のファイル形式・手順に合わせて作成</li>
+                  <li>手順書とあわせて納品</li>
+                  <li>納品後の修正・保守は別途ご相談</li>
+                </ul>
               </div>
             </div>
+            <details className={s.supportDetails}>
+              <summary>なぜ伴走支援がおすすめなのか</summary>
+              <p>
+                業務もAIツールも変わり続けます。社内で手順を直したり広げたりできる状態を、一緒に目指します。見本で確かめ、実際に使いながら改善していきます。
+              </p>
+            </details>
+            <div className={s.diagnosis}>
+              <div>
+                <h2>まずは90分の業務診断から</h2>
+                <p>AIに任せられそうな業務と注意点を整理します。</p>
+                <small>
+                  {pricing.diagnosis === null
+                    ? "単発・料金はお問い合わせください"
+                    : `単発 ${pricing.diagnosis}万円（税別）`}
+                </small>
+              </div>
+              <button className={s.primary} onClick={() => openContact("相談")}>
+                診断について相談する
+                <ArrowRight />
+              </button>
+            </div>
             <p className={s.note}>
-              外部サービスを利用する場合、その利用料は別途かかります。
+              AIツールなど外部サービスは御社でのご契約となり、利用料は別途かかります。表示は目安で、内容により変わります。
             </p>
             <div className={s.actions}>
               <button className={s.textButton} onClick={() => navigate(1)}>
@@ -240,17 +280,17 @@ export default function BusinessTour() {
                 {
                   icon: Chats,
                   title: "相談する",
-                  body: "普段の作業をお聞かせください。",
+                  body: "今の業務と、困っていることをお聞かせください。",
                 },
                 {
                   icon: ClipboardText,
-                  title: "範囲と費用を決める",
-                  body: "内容とお見積もりを確認してから着手。",
+                  title: "進め方を決める",
+                  body: "伴走支援か実装か、範囲と費用を確認してから始めます。",
                 },
                 {
                   icon: CheckCircle,
-                  title: "作って、確認する",
-                  body: "実際に触って確認し、手順書とともにお渡し。",
+                  title: "一緒に形にする",
+                  body: "見本を動かしながら、社内で回せる状態を目指します。",
                 },
               ].map((p, i) => (
                 <div key={p.title}>
@@ -266,12 +306,12 @@ export default function BusinessTour() {
               <h2>今の状況に合わせて、お選びください。</h2>
               <div className={s.choices}>
                 <div>
-                  <p>自社でも使えるか、具体的に相談したい</p>
+                  <p>まずは業務診断を受けてみたい</p>
                   <button
                     className={s.primary}
                     onClick={() => openContact("相談")}
                   >
-                    この内容で相談する <ArrowRight />
+                    診断について相談する <ArrowRight />
                   </button>
                 </div>
                 <div>
@@ -293,7 +333,7 @@ export default function BusinessTour() {
           </section>
         )}
       </main>
-      <nav className={s.steps} aria-label="ご案内のステップ">
+      {step !== 1 && <nav className={s.steps} aria-label="ご案内のステップ">
         {steps.map((label, i) => (
           <button
             key={label}
@@ -306,12 +346,12 @@ export default function BusinessTour() {
             <strong>{label}</strong>
           </button>
         ))}
-      </nav>
-      <footer className={s.footer}>
+      </nav>}
+      {step !== 1 && <footer className={s.footer}>
         <Link href="/business/profile">プロフィール</Link>
         <Link href="/business/privacy">プライバシーポリシー</Link>
         <Link href="/business/legal">特定商取引法に基づく表記</Link>
-      </footer>
+      </footer>}
       <dialog
         ref={dialog}
         className={s.dialog}
@@ -385,7 +425,9 @@ function ContactForm({ kind, task }: { kind: string; task: string }) {
     );
   return (
     <form onSubmit={submit} className={s.form}>
-      <h2>{kind === "質問" ? "気になる点を質問する" : "この内容で相談する"}</h2>
+      <h2>
+        {kind === "質問" ? "気になる点を質問する" : "診断について相談する"}
+      </h2>
       <p className={s.eyebrow}>{task}</p>
       <input type="hidden" name="業務" value={task} />
       <input type="hidden" name="種別" value={kind} />
