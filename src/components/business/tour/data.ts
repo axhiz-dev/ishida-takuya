@@ -2,37 +2,37 @@ export type TaskId = "aggregate" | "invoice" | "inquiry";
 export const tasks = [
   {
     id: "aggregate" as const,
-    label: "集計・転記",
-    problem: "毎月、同じような集計を作っている…",
-    detail: "ファイルを開いて、コピーして、また確認。",
-    title: "毎月の集計、まとめて自動化できます。",
+    label: "売上日報",
+    problem: "毎朝、同じ集計と確認を繰り返している…",
+    detail: "送料・返品・重複。その判断も毎回手作業。",
+    title: "いつもの判断を、AIの仕事の手順に。",
     solution:
-      "形式の違う売上明細をひとつに。顧客名の照合や重複チェックまで行い、確認が必要な箇所だけを残します。",
-    demo: "月次売上の取りまとめ",
+      "売上明細と過去の日報をもとに、AIと会話しながら集計ルールを整理。見本で確かめ、毎朝使えるスキルにする体験です。",
+    demo: "売上日報のスキルづくり",
     x: 22,
     y: 28,
   },
   {
     id: "invoice" as const,
-    label: "請求書づくり",
-    problem: "請求書を1件ずつ作って、確認して…",
-    detail: "宛名と明細を転記するだけで、月末が終わる。",
-    title: "取引明細から、請求書をまとめて作成。",
+    label: "経費の確認",
+    problem: "領収書の転記と規程の確認に追われている…",
+    detail: "読みにくい金額、上限超過、重複の確認。",
+    title: "確認すべきところがわかる、AIの手順に。",
     solution:
-      "顧客ごとに明細をまとめ、宛名や金額を反映。請求書を確認し、PDFで保存するところまで体験できます。",
-    demo: "請求書の一括作成",
+      "領収書と経費規程を見ながら、AIに任せる部分と人が判断する部分を会話で整理。確認用の一覧を作るスキルにします。",
+    demo: "経費確認のスキルづくり",
     x: 52,
     y: 22,
   },
   {
     id: "inquiry" as const,
     label: "問い合わせ対応",
-    problem: "一次対応が遅れて、取りこぼしているかも…",
-    detail: "担当者への連絡も、返信の確認も、手作業。",
-    title: "届いた問い合わせを、対応につなげます。",
+    problem: "担当の判断も、返信の下書きも毎回手作業…",
+    detail: "返金や苦情は、勝手に返信してほしくない。",
+    title: "御社の対応方針を、AIの手順に。",
     solution:
-      "問い合わせを一覧にまとめ、決めたルールで担当を振り分け。一次返信の下書きと、未対応の確認をひとつの画面に。",
-    demo: "問い合わせの受付と振り分け",
+      "過去の返信と対応ルールから、担当候補と返信の下書きを準備するスキルへ。人への確認が必要な条件も一緒に決めます。",
+    demo: "問い合わせ対応のスキルづくり",
     x: 83,
     y: 32,
   },
@@ -118,7 +118,10 @@ export function aggregateSales(
       const key = `${row.source}:${row.id}`;
       if (!keepDuplicate && seen.has(key)) return false;
       seen.add(key);
-      return includeUnknown || row.customer !== "みなと企画";
+      return (
+        includeUnknown ||
+        customerMaster.some((c) => c.aliases.includes(row.customer))
+      );
     })
     .map((row) => ({ ...row, customer: normalizeCustomer(row.customer) }));
   const totals = Object.entries(
