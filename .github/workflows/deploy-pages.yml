@@ -26,7 +26,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
   build:
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { assessedSales, total, products } from '../src/components/business/tour/skillSamples';
+import { contactConfig } from '../src/components/business/tour/config';
 import { skillScenarios } from '../src/components/business/tour/skillScenarios';
 test('見本：送料・税・返品と重複の判断を反映し、合計と商品別内訳が一致する', () => {
   expect(total).toBe(11000);
@@ -39,7 +40,11 @@ for (const [id, label] of [['aggregate', '売上日報'], ['invoice', '経費の
     await page.getByRole('button', { name: '診断について相談する', exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.locator('input[name="業務"]')).toHaveValue(`${id === 'aggregate' ? '売上日報' : id === 'invoice' ? '経費確認' : '問い合わせ対応'}のスキルづくり`);
-    await expect(dialog.getByRole('button', { name: '送信する', exact: true })).toBeDisabled();
+    if (/^[a-zA-Z0-9]+$/.test(contactConfig.formId)) {
+      await expect(dialog.getByRole('button', { name: '送信する', exact: true })).toBeEnabled();
+    } else {
+      await expect(dialog.getByRole('button', { name: '送信する', exact: true })).toBeDisabled();
+    }
   });
 }
 test('モバイル：全場面で横にはみ出さず、戻る・履歴・リセットが動く', async ({ page }) => {
@@ -56,3 +61,36 @@ test('モバイル：全場面で横にはみ出さず、戻る・履歴・リ�
   await demo.getByRole('button', { name: '最初から見る', exact: true }).click();
   await expect(demo.getByRole('status')).toHaveText('1 / 7');
 });
+
+for (const width of [320, 390]) {
+  test(`${width}px：最終場面・翌朝・料金・相談まで操作できる`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 640 });
+    await page.goto('/business/');
+    await page.getByRole('button', { name: '2 体験する', exact: true }).click();
+    const demo = page.getByTestId('skill-demo-aggregate');
+    const fits = async () => expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    for (let i = 0; i < 5; i++) await demo.getByRole('button', { name: skillScenarios.aggregate.scenes[i]!.next, exact: true }).click();
+    await fits();
+    for (const box of await demo.getByRole('checkbox').all()) await box.check();
+    await demo.getByRole('button', { name: '確認して手順をまとめる', exact: true }).click();
+    await fits();
+    await demo.getByRole('button', { name: 'この手順を保存する', exact: true }).click();
+    await fits();
+    await demo.getByRole('button', { name: '翌朝を体験する', exact: true }).click();
+    await expect(demo.getByRole('heading', { name: '翌朝 08:00 のイメージ' })).toBeVisible();
+    await fits();
+    await demo.getByRole('button', { name: '伴走支援と費用を見る', exact: true }).click();
+    await fits();
+    await page.getByRole('button', { name: '体験に戻る', exact: true }).click();
+    await expect(demo.getByRole('heading', { name: '翌朝 08:00 のイメージ' })).toBeVisible();
+    await demo.getByRole('button', { name: '伴走支援と費用を見る', exact: true }).click();
+    await page.getByRole('button', { name: '導入の流れ・相談へ', exact: true }).click();
+    await page.getByRole('button', { name: 'まずは質問する', exact: true }).click();
+    await expect(page.getByRole('dialog').locator('input[name="種別"]')).toHaveValue('質問');
+    await fits();
+    await page.keyboard.press('Escape');
+    await page.reload();
+    await page.getByRole('button', { name: '2 体験する', exact: true }).click();
+    await expect(demo.getByRole('status')).toHaveText('1 / 7');
+  });
+}

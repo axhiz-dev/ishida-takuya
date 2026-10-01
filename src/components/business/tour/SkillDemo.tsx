@@ -208,7 +208,7 @@ export function SkillDemo({
                     : current.artifact === "verify"
                       ? "見本で、手順を確かめる"
                       : current.artifact === "report"
-                        ? "日報の見本"
+                        ? task === "aggregate" ? "日報の見本" : task === "invoice" ? "経費の確認一覧の見本" : "一次返信の下書きの見本"
                         : scene === 6
                           ? "繰り返し使える、御社の仕事の手順"
                           : "会話から、仕事の手順ができていく"}
