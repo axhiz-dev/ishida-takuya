@@ -217,14 +217,44 @@
   font-size: 15px;
   color: var(--tour-muted);
 }
-.solutionIcons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 35px;
+.workerQuote {
+  margin: 0;
+  padding: 16px 20px;
+  border-left: 3px solid var(--tour-accent);
+  background: var(--tour-tint);
   color: var(--tour-accent);
-  flex: 1;
-  min-height: 110px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.frustrations {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.frustrations li + li {
+  border-top: 1px solid var(--tour-line);
+  padding-top: 16px;
+}
+.frustrations h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  line-height: 1.6;
+}
+.frustrations p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--tour-muted);
+}
+.wish {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+.drawer > * {
+  flex-shrink: 0;
 }
 .primary,
 .secondary {
@@ -1075,9 +1105,6 @@
   }
   .dialog {
     padding: 40px 22px 25px;
-  }
-  .solutionIcons {
-    min-height: 80px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
