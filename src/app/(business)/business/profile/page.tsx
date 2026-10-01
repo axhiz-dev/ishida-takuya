@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { about, profile, profilePage } from "@/content";
+import { profile, profilePage } from "@/content";
 import { owner } from "@/config/owner";
 import { Fillable } from "@/components/common/Fillable";
 import { Portrait } from "@/components/business/Portrait";
@@ -8,7 +8,7 @@ import styles from "@/components/business/business.module.css";
 
 export const metadata: Metadata = {
   title: `プロフィール — ${profile.name}`,
-  description: "業務の自動化を請け負っている石田卓也の経歴と、やること・やらないこと。",
+  description: "AI活用・自動化の伴走支援を行う石田卓也のプロフィールと、支援の進め方。",
 };
 
 export default function ProfilePage() {
@@ -19,15 +19,12 @@ export default function ProfilePage() {
           <Portrait
             photo={profile.photo}
             name={profile.name}
-            role="業務自動化"
+            role="AI活用・伴走支援"
             location={owner.businessHours}
           />
 
           <div className={styles.aboutBody}>
-            {about.career.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-            <p>{about.motive}</p>
+            <p>業務の資料と判断ルールを整理し、見本で確かめながら、社内で使えるAIの手順を一緒につくります。</p>
           </div>
         </div>
       </section>

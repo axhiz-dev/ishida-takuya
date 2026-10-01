@@ -13,6 +13,8 @@
 # testing
 /coverage
 /playwright-report/
+/playwright-contact-report/
+/playwright-compat-report/
 /test-results/
 
 # next.js

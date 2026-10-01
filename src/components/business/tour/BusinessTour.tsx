@@ -384,15 +384,20 @@ function ContactForm({ kind, task }: { kind: string; task: string }) {
     "idle" | "sending" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
+  const sending = useRef(false);
+  const pending = useRef<AbortController | null>(null);
+  useEffect(() => () => pending.current?.abort(), []);
   const ready = /^[a-zA-Z0-9]+$/.test(contactConfig.formId);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!ready || status === "sending") return;
+    if (!ready || sending.current) return;
     const form = e.currentTarget;
     const data = new FormData(form);
     if (data.get("_gotcha")) return;
+    sending.current = true;
     setStatus("sending");
     const controller = new AbortController();
+    pending.current = controller;
     const timer = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(
@@ -409,10 +414,12 @@ function ContactForm({ kind, task }: { kind: string; task: string }) {
     } catch {
       setStatus("error");
       setMessage(
-        "送信を確認できませんでした。入力内容は残っています。時間をおいて再度お試しください。",
+        "送信を確認できませんでした。入力内容は残っています。受付済みの可能性もあります。時間をおいて再度お試しください。",
       );
     } finally {
       clearTimeout(timer);
+      sending.current = false;
+      pending.current = null;
     }
   }
   if (status === "success")

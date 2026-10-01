@@ -24,3 +24,9 @@ The source is 1536×1024 and the browser capture is 1363×936; the comparison no
 ## Validation and limits
 
 `npm run typecheck`, `npm run lint`, and `npm run build:export` passed. The browser-free sample calculation test passed (tax, shipping, returns, duplicates, and matching totals). E2E specifications were updated; the full automated browser suite has not been run locally. Mobile review uses a narrow iframe, not a physical device. Safari and Firefox remain untested. Browser-extension metadata errors appeared in the browser console and are unrelated to the application.
+
+## Release follow-up (2026-10-01)
+
+The earlier statement about the browser suite refers to local execution at the time of PR #8. GitHub Actions did execute the Chromium suite for both the PR head and merged main: **54 passed, 1 skipped**. Main run: https://github.com/axhiz-dev/ishida-takuya/actions/runs/36721446746 . The skipped test is the placeholder-content check (`IS_PLACEHOLDER_CONTENT = true`); this does not validate that public business information is complete.
+
+This follow-up aligns SEO/OGP, profile and trade descriptions with the support offering, removes the example career paragraphs from the public profile, corrects expense/inquiry artifact headings, and adds isolated mocked contact tests plus Firefox/WebKit demo tests. CI is now required before automatic Pages deployment. See `business-release-readiness.md` for verification and remaining owner-dependent tasks.

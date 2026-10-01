@@ -10,7 +10,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "serve:out": "serve out -l 4321 --no-clipboard",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:contact": "playwright test --config playwright.contact.config.ts",
+    "test:e2e:compat": "playwright test --config playwright.compat.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

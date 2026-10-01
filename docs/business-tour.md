@@ -44,10 +44,17 @@
 
 所有者のFormspreeアカウントで受信先を確認し、公開フォームIDを `config.ts` に設定してください。再ビルド後、実送信・受信と失敗時の動作を別途確認します。秘密鍵やGmailパスワードは不要です。
 
-入力検証、honeypot、二重送信防止、15秒タイムアウト、失敗時の入力保持は既存処理を継続します。
+入力検証、honeypot、二重送信防止、15秒タイムアウト、失敗時の入力保持があります。連続するsubmitイベントは同期的なガードで止め、フォームを閉じると進行中の通信を中止します。入力保持は同じフォームを開いている間のみで、閉じて開き直すとリセットします。タイムアウトは受付の失敗を保証せず、再送で重複する可能性があることを失敗表示にも記載します。
 
 ## 確認
 
 `npm run typecheck` / `npm run lint` / `npm run build:export`。
 `e2e/demo.spec.ts` は売上計算、3デモの7場面・確認ゲート・翌朝・料金・相談、モバイルの横幅とリセットを確認します。
 `e2e/smoke.spec.ts` に伴走料金の確認を追加。画面確認の実施状況と残る制約は `design-qa.md` を参照してください。
+
+## 公開前の追加検証
+
+- `npm run test:e2e:contact`：一時コピーにテスト専用IDを設定して静的ビルド。Formspreeへの通信をすべてモックし、実メールを送らずに正常系・HTTPエラー・通信断・15秒タイムアウト・入力保持と再送・同意・honeypot・連続submitを確認。元のconfigと通常のoutは変更しません。
+- `npm run test:e2e:compat`：既存デモと320/390pxの最終場面・翌朝・料金・質問フォームをFirefox/WebKitでも実行。事前に `npx playwright install --with-deps chromium firefox webkit` が必要です。WebKitの結果は実機Safariの代替にはなりません。
+- Pagesデプロイは再利用するCIの成功後に開始します。CIが失敗した変更は自動公開しません。
+- 公開情報の未入力、Formspreeの受信先・公開ID・実受信、支払・解約条件の確定、実機確認は `business-release-readiness.md` を参照。
