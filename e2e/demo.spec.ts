@@ -15,7 +15,7 @@ for (const [id, label] of [['aggregate', '売上日報'], ['invoice', '経費の
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/business/');
     await page.getByRole('button', { name: label, exact: true }).click();
-    await page.getByRole('button', { name: '体験する', exact: true }).click();
+    await page.getByRole('button', { name: 'AIに相談する流れを見る', exact: true }).click();
     const demo = page.getByTestId(`skill-demo-${id}`);
     await expect(demo.getByRole('button', { name: '戻る', exact: true })).toBeDisabled();
     for (let i = 0; i < 5; i++) {

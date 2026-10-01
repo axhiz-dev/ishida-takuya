@@ -7,8 +7,6 @@ import {
   ArrowLeft,
   Plus,
   X,
-  FileXls,
-  ChartBar,
   Chats,
   ClipboardText,
   CheckCircle,
@@ -121,7 +119,7 @@ export default function BusinessTour() {
                       <strong>{t.problem}</strong>
                       <p>{t.detail}</p>
                       <span>
-                        クリックして解決策を見る <ArrowRight />
+                        この担当者の困りごとを見る <ArrowRight />
                       </span>
                     </div>
                   )}
@@ -135,7 +133,7 @@ export default function BusinessTour() {
                 tabIndex={-1}
                 className={s.drawer}
                 role="region"
-                aria-label={`${selected.label}の解決策`}
+                aria-label={`${selected.label}の困りごと`}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") closeDrawer();
                 }}
@@ -148,25 +146,22 @@ export default function BusinessTour() {
                   <X />
                 </button>
                 <small className={s.eyebrow}>{selected.label}</small>
-                <p className={s.problem}>{selected.problem}</p>
-                <h2>{selected.title}</h2>
-                <p>{selected.solution}</p>
-                <div className={s.solutionIcons} aria-hidden="true">
-                  <FileXls size={64} />
-                  <ArrowRight size={32} />
-                  {task === "inquiry" ? (
-                    <Chats size={64} />
-                  ) : task === "invoice" ? (
-                    <ClipboardText size={64} />
-                  ) : (
-                    <ChartBar size={64} />
-                  )}
-                </div>
+                <h2>{selected.situation}</h2>
+                <blockquote className={s.workerQuote}>{selected.quote}</blockquote>
+                <ul className={s.frustrations}>
+                  {selected.frustrations.map((item) => (
+                    <li key={item.title}>
+                      <h3>{item.title}</h3>
+                      <p>{item.body}</p>
+                    </li>
+                  ))}
+                </ul>
+                <p className={s.wish}>{selected.wish}</p>
                 <p className={s.note}>
-                  御社の仕事の進め方を、一緒にAIの手順へ整理します。
+                  この困りごとをAIに相談したら？ 次の画面で、会話しながら仕事の手順をつくる流れを体験できます。
                 </p>
                 <button className={s.primary} onClick={() => navigate(1)}>
-                  体験する <ArrowRight />
+                  AIに相談する流れを見る <ArrowRight />
                 </button>
               </div>
             )}
