@@ -269,3 +269,20 @@
  --tour-scrim: #12283f88;
  --tour-shadow: 0 12px 40px #12283f24;
 }
+
+/* /business renewal: approved forest-green photographic direction. */
+[data-theme="business"] {
+  --renewal-paper: #f8f7f2;
+  --renewal-white: #ffffff;
+  --renewal-ink: #162a24;
+  --renewal-green: #174737;
+  --renewal-green-hover: #245b47;
+  --renewal-muted: #4d6259;
+  --renewal-line: #c6d0c7;
+  --renewal-sage: #edf3e9;
+  --renewal-soft: #f0f3f3;
+  --renewal-photo-shade: rgba(8, 35, 24, .48);
+  --renewal-serif: "Noto Serif JP", "Yu Mincho", serif;
+  --color-paper: var(--renewal-paper);
+  --color-focus: var(--renewal-green);
+}

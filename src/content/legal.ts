@@ -1,4 +1,4 @@
-import { pricing } from "@/components/business/tour/skillScenarios";
+import { service } from "@/components/business/renewal/content";
 import { owner } from "@/config/owner";
 
 /**
@@ -30,8 +30,8 @@ export const tradeLawRows: LegalRow[] = [
   { label: "営業時間", value: owner.businessHours, note: "時間外はメールでお受けします。" },
   {
     label: "役務の対価",
-    value: `AI活用・自動化の伴走支援は月${pricing.accompaniment}万円から（税別・3か月から）。自動化ツールの実装は${pricing.implementation}万円から（税別・要お見積もり）。90分の業務診断は料金お問い合わせ。`,
-    note: "作業の範囲によって変わります。金額はお見積もりでご提示し、合意のうえで着手します。",
+    value: `AI活用・伴走支援は${service.duration}で${service.price}（税込／税別${service.priceExTax}）。1名・1業務が対象です。無料相談は20分です。`,
+    note: "開発・外部サービス連携・別業務の追加は別途ご相談ください。自動更新はありません。",
   },
   {
     label: "対価以外に必要な費用",
@@ -41,8 +41,8 @@ export const tradeLawRows: LegalRow[] = [
   { label: "支払方法", value: "銀行振込", note: "振込手数料はご負担ください。" },
   {
     label: "支払時期",
-    value: "ご契約前に、お見積もり・契約書で支払時期をご案内します",
-    note: "伴走支援・業務診断・実装それぞれの支払条件を確認し、合意のうえで開始します。",
+    value: "支援開始前に一括でお支払いいただきます",
+    note: "支払方法と期日は申し込み前にご案内します。",
   },
   {
     label: "役務の提供時期",
@@ -52,7 +52,7 @@ export const tradeLawRows: LegalRow[] = [
   {
     label: "契約の解除",
     value: "解約・キャンセルの条件は、ご契約前にご案内します",
-    note: "伴走支援は3か月から。実装の納品後の修正・保守は別途ご相談ください。契約期間、解約時の精算、修正・保守の範囲を確認してから始めます。",
+    note: "支援期間は4週間で自動更新はありません。開始前・開始後のキャンセルと精算方法を申し込み前に確認します。",
   },
 ];
 
@@ -66,7 +66,7 @@ export const privacySections: PolicySection[] = [
   {
     heading: "取得する情報",
     body: [
-      "お問い合わせのときにご記入いただく、会社名（任意）・お名前・メールアドレス・ご相談の内容・選択した業務とお問い合わせの種別。",
+      "お問い合わせのときにご記入いただく、お名前・メールアドレス・相談したい仕事・希望の連絡方法。",
       "お仕事をお受けするときにお預かりする、業務に必要な範囲のデータ（表計算ファイル、システムの設定情報など）。",
     ],
   },
@@ -88,7 +88,7 @@ export const privacySections: PolicySection[] = [
     heading: "お預かりしたデータの取り扱い",
     body: [
       "業務に必要な範囲だけをお預かりし、必要がなくなった時点で削除します。",
-      "支援に必要なデータの範囲と保管期間は、作業を始める前に確認します。削除をご希望の場合はお申しつけください。",
+      "個人情報・機密情報を伏せた見本を基本とし、共有された業務資料は支援終了後30日以内に削除します。お問い合わせの記録や法令上保管が必要な取引記録は、この業務資料の削除対象には含みません。",
       "秘密保持契約を結んでから作業に入ることができます。契約書は当方からご提案します。",
     ],
   },
@@ -113,4 +113,4 @@ export const privacySections: PolicySection[] = [
 ];
 
 /** 最終改定日。内容を変えたらここも直す。 */
-export const policyUpdatedAt = "2026-10-01";
+export const policyUpdatedAt = "2026-10-07";

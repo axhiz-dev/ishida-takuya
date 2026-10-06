@@ -20,7 +20,7 @@ const run = (cmd, args) => new Promise((resolve, reject) => {
 });
 try {
   await run(process.execPath, [join(root, 'node_modules/next/dist/bin/next'), 'build']);
-  await run(process.execPath, [join(root, 'node_modules/serve/build/main.js'), 'out', '-l', '4322', '--no-clipboard']);
+  await run(process.execPath, [join(scratch, 'scripts/serve-static.mjs'), '4322']);
 } catch (error) {
   console.error(error);
   process.exitCode = 1;

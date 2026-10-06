@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | `/` | すべて | 1 画面の入口。左右のパネルでどちらのページに進むかを選ぶ |
 | `/engineer` | 採用担当・エージェント | 職務経歴書。URL を送ればそれだけで経歴が伝わる。技術タグで案件を絞り込める。PDF 出力あり |
-| `/business` | 仕事を頼みたい会社の人 | 業務の自動化。触れるデモと料金 |
+| `/business` | 仕事を頼みたい会社の人 | AI活用のマンツーマン支援。会話例と料金 |
 
 公開先: https://axhiz-dev.github.io/ishida-takuya/
 
@@ -46,11 +46,11 @@ src/
 ├─ components/
 │  ├─ common/               MarkedHeading・ダミー表示
 │  ├─ engineer/             画面版（EngineerScreen）・紙版（ResumeDocument）・演出の小物
-│  └─ business/             tour/ に4ステップ導線・3種類のデモ・相談フォーム
+│  └─ business/             renewal/ にステージ選択・活用例・会話デモ・相談フォーム
 ├─ content/                 プロフィール・経歴・下層ページの文章とデータ
 │  ├─ profile.ts            氏名・連絡先・最終更新（3 面で共有する唯一の身元）
 │  ├─ engineer.ts           ★ /engineer の職務要約・経歴・副業・スキル
-│  └─ business.ts           既存の業務紹介原稿（新ツアーは components/business/tour/data.ts）
+│  └─ business.ts           既存の業務紹介原稿（現行ページは components/business/renewal/content.ts）
 ├─ config/site.ts           ★ 定数・機能フラグ（環境変数ではない）
 ├─ lib/                     フォント定義・派生値・フック
 └─ styles/
@@ -91,10 +91,10 @@ Tailwind の preflight は `/business` に届きません。
 | ページ | 地 | 構造 | ナビ / フッター | アクセント |
 | --- | --- | --- | --- | --- |
 | `/engineer` | オフホワイト・方眼 | ヘッダ・職務要約・経歴（技術タグで絞り込み・開閉カード）・スキル | 細いスティッキーナビ | 藍 |
-| `/business` | 白 | 困りごと → 体験 → 費用 → 相談の4ステップ | 下部ステップナビ | 濃紺 + 青緑 |
+| `/business` | クリーム | ステージ選択 → 活用例 → 会話 → 支援・料金・相談 | 上部ナビ | 深い緑 + 写真 |
 | `/` | オフホワイト・方眼 | 1 画面の分岐・hover で広がる左右パネル | — | 藍 |
 
-書体は `/business` が **Bricolage Grotesque** / **Geist** / **JetBrains Mono** ＋
+現行 `/business` は **Noto Serif JP** の見出しと **Noto Sans JP** の本文。旧ページの書体は **Bricolage Grotesque** / **Geist** / **JetBrains Mono** ＋
 **Zen Kaku Gothic New**、`/` と `/engineer` は **Noto Sans JP** / **JetBrains Mono**
 です（`src/lib/fonts.ts` と `src/lib/engineerFonts.ts`）。
 

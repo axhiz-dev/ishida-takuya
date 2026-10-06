@@ -1,96 +1,69 @@
-import { test, expect } from '@playwright/test';
-import { assessedSales, total, products } from '../src/components/business/tour/skillSamples';
-import { contactConfig } from '../src/components/business/tour/config';
-import { skillScenarios } from '../src/components/business/tour/skillScenarios';
-test('見本：送料・税・返品と重複の判断を反映し、合計と商品別内訳が一致する', () => {
-  expect(total).toBe(11000);
-  expect(products.reduce((sum, p) => sum + p.amount, 0)).toBe(total);
-  expect(assessedSales.filter(r => r.duplicate)).toHaveLength(2);
-  expect(assessedSales.filter(r => r.unknown)).toHaveLength(1);
-  expect(assessedSales.find(r => r.id === 'S-102')?.net).toBe(-1000);
-  expect(assessedSales.find(r => r.id === 'E-102')?.net).toBe(3000);
-});
-for (const [id, label] of [['aggregate', '売上日報'], ['invoice', '経費の確認'], ['inquiry', '問い合わせ対応']] as const) {
-  test(`${label}：会話、確認、スキル保存、翌朝、料金・相談を通れる`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+import { expect, test } from '@playwright/test';
+
+for (const item of [
+  { id: 'meeting', title: '会議メモをまとめる', result: '打ち合わせの共有メモ' },
+  { id: 'planning', title: '今日の仕事を整理する', result: '今日の仕事の順番' },
+  { id: 'proposal', title: '提案書の下書きを作る', result: '問い合わせ受付の改善提案（下書き）' },
+]) {
+  test(`${item.title}: 一覧から会話と成果物を見て戻れる`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
     await page.goto('/business/');
-    await page.getByRole('button', { name: label, exact: true }).click();
-    await page.getByRole('button', { name: 'AIに相談する流れを見る', exact: true }).click();
-    const demo = page.getByTestId(`skill-demo-${id}`);
-    await expect(demo.getByRole('button', { name: '戻る', exact: true })).toBeDisabled();
-    for (let i = 0; i < 5; i++) {
-      await expect(demo.getByRole('status')).toHaveText(`${i + 1} / 7`);
-      await demo.getByRole('button', { name: skillScenarios[id].scenes[i]!.next, exact: true }).click();
-    }
-    const confirm = demo.getByRole('button', { name: '確認して手順をまとめる', exact: true });
-    await expect(confirm).toBeDisabled();
-    for (const box of await demo.getByRole('checkbox').all()) await box.check();
-    await confirm.click();
-    await expect(demo.getByRole('status')).toHaveText('7 / 7');
-    await demo.getByRole('button', { name: '戻る', exact: true }).click();
-    for (const box of await demo.getByRole('checkbox').all()) await expect(box).toBeChecked();
-    await confirm.click();
-    await demo.getByRole('button', { name: 'この手順を保存する', exact: true }).click();
-    await demo.getByLabel('平日の実行時刻（体験用）').selectOption('09:30');
-    await demo.getByRole('button', { name: '翌朝を体験する', exact: true }).click();
-    await expect(demo.getByRole('heading', { name: '翌朝 09:30 のイメージ' })).toBeVisible();
-    await demo.getByRole('button', { name: '伴走支援と費用を見る', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'AI活用・自動化の伴走支援', exact: true })).toBeVisible();
-    await expect(page.getByText('買い切り', { exact: true })).toHaveCount(0);
-    await page.getByRole('button', { name: '診断について相談する', exact: true }).click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.locator('input[name="業務"]')).toHaveValue(`${id === 'aggregate' ? '売上日報' : id === 'invoice' ? '経費確認' : '問い合わせ対応'}のスキルづくり`);
-    if (/^[a-zA-Z0-9]+$/.test(contactConfig.formId)) {
-      await expect(dialog.getByRole('button', { name: '送信する', exact: true })).toBeEnabled();
-    } else {
-      await expect(dialog.getByRole('button', { name: '送信する', exact: true })).toBeDisabled();
-    }
+    await page.getByRole('button', { name: new RegExp(item.title) }).click();
+    const demo = page.getByTestId(`demo-${item.id}`);
+    await expect(demo).toBeVisible();
+    await expect(page.getByRole('button', { name: '戻る', exact: true })).toBeDisabled();
+    await expect(page.getByRole('heading', { name: item.result })).toHaveCount(0);
+    await page.getByRole('button', { name: '会話の続きを見る' }).click();
+    await expect(page.getByRole('status', { name: '会話の進行' })).toHaveText('2 / 3');
+    await page.getByRole('button', { name: '戻る', exact: true }).click();
+    await expect(page.getByRole('status', { name: '会話の進行' })).toHaveText('1 / 3');
+    await page.getByRole('button', { name: '会話の続きを見る' }).click();
+    await page.getByRole('button', { name: '下書きを見る' }).click();
+    await expect(demo.getByRole('heading', { name: item.result })).toBeVisible();
+    await demo.getByText('次回も使うための指示を見る').click();
+    await expect(demo.locator('details')).toHaveAttribute('open', '');
+    await page.getByRole('button', { name: '活用例に戻る' }).click();
+    await expect(page.getByRole('heading', { name: 'こんな仕事に使えます' })).toBeFocused();
+    await expect(page.getByTestId(`demo-${item.id}`)).toHaveCount(0);
+    expect(errors).toEqual([]);
   });
 }
-test('モバイル：全場面で横にはみ出さず、戻る・履歴・リセットが動く', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+
+test('ステージ選択は同じ支援プランへつながる', async ({ page }) => {
   await page.goto('/business/');
-  await page.getByRole('button', { name: '2 体験する', exact: true }).click();
-  const demo = page.getByTestId('skill-demo-aggregate');
-  for (let i = 0; i < 6; i++) {
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (i < 5) await demo.getByRole('button', { name: skillScenarios.aggregate.scenes[i]!.next, exact: true }).click();
-  }
-  await demo.getByText('ここまでの会話を読む', { exact: true }).click();
-  await expect(demo.getByText('毎朝、店舗・通販・代理店のExcelをまとめて、店長向けの売上日報を作っています。', { exact: true })).toBeVisible();
-  await demo.getByRole('button', { name: '最初から見る', exact: true }).click();
-  await expect(demo.getByRole('status')).toHaveText('1 / 7');
+  await page.getByRole('link', { name: /02 BUILD/ }).click();
+  await expect(page).toHaveURL(/#examples$/);
+  await expect(page.locator('#examples')).toContainText('毎回使える指示の作り方');
+  await page.getByRole('navigation', { name: 'メインナビゲーション' }).getByRole('link', { name: '料金', exact: true }).click();
+  await expect(page.locator('#pricing')).toContainText('55,000円');
+  await expect(page.locator('#pricing')).toContainText('1名・1業務／自動更新なし');
+  await expect(page.getByRole('button', { name: '無料相談を申し込む' })).toBeDisabled();
+  await expect(page.locator('#contact')).toContainText('フォームの受付は準備中');
 });
 
-for (const width of [320, 390]) {
-  test(`${width}px：最終場面・翌朝・料金・相談まで操作できる`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 640 });
+for (const width of [320, 390, 768]) {
+  test(`${width}px: 会話・成果物・フォームがはみ出さない`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 740 });
     await page.goto('/business/');
-    await page.getByRole('button', { name: '2 体験する', exact: true }).click();
-    const demo = page.getByTestId('skill-demo-aggregate');
-    const fits = async () => expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    for (let i = 0; i < 5; i++) await demo.getByRole('button', { name: skillScenarios.aggregate.scenes[i]!.next, exact: true }).click();
-    await fits();
-    for (const box of await demo.getByRole('checkbox').all()) await box.check();
-    await demo.getByRole('button', { name: '確認して手順をまとめる', exact: true }).click();
-    await fits();
-    await demo.getByRole('button', { name: 'この手順を保存する', exact: true }).click();
-    await fits();
-    await demo.getByRole('button', { name: '翌朝を体験する', exact: true }).click();
-    await expect(demo.getByRole('heading', { name: '翌朝 08:00 のイメージ' })).toBeVisible();
-    await fits();
-    await demo.getByRole('button', { name: '伴走支援と費用を見る', exact: true }).click();
-    await fits();
-    await page.getByRole('button', { name: '体験に戻る', exact: true }).click();
-    await expect(demo.getByRole('heading', { name: '翌朝 08:00 のイメージ' })).toBeVisible();
-    await demo.getByRole('button', { name: '伴走支援と費用を見る', exact: true }).click();
-    await page.getByRole('button', { name: '導入の流れ・相談へ', exact: true }).click();
-    await page.getByRole('button', { name: 'まずは質問する', exact: true }).click();
-    await expect(page.getByRole('dialog').locator('input[name="種別"]')).toHaveValue('質問');
-    await fits();
-    await page.keyboard.press('Escape');
-    await page.reload();
-    await page.getByRole('button', { name: '2 体験する', exact: true }).click();
-    await expect(demo.getByRole('status')).toHaveText('1 / 7');
+    if (width <= 850) {
+      await page.getByRole('button', { name: 'メニューを開く' }).click();
+      await page.getByRole('navigation', { name: 'メインナビゲーション' }).getByRole('link', { name: '活用例' }).click();
+      await expect(page.getByRole('button', { name: 'メニューを開く' })).toHaveAttribute('aria-expanded', 'false');
+    }
+    await page.getByRole('button', { name: /提案書の下書きを作る/ }).click();
+    for (const button of ['会話の続きを見る', '下書きを見る']) await page.getByRole('button', { name: button }).click();
+    await page.locator('#pricing summary').click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await expect(page.getByLabel('相談したい仕事', { exact: true })).toBeVisible();
   });
 }
+
+test('モーション低減でも会話を操作できる', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/business/');
+  await page.getByRole('button', { name: /会議メモをまとめる/ }).click();
+  await page.getByRole('button', { name: '会話の続きを見る' }).click();
+  await expect(page.getByRole('status', { name: '会話の進行' })).toHaveText('2 / 3');
+});

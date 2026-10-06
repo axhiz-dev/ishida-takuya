@@ -19,6 +19,7 @@
     "@fontsource/geist": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/noto-sans-jp": "^5.3.0",
+    "@fontsource/noto-serif-jp": "^5.3.0",
     "@fontsource/zen-kaku-gothic-new": "^5.3.0",
     "@phosphor-icons/react": "^2.1.10",
     "jspdf": "^4.2.1",
