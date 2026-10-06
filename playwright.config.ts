@@ -43,7 +43,7 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: `npm run build:export && npx serve out -l ${PORT} --no-clipboard`,
+        command: `npm run build:export && node scripts/serve-static.mjs ${PORT}`,
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 5 * 60 * 1000,

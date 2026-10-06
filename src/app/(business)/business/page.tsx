@@ -1,2 +1,2 @@
-import BusinessTour from '@/components/business/tour/BusinessTour';
-export default function BusinessPage(){return <BusinessTour />;}
+import BusinessRenewal from "@/components/business/renewal/BusinessRenewal";
+export default function BusinessPage() { return <BusinessRenewal />; }
