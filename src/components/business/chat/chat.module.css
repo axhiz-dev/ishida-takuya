@@ -1073,3 +1073,5 @@
   .previewHeader { gap: 8px; }
   .sheetTabs > button { font-size: 12px !important; padding: 8px 12px; }
 }
+
+.botResponse [data-stream-cursor]::after { content: "▍"; color: #376451; animation: pulse 700ms infinite; }

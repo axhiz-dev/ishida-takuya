@@ -55,21 +55,29 @@ function StreamResponse({ children, immediate, onComplete }: { children: ReactNo
     blocks.forEach((block) => { block.hidden = true; });
     let index = 0;
     let length = 0;
+    let cursor: HTMLElement | null = null;
     const timer = setInterval(() => {
       const current = nodes[index];
       if (!current) {
         clearInterval(timer);
         blocks.forEach((block) => { block.hidden = false; });
+        cursor?.removeAttribute("data-stream-cursor");
         onComplete();
         return;
       }
       for (let parent = current.node.parentElement; parent && parent !== root.current; parent = parent.parentElement) parent.hidden = false;
+      if (cursor !== current.node.parentElement) {
+        cursor?.removeAttribute("data-stream-cursor");
+        cursor = current.node.parentElement;
+        cursor?.setAttribute("data-stream-cursor", "");
+      }
       length = Math.min(length + 1, current.text.length);
       current.node.data = current.text.slice(0, length);
       if (length === current.text.length) { index++; length = 0; }
-    }, 30);
+    }, 45);
     return () => {
       clearInterval(timer);
+      cursor?.removeAttribute("data-stream-cursor");
       nodes.forEach(({ node, text }) => { node.data = text; });
       blocks.forEach((block) => { block.hidden = false; });
     };
@@ -84,6 +92,7 @@ export default function ChatTurn({ user, attachments = false, children }: { user
   const [immediate, setImmediate] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const skipped = useRef(false);
+  const sendUser = useRef<() => void>(() => {});
   const complete = useRef(() => setPhase("ready")).current;
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -101,6 +110,12 @@ export default function ChatTurn({ user, attachments = false, children }: { user
         reply = setTimeout(() => { if (!skipped.current) setPhase("streaming"); }, 2000);
       }
     }, 45);
+    sendUser.current = () => {
+      clearInterval(timer);
+      setLength(user.length);
+      setPhase("thinking");
+      reply = setTimeout(() => { if (!skipped.current) setPhase("streaming"); }, 2000);
+    };
     const changed = () => { if (media.matches) { clearInterval(timer); clearTimeout(reply); finish(); } };
     media.addEventListener("change", changed);
     root.current?.scrollIntoView({ block: "start" });
@@ -121,7 +136,9 @@ export default function ChatTurn({ user, attachments = false, children }: { user
     </ResponseReadyContext.Provider>}
     {phase !== "ready" && <div className={s.turnStatus}>
       {phase === "streaming" && <span role="status" className={s.srOnly}>AIが回答中…</span>}
-      <button onClick={() => { skipped.current = true; setImmediate(true); setLength(user.length); setPhase("ready"); }}>すぐに表示</button>
+      {phase === "user"
+        ? <button onClick={() => sendUser.current()}>入力を完了して送信</button>
+        : <button onClick={() => { skipped.current = true; setImmediate(true); setLength(user.length); setPhase("ready"); }}>回答をすべて表示</button>}
     </div>}
   </div>;
 }
