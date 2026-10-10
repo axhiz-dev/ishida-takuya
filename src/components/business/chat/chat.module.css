@@ -587,7 +587,7 @@
   justify-content: center;
   gap: 24px;
   font-size: 10px;
-  color: #71808c;
+  color: var(--chat-muted);
   padding-top: 10px;
 }
 .dockMeta > span {
