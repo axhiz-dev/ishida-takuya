@@ -28,6 +28,7 @@ test("入力、添付Excel、Botの応答が順番に現れ、選んだ回答が
   await expect(page.getByRole("button", { name: "メニューから、できることを選ぶ" })).toHaveCount(0);
   const botImages = page.locator("main img");
   await expect(botImages).toHaveCount(1);
+  await expect(botImages.first()).toHaveAttribute("src", /\/_next\/static\/media\/chat-guide\.[^/]+\.png$/);
   expect(await botImages.first().evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBeTruthy();
   await expect.poll(() => page.locator("[data-chat-turn]").first().evaluate((el) => getComputedStyle(el.lastElementChild!).opacity)).toBe("1");
   await page.locator("main").evaluate((el) => { el.scrollTop = 0; });

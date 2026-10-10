@@ -3,13 +3,13 @@
 import { createContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { FileXls, User } from "@phosphor-icons/react";
-import { BASE_PATH } from "@/config/site";
+import guideImage from "../../../../public/images/business/chat-guide.png";
 import s from "./chat.module.css";
 import WorkbookPreview from "./WorkbookPreview";
 
 export function Guide({ children, title = false }: { children: ReactNode; title?: boolean }) {
   return <div className={s.guide}>
-    <Image src={`${BASE_PATH}/images/business/chat-guide.png`} alt="" width={52} height={52} className={s.mascot} />
+    <Image src={guideImage} loading="eager" alt="" width={52} height={52} className={s.mascot} />
     <div className={s.guideText}>{title ? <h1>{children}</h1> : children}</div>
   </div>;
 }
