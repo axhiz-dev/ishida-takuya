@@ -1,7 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { shiftSteps } from "../src/components/business/chat/content";
 
-test.use({ reducedMotion: "reduce" });
+// Apply media emulation to each page before navigation, including in CI.
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
+});
 
 test("集計：判断、結果、相談への引き継ぎと未設定時の送信防止", async ({
   page,
