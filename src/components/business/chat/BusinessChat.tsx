@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import ChatTurn, { Guide } from "./ChatTurn";
+import ChatTurn, { Guide, ResponseReadyContext } from "./ChatTurn";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -48,13 +48,15 @@ type ChoiceDock = {
 const ChoiceDockContext = createContext<ChoiceDock | null>(null);
 function Choices({ items, label }: { items: Choice[]; label: string }) {
   const id = useId();
+  const ready = useContext(ResponseReadyContext);
   const dock = useContext(ChoiceDockContext)!;
   const { setActive } = dock;
   useEffect(() => {
+    if (!ready) return;
     setActive(id);
     return () => setActive((current) => current === id ? "" : current);
-  }, [id, setActive]);
-  if (!dock.target || dock.active !== id || dock.dismissed === id) return null;
+  }, [id, ready, setActive]);
+  if (!ready || !dock.target || dock.active !== id || dock.dismissed === id) return null;
   return createPortal(
     <section className={s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
       if (event.key === "Escape") dock.setDismissed(id);

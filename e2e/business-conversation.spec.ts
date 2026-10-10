@@ -64,3 +64,31 @@ test("320pxと動きを減らす設定でも相談文・添付・選択肢が使
   await page.getByRole("button", { name: "最初の画面に戻る" }).click();
   await expect(page.getByRole("heading", { name: "いつもの仕事、AIと一緒なら？" })).toBeVisible();
 });
+
+
+test("送信後に考え中を挟み、応答全体のストリーム表示後に選択肢が出る", async ({ page, baseURL }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(`${baseURL}/business/`);
+  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: "すぐに表示" }).click();
+  await page.clock.install();
+  await page.getByRole("button", { name: /^取引先コードで照合する/ }).click();
+  const turn = page.locator("[data-chat-turn]").last();
+  await page.clock.runFor(2300);
+  await expect(turn).toHaveAttribute("data-phase", "thinking");
+  await expect(turn.getByRole("status")).toContainText("考え中...");
+  await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+  await page.clock.runFor(2100);
+  await expect(turn).toHaveAttribute("data-phase", "streaming");
+  const firstLine = turn.locator("p").filter({ hasText: /^確認/ });
+  await expect(firstLine).toBeVisible();
+  expect((await firstLine.innerText()).length).toBeLessThan("確認が必要なものだけ、人が見られる形にしました。".length);
+  await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+  await page.clock.runFor(15000);
+  await expect(turn).toHaveAttribute("data-phase", "ready");
+  await expect(turn.getByText("この確認ルールを、来月も使える手順として残せます。")).toBeVisible();
+  await expect(turn.getByRole("table")).toContainText("230,000");
+  await expect(page.getByRole("button", { name: "自分の仕事で考えてみる" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveCount(0);
+});
+
