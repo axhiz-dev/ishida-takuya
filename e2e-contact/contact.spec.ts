@@ -1,102 +1,117 @@
-import { test, expect, type Page } from '@playwright/test';
-const endpoint = 'https://formspree.io/f/**';
+import { test, expect, type Page } from "@playwright/test";
+const endpoint = "https://formspree.io/f/**";
 async function openForm(page: Page) {
-  await page.goto('/business/');
-  await page.getByRole('button', { name: '直接相談する' }).click();
-  const dialog = page.getByRole('dialog');
-  await dialog.getByLabel('会社名（任意）').fill('テスト株式会社');
-  await dialog.getByLabel('お名前', { exact: true }).fill('確認 太郎');
-  await dialog.getByLabel('メールアドレス', { exact: true }).fill('test@example.com');
-  await dialog.getByLabel('相談したいこと').fill('日本語の送信・再送を確認します。');
-  await dialog.getByRole('checkbox').check();
-  return dialog;
+  await page.goto("/business/");
+  await page.getByRole("button", { name: "相談する", exact: true }).click();
+  const form = page.getByRole("region", { name: "相談フォーム" });
+  await form.getByLabel("お名前", { exact: true }).fill("確認 太郎");
+  await form.getByLabel("メールアドレス").fill("test@example.com");
+  await form
+    .getByLabel("相談したいこと（任意）")
+    .fill("日本語の送信・再送を確認します。");
+  await form.getByRole("checkbox").check();
+  return form;
 }
-// Every Formspree request is intercepted, including unexpected ones. No real email.
-test.beforeEach(async ({ page }) => { await page.route(endpoint, route => route.abort()); });
-test('成功：送信値が揃い、連打でも1件だけ送信する', async ({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await page.route(endpoint, (route) => route.abort());
+});
+test("確認後に送信：内容が揃い、連打でも1件だけ送信する", async ({ page }) => {
   let count = 0;
-  let body = '';
+  let data: Record<string, string> = {};
   let release!: () => void;
-  const gate = new Promise<void>(resolve => { release = resolve; });
-  await page.route(endpoint, async route => {
-    count++;
-    body = route.request().postData() ?? '';
-    await gate;
-    await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
   });
-  const dialog = await openForm(page);
-  const send = dialog.getByRole('button', { name: '送信する', exact: true });
-  // Synchronous duplicate events exercise the ref guard before React rerenders.
-  await dialog.locator('form').evaluate(form => {
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  await page.route(endpoint, async (route) => {
+    count++;
+    data = route.request().postDataJSON();
+    await gate;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: '{"ok":true}',
+    });
+  });
+  const form = await openForm(page);
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  expect(count).toBe(0);
+  const send = form.getByRole("button", { name: "この内容で相談を送信" });
+  await send.evaluate((button) => {
+    (button as HTMLButtonElement).click();
+    (button as HTMLButtonElement).click();
   });
   await expect.poll(() => count).toBe(1);
-  await expect(dialog.getByRole('button', { name: '送信中…' })).toBeDisabled();
-  for (const value of ['テスト株式会社', '確認 太郎', 'test@example.com', '日本語の送信・再送を確認します。', '売上日報のスキルづくり', '相談']) expect(body).toContain(value);
-  expect(body).toContain('name="業務"');
-  expect(body).toContain('name="種別"');
+  await expect(form.getByRole("button", { name: "送信中…" })).toBeDisabled();
+  expect(data).toMatchObject({
+    name: "確認 太郎",
+    email: "test@example.com",
+    message: "日本語の送信・再送を確認します。",
+    業務: "AI活用について",
+  });
   release();
-  await expect(dialog.getByRole('status')).toContainText('お問い合わせを受け付けました');
-  await expect(send).toHaveCount(0);
+  await expect(page.getByRole("status")).toContainText(
+    "お問い合わせを受け付けました",
+  );
   expect(count).toBe(1);
 });
-for (const failure of ['http', 'network', 'timeout'] as const) {
-  test(`${failure}：失敗後も入力・同意を保持し再送できる`, async ({ page }) => {
+for (const failure of ["http", "network", "timeout"] as const)
+  test(`${failure}：失敗後も入力を保持し再送できる`, async ({ page }) => {
     let count = 0;
-    await page.route(endpoint, async route => {
+    await page.route(endpoint, async (route) => {
       count++;
       if (count > 1) return route.fulfill({ status: 200, body: '{"ok":true}' });
-      if (failure === 'http') return route.fulfill({ status: 503, body: '{}' });
-      if (failure === 'network') return route.abort();
-      // Leave the first response pending so the application's real 15s abort fires.
+      if (failure === "http") return route.fulfill({ status: 503, body: "{}" });
+      if (failure === "network") return route.abort();
     });
-    const dialog = await openForm(page);
-    await dialog.getByRole('button', { name: '送信する', exact: true }).click();
-    await expect(dialog.getByRole('alert')).toContainText('入力内容は残っています', { timeout: 20000 });
-    await expect(dialog.getByLabel('会社名（任意）')).toHaveValue('テスト株式会社');
-    await expect(dialog.getByLabel('お名前', { exact: true })).toHaveValue('確認 太郎');
-    await expect(dialog.getByLabel('メールアドレス', { exact: true })).toHaveValue('test@example.com');
-    await expect(dialog.getByLabel('相談したいこと')).toHaveValue('日本語の送信・再送を確認します。');
-    await expect(dialog.getByRole('checkbox')).toBeChecked();
-    const send = dialog.getByRole('button', { name: '送信する', exact: true });
-    await expect(send).toBeEnabled();
-    await send.click();
-    await expect(dialog.getByRole('status')).toContainText('お問い合わせを受け付けました');
+    const form = await openForm(page);
+    await form.getByRole("button", { name: "相談内容を確認する" }).click();
+    await form.getByRole("button", { name: "この内容で相談を送信" }).click();
+    await expect(form.getByRole("alert")).toContainText(
+      "入力内容は残っています",
+      { timeout: 20000 },
+    );
+    await form.getByRole("button", { name: "戻って修正" }).click();
+    await expect(form.getByLabel("お名前", { exact: true })).toHaveValue(
+      "確認 太郎",
+    );
+    await expect(form.getByRole("checkbox")).toBeChecked();
+    await form.getByRole("button", { name: "相談内容を確認する" }).click();
+    await form.getByRole("button", { name: "この内容で相談を送信" }).click();
+    await expect(page.getByRole("status")).toContainText(
+      "お問い合わせを受け付けました",
+    );
     expect(count).toBe(2);
   });
-}
-test('必須入力・不正メール・同意なしは送信しない', async ({ page }) => {
-  let count = 0;
-  await page.route(endpoint, route => { count++; return route.abort(); });
-  const dialog = await openForm(page);
-  const send = dialog.getByRole('button', { name: '送信する', exact: true });
-  await dialog.getByLabel('お名前', { exact: true }).fill('');
-  await send.click();
-  await expect(dialog.getByLabel('お名前', { exact: true })).toBeFocused();
-  await dialog.getByLabel('お名前', { exact: true }).fill('確認 太郎');
-  await dialog.getByLabel('メールアドレス', { exact: true }).fill('invalid');
-  await send.click();
-  await expect(dialog.getByLabel('メールアドレス', { exact: true })).toBeFocused();
-  await dialog.getByLabel('メールアドレス', { exact: true }).fill('test@example.com');
-  await dialog.getByLabel('相談したいこと').fill('');
-  await send.click();
-  await expect(dialog.getByLabel('相談したいこと')).toBeFocused();
-  await dialog.getByLabel('相談したいこと').fill('確認');
-  await dialog.getByRole('checkbox').uncheck();
-  await send.click();
-  await expect(dialog.getByRole('checkbox')).toBeFocused();
-  expect(count).toBe(0);
+test("必須入力・不正メール・同意なしは確認へ進めない", async ({ page }) => {
+  const form = await openForm(page);
+  const confirm = form.getByRole("button", { name: "相談内容を確認する" });
+  await form.getByLabel("お名前", { exact: true }).fill("");
+  await confirm.click();
+  await expect(form.getByLabel("お名前", { exact: true })).toBeFocused();
+  await form.getByLabel("お名前", { exact: true }).fill("確認 太郎");
+  await form.getByLabel("メールアドレス").fill("invalid");
+  await confirm.click();
+  await expect(form.getByLabel("メールアドレス")).toBeFocused();
+  await form.getByLabel("メールアドレス").fill("test@example.com");
+  await form.getByRole("checkbox").uncheck();
+  await confirm.click();
+  await expect(form.getByRole("checkbox")).toBeFocused();
+  await expect(
+    form.getByRole("button", { name: "この内容で相談を送信" }),
+  ).toHaveCount(0);
 });
-test('honeypotは送信しない・Escapeで閉じて元のボタンへ戻る', async ({ page }) => {
+test("honeypotが埋まっていたら送信しない", async ({ page }) => {
   let count = 0;
-  await page.route(endpoint, route => { count++; return route.abort(); });
-  const dialog = await openForm(page);
-  await dialog.locator('input[name="_gotcha"]').evaluate((input: HTMLInputElement) => { input.value = 'bot'; });
-  await dialog.getByRole('button', { name: '送信する', exact: true }).click();
-  await expect(dialog.getByRole('button', { name: '送信する', exact: true })).toBeEnabled();
-  await page.keyboard.press('Escape');
-  await expect(dialog).not.toBeVisible();
-  await expect(page.getByRole('button', { name: '直接相談する' })).toBeFocused();
+  await page.route(endpoint, (route) => {
+    count++;
+    return route.abort();
+  });
+  const form = await openForm(page);
+  await form.locator('input[name="_gotcha"]').fill("bot", { force: true });
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await form.getByRole("button", { name: "この内容で相談を送信" }).click();
+  await expect(
+    form.getByRole("button", { name: "この内容で相談を送信" }),
+  ).toBeEnabled();
   expect(count).toBe(0);
 });

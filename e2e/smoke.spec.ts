@@ -281,16 +281,10 @@ test("下層ページから、法定の表記に行き来できる", async ({ pa
 });
 
 
-test('business: 伴走支援の料金と業務診断を表示する', async ({ page }) => {
+test('business: 未確定料金を断定せず、費用へ直接進める', async ({ page }) => {
   await page.goto('/business/');
-  await page.getByRole('button', { name: '2 体験する', exact: true }).click();
-  const demo = page.getByTestId('skill-demo-aggregate');
-  for (const name of ['AIの返答を見る', '集計のルールを伝える', 'AIの返答を見る', '日報に載せたい内容を伝える', '見本で確かめる']) await demo.getByRole('button', { name, exact: true }).click();
-  for (const box of await demo.getByRole('checkbox').all()) await box.check();
-  await demo.getByRole('button', { name: '確認して手順をまとめる', exact: true }).click();
-  await demo.getByRole('button', { name: 'この手順を保存する', exact: true }).click();
-  await demo.getByRole('button', { name: '伴走支援と費用を見る', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'AI活用・自動化の伴走支援' })).toBeVisible();
-  await expect(page.getByText('単発・料金はお問い合わせください', { exact: true })).toBeVisible();
-  await expect(page.getByText('もっとシンプルな機能なら')).toHaveCount(0);
+  await page.getByRole('button', { name: '費用・FAQ', exact: true }).click();
+  await page.getByRole('button', { name: '費用・支援内容', exact: true }).click();
+  await expect(page.getByText(/料金・支援範囲は現在検討中/)).toBeVisible();
+  await expect(page.locator('body')).not.toContainText('月3万円');
 });
