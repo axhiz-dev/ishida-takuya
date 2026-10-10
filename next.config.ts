@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   output: process.env.NEXT_OUTPUT === "export" ? "export" : undefined,
   basePath: process.env.NEXT_BASE_PATH || undefined,
+  // Static asset URLs are also built in client components after hydration.
+  env: { NEXT_BASE_PATH: process.env.NEXT_BASE_PATH || "" },
 
   // 静的書き出しでは Next の画像最適化サーバが存在しないため必須
   images: { unoptimized: true },

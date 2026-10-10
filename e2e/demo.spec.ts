@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { shiftSteps } from "../src/components/business/chat/content";
 
+test.use({ reducedMotion: "reduce" });
+
 test("集計：判断、結果、相談への引き継ぎと未設定時の送信防止", async ({
   page,
 }) => {
@@ -76,6 +78,7 @@ test("メニューは検索・キーボード・閉じた後のフォーカス�
   const launcher = page.getByRole("button", {
     name: "メニューから、できることを選ぶ",
   });
+  await page.getByRole("button", { name: "選択肢を閉じる" }).click();
   await launcher.click();
   await page.getByLabel("メニューを検索").fill("費用");
   await expect(
@@ -103,9 +106,9 @@ for (const width of [320, 390, 768])
           () => document.documentElement.scrollWidth - innerWidth,
         ),
       ).toBeLessThanOrEqual(1);
-      const box = await page
-        .getByRole("button", { name: "メニューから、できることを選ぶ" })
-        .boundingBox();
+      const panel = page.getByRole("region", { name: "選択肢パネル" });
+      await expect(panel).toBeVisible();
+      const box = await panel.boundingBox();
       expect(box!.y + box!.height).toBeLessThanOrEqual(844);
       await page.getByRole("button", { name: step.next, exact: true }).click();
     }

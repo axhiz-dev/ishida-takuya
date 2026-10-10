@@ -1,0 +1,103 @@
+import { test, expect } from "@playwright/test";
+
+test("入力、添付Excel、Botの応答が順番に現れ、選んだ回答が会話に残る", async ({ page, baseURL }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 1300 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(`${baseURL}/business/`);
+  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await expect(page.getByRole("status")).toContainText("ユーザーが入力中…");
+  await expect(page.getByRole("group", { name: "集計の進め方" })).toHaveCount(0);
+  await page.waitForTimeout(250);
+  const typed = await page.locator('[aria-label="ユーザーの発言"] p > [aria-hidden="true"]').innerText();
+  expect(typed.length).toBeLessThan(30);
+  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  await page.getByRole("button", { name: "回答をすべて表示" }).click();
+  await expect(page.getByText(/私は経理担当をしています。/).last()).toBeAttached();
+  const attachment = page.getByRole("button", { name: /月末集計サンプル.xlsx/ });
+  await expect(attachment).toBeVisible();
+  await attachment.click();
+  const preview = page.getByRole("dialog", { name: "月末集計サンプル.xlsx" });
+  await expect(preview.getByRole("table")).toContainText("230,000");
+  await preview.getByRole("button", { name: "入金明細", exact: true }).click();
+  await expect(preview.getByRole("table")).toContainText("200,000");
+  await expect(preview.getByRole("table")).toContainText("田中工業株式会社");
+  await page.screenshot({ path: testInfo.outputPath("excel-preview.png") });
+  await page.keyboard.press("Escape");
+  await expect(preview).toHaveCount(0);
+  await expect(attachment).toBeFocused();
+  await expect(page.getByRole("button", { name: "メニューから、できることを選ぶ" })).toHaveCount(0);
+  const botImages = page.locator("main img");
+  await expect(botImages).toHaveCount(1);
+  expect(await botImages.first().evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBeTruthy();
+  await expect.poll(() => page.locator("[data-chat-turn]").first().evaluate((el) => getComputedStyle(el.lastElementChild!).opacity)).toBe("1");
+  await page.locator("main").evaluate((el) => { el.scrollTop = 0; });
+  await page.screenshot({ path: testInfo.outputPath("aggregate.png") });
+  await page.getByRole("button", { name: /^取引先コードで照合する/ }).click();
+  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  await page.getByRole("button", { name: "回答をすべて表示" }).click();
+  await expect(page.getByText("差額は30,000円。分割入金か、入力漏れかを人が確認します。")).toBeVisible();
+  await expect(page.locator("[data-chat-turn]")).toHaveCount(2);
+  await expect(botImages).toHaveCount(2);
+  // Skipping must cancel pending timers rather than hide the reply again.
+  await page.waitForTimeout(1200);
+  await expect(page.getByRole("button", { name: "自分の仕事で考えてみる" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "他の事例も見てみる" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ひとつ前に戻る" })).toHaveCount(0);
+  await page.getByRole("button", { name: "他の事例も見てみる" }).click();
+  await expect(page.getByRole("button", { name: /^シフトの回収・調整/ })).toBeVisible();
+});
+
+test("320pxと動きを減らす設定でも相談文・添付・選択肢が使える", async ({ page, baseURL }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`${baseURL}/business/`);
+  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await expect(page.getByRole("button", { name: /^名前をそろえるルールを決める/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  await page.getByRole("button", { name: /^名前をそろえるルールを決める/ }).click();
+  await expect(page.getByText("差額は30,000円。分割入金か、入力漏れかを人が確認します。")).toBeVisible();
+  await page.getByRole("button", { name: "選択肢を閉じる" }).click();
+  await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "メニューから、できることを選ぶ" })).toBeFocused();
+  await page.getByRole("button", { name: "選択肢を表示" }).click();
+  await expect(page.getByRole("button", { name: "他の事例も見てみる" })).toBeVisible();
+  await page.getByRole("button", { name: "最初の画面に戻る" }).click();
+  await expect(page.getByRole("heading", { name: "いつもの仕事、AIと一緒なら？" })).toBeVisible();
+});
+
+
+test("送信後に考え中を挟み、応答全体のストリーム表示後に選択肢が出る", async ({ page, baseURL }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(`${baseURL}/business/`);
+  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  await page.getByRole("button", { name: "回答をすべて表示" }).click();
+  await page.clock.install();
+  await page.getByRole("button", { name: /^取引先コードで照合する/ }).click();
+  const turn = page.locator("[data-chat-turn]").last();
+  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  await page.clock.runFor(1000);
+  await expect(turn).toHaveAttribute("data-phase", "thinking");
+  await expect(turn.getByRole("status")).toContainText("考え中...");
+  await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+  await page.clock.runFor(1300);
+  await expect(turn).toHaveAttribute("data-phase", "streaming");
+  const firstLine = turn.locator("p").filter({ hasText: /^確認/ });
+  await expect(firstLine).toBeVisible();
+  await expect(turn.locator("[data-stream-cursor]")).toHaveCount(1);
+  const partial = await firstLine.innerText();
+  await page.clock.runFor(180);
+  expect((await firstLine.innerText()).length).toBeGreaterThan(partial.length);
+  expect((await firstLine.innerText()).length).toBeLessThan("確認が必要なものだけ、人が見られる形にしました。".length);
+  await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+  await page.clock.runFor(15000);
+  await expect(turn).toHaveAttribute("data-phase", "ready");
+  await expect(turn.getByText("この確認ルールを、来月も使える手順として残せます。")).toBeVisible();
+  await expect(turn.getByRole("table")).toContainText("230,000");
+  await expect(turn.locator("[data-stream-cursor]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "自分の仕事で考えてみる" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveCount(0);
+});
+
