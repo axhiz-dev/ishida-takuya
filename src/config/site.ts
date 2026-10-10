@@ -6,8 +6,8 @@
  * GitHub Pages のデプロイ経路が要求するインフラ変数のため
  * next.config.ts とこのファイルの中でしか読まない。
  *
- * 内部リンクと画像は next/link・next/image が basePath を
- * 自動で付けるので、アプリのコードで basePath を意識する必要はない。
+ * next/link は内部リンクに basePath を付ける。
+ * next/image の src と通常の a の静的ファイルには BASE_PATH を明示する。
  */
 
 /** GitHub Pages のサブパス。ローカルでは空文字。 */

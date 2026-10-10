@@ -58,7 +58,9 @@ export function AggregateArtifact({
           <p className={s.artifactLead}>
             {method === "hold"
               ? "判断できない取引先を、確認用に分けました。"
-              : "名前をそろえても、金額の違いが残りました。"}
+              : method === "code"
+                ? "取引先コードで照合すると、金額の違いが見つかりました。"
+                : "名前をそろえても、金額の違いが残りました。"}
           </p>
           <table>
             <thead>

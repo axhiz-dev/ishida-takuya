@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import Image from "next/image";
+import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import ChatTurn, { Guide } from "./ChatTurn";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -14,7 +15,6 @@ import {
   ListChecks,
   Plus,
   Question,
-  User,
   X,
 } from "@phosphor-icons/react";
 import { AggregateArtifact, ShiftArtifact } from "./Artifacts";
@@ -28,60 +28,61 @@ import {
 } from "./content";
 import s from "./chat.module.css";
 
+
+const aggregateRequest = "私は経理担当をしています。\n毎月月末になると、売上データと入金明細のExcelを開いて、取引先ごとに金額を照合しています。\n会社名の書き方が違うこともあり、同じ取引先かどうかを一件ずつ確認するのが大変です。\n使っているExcelのサンプルはこちらです。毎月同じような作業なので、自動化したいのですが、できますか？";
+const aggregateMethods = [
+  { id: "code", label: "取引先コードで照合する", description: "共通のコードがあるか確認して、同じ取引先をまとめます。", reply: "両方のファイルに取引先コードがあります。名前の表記が違っても、コードが同じものを照合してください。" },
+  { id: "name", label: "名前をそろえるルールを決める", description: "「（株）」などの表記の違いを整理します。", reply: "「（株）」と「株式会社」の表記をそろえるルールを決めたいです。判断が難しいものは、確認できるように残してください。" },
+  { id: "hold", label: "判断が難しいものは確認に回す", description: "無理にまとめず、人が確認できるように残します。", reply: "同じ取引先か判断が難しいものは、無理にまとめず、私が確認する一覧に分けてください。" },
+];
+
 type View = "experience" | "faq" | "pricing" | "process" | "contact";
 type Choice = { label: string; description?: string; action: () => void };
-function Guide({
-  children,
-  title = false,
-}: {
-  children: ReactNode;
-  title?: boolean;
-}) {
-  return (
-    <div className={s.guide}>
-      <Image
-        src="/images/business/chat-guide.png"
-        alt=""
-        width={52}
-        height={52}
-        className={s.mascot}
-      />
-      <div className={s.guideText}>
-        {title ? <h1>{children}</h1> : children}
-      </div>
-    </div>
-  );
-}
-function UserMessage({ children }: { children: ReactNode }) {
-  return (
-    <div className={s.userMessage}>
-      <p>{children}</p>
-      <User size={23} weight="fill" aria-hidden="true" />
-    </div>
-  );
-}
+type ChoiceDock = {
+  target: HTMLDivElement | null;
+  active: string;
+  dismissed: string;
+  setActive: React.Dispatch<React.SetStateAction<string>>;
+  setDismissed: React.Dispatch<React.SetStateAction<string>>;
+};
+const ChoiceDockContext = createContext<ChoiceDock | null>(null);
 function Choices({ items, label }: { items: Choice[]; label: string }) {
-  return (
-    <div className={s.choices} role="group" aria-label={label}>
-      {items.map((item, index) => (
-        <button key={item.label} onClick={item.action} data-multiline>
-          <span>
-            <strong>{item.label}</strong>
-            {item.description && <small>{item.description}</small>}
-          </span>
-          <span className={s.choiceTail}>
-            <span className={s.choiceNumber} aria-hidden="true">
-              {index + 1}
+  const id = useId();
+  const dock = useContext(ChoiceDockContext)!;
+  const { setActive } = dock;
+  useEffect(() => {
+    setActive(id);
+    return () => setActive((current) => current === id ? "" : current);
+  }, [id, setActive]);
+  if (!dock.target || dock.active !== id || dock.dismissed === id) return null;
+  return createPortal(
+    <section className={s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
+      if (event.key === "Escape") dock.setDismissed(id);
+    }}>
+      <div className={s.choicePanelHeader}>
+        <span>{label}</span>
+        <button aria-label="選択肢を閉じる" onClick={() => dock.setDismissed(id)}><X size={20} /></button>
+      </div>
+      <div className={s.choices} role="group" aria-label={label}>
+        {items.map((item, index) => (
+          <button key={item.label} onClick={() => { dock.setDismissed(id); item.action(); }} data-multiline>
+            <span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span>
+            <span className={s.choiceTail}>
+              <span className={s.choiceNumber} aria-hidden="true">{index + 1}</span>
+              <CaretRight size={17} />
             </span>
-            <CaretRight size={17} />
-          </span>
-        </button>
-      ))}
-    </div>
+          </button>
+        ))}
+      </div>
+    </section>, dock.target,
   );
 }
 
 export default function BusinessChat() {
+  const [choiceTarget, setChoiceTarget] = useState<HTMLDivElement | null>(null);
+  const [activeChoice, setActiveChoice] = useState("");
+  const [dismissedChoice, setDismissedChoice] = useState("");
+  const choicesVisible = !!activeChoice && dismissedChoice !== activeChoice;
   const [view, setView] = useState<View>("experience");
   const [experience, setExperience] = useState<Experience | null>(null);
   const [step, setStep] = useState(0);
@@ -101,12 +102,15 @@ export default function BusinessChat() {
   const menuBox = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    if (activeChoice && dismissedChoice === activeChoice) launcher.current?.focus();
+  }, [activeChoice, dismissedChoice]);
+  useEffect(() => {
     const timer = setTimeout(() => setWelcomed(true), 550);
     return () => clearTimeout(timer);
   }, []);
   useEffect(() => {
     if (welcomed) {
-      main.current?.scrollTo({ top: 0 });
+      if (view !== "experience" || !experience) main.current?.scrollTo({ top: 0 });
       main.current?.focus({ preventScroll: true });
     }
   }, [view, step, experience, question, welcomed]);
@@ -181,15 +185,17 @@ export default function BusinessChat() {
     { label: "相談する", icon: ChatCircle, action: contact },
   ].filter((item) => item.label.includes(search.trim()));
   return (
+    <ChoiceDockContext.Provider value={{ target: choiceTarget, active: activeChoice, dismissed: dismissedChoice, setActive: setActiveChoice, setDismissed: setDismissedChoice }}>
     <div className={s.app}>
       <a className={s.skip} href="#business-conversation">
         会話へ移動
       </a>
       <header className={s.header}>
         <button
-          onClick={() => navigate("experience")}
+          onClick={home}
           className={s.brand}
-          aria-label="体験に戻る"
+          aria-label="最初の画面に戻る"
+          title="最初の画面に戻る"
         >
           石田 卓也
         </button>
@@ -273,84 +279,34 @@ export default function BusinessChat() {
           )}
           {view === "experience" && experience && (
             <>
-              <div className={s.trail}>
-                <button onClick={home}>
-                  <ArrowLeft size={16} />
-                  仕事を選び直す
-                </button>
-                <span>
-                  {experience === "shift"
-                    ? `${Math.min(step + 1, 6)} / 6`
-                    : `${Math.min(step + 1, 3)} / 3`}
-                </span>
-              </div>
-              <UserMessage>{experienceNames[experience]}</UserMessage>
-              {!reflection && experience === "aggregate" && (
+              {experience === "aggregate" && (
                 <>
-                  <Guide>
-                    <p>
-                      {step === 0
-                        ? "まず、集計する前に確認したいことがあります。"
-                        : "確認が必要なものだけ、人が見られる形にしました。"}
-                    </p>
-                  </Guide>
-                  <div className={s.indent}>
-                    <AggregateArtifact resolved={step === 1} method={method} />
-                  </div>
-                  <Guide>
-                    <p>
-                      {step === 0
-                        ? "この2つ、どう扱いましょう？"
-                        : "この確認ルールを、来月も使える手順として残せます。"}
-                    </p>
-                  </Guide>
-                  <div className={s.indent}>
-                    <Choices
-                      label="集計の進め方"
-                      items={
-                        step === 0
-                          ? [
-                              {
-                                label: "取引先コードで照合する",
-                                description:
-                                  "共通のコードがあるか確認して、同じ取引先をまとめます。",
-                                action: () => {
-                                  setMethod("code");
-                                  setStep(1);
-                                },
-                              },
-                              {
-                                label: "名前をそろえるルールを決める",
-                                description:
-                                  "「（株）」などの表記の違いを整理します。",
-                                action: () => {
-                                  setMethod("name");
-                                  setStep(1);
-                                },
-                              },
-                              {
-                                label: "判断が難しいものは確認に回す",
-                                description:
-                                  "無理にまとめず、人が確認できるように残します。",
-                                action: () => {
-                                  setMethod("hold");
-                                  setStep(1);
-                                },
-                              },
-                            ]
-                          : [
-                              {
-                                label: "自分の仕事で考えてみる",
-                                action: () => setStep(2),
-                              },
-                            ]
-                      }
-                    />
-                  </div>
+                  <ChatTurn user={aggregateRequest} attachments>
+                    <Guide>
+                      <p>サンプルを確認しました。まず、集計する前に確認したいことがあります。</p>
+                      <AggregateArtifact />
+                      <p>この2つ、どう扱いましょう？</p>
+                      {step === 0 && <Choices label="集計の進め方" items={aggregateMethods.map((item) => ({
+                        ...item, action: () => { setMethod(item.id); setStep(1); },
+                      }))} />}
+                    </Guide>
+                  </ChatTurn>
+                  {step >= 1 && <ChatTurn key={method} user={aggregateMethods.find((item) => item.id === method)!.reply}>
+                    <Guide>
+                      <p>確認が必要なものだけ、人が見られる形にしました。</p>
+                      <AggregateArtifact resolved method={method} />
+                      <p>この確認ルールを、来月も使える手順として残せます。</p>
+                      {step === 1 && <Choices label="集計の進め方" items={[{
+                        label: "自分の仕事で考えてみる", action: () => setStep(2),
+                      }, {
+                        label: "他の事例も見てみる", action: home,
+                      }]} />}
+                    </Guide>
+                  </ChatTurn>}
                 </>
               )}
               {!reflection && experience === "shift" && (
-                <>
+                <ChatTurn key={`shift-${step}`} user={step === 0 ? "スタッフのシフト希望を毎月LINEで集めています。返信の確認や、足りない時間帯の調整に時間がかかるので、自動化できるか知りたいです。" : shiftSteps[step - 1]!.next}>
                   <Guide>
                     <p>{shiftSteps[step]!.line}</p>
                   </Guide>
@@ -374,10 +330,11 @@ export default function BusinessChat() {
                       ]}
                     />
                   </div>
-                </>
+                </ChatTurn>
               )}
               {reflection && (
                 <>
+                  <ChatTurn user={experience === "aggregate" ? "自分の仕事で考えてみる" : "自分のお店で考えてみる"}>
                   <Guide>
                     <p>
                       {experience === "shift"
@@ -386,17 +343,17 @@ export default function BusinessChat() {
                     </p>
                   </Guide>
                   <div className={s.indent}>
-                    <Choices
+                    {!concern && <Choices
                       label="困っていること"
                       items={concerns[experience].map((label) => ({
                         label,
                         action: () => setConcern(label),
                       }))}
-                    />
+                    />}
                   </div>
+                  </ChatTurn>
                   {concern && (
-                    <>
-                      <UserMessage>{concern}</UserMessage>
+                    <ChatTurn key={concern} user={concern}>
                       <Guide>
                         <p>今のやり方も含めて、ご相談いただけます。</p>
                       </Guide>
@@ -417,17 +374,9 @@ export default function BusinessChat() {
                           ]}
                         />
                       </div>
-                    </>
+                    </ChatTurn>
                   )}
                 </>
-              )}
-              {step > 0 && (
-                <div className={s.indent}>
-                  <button className={s.back} onClick={() => setStep(step - 1)}>
-                    <ArrowLeft size={16} />
-                    ひとつ前に戻る
-                  </button>
-                </div>
               )}
             </>
           )}
@@ -455,8 +404,7 @@ export default function BusinessChat() {
                   </div>
                 </>
               ) : (
-                <>
-                  <UserMessage>{questions[question]!.q}</UserMessage>
+                <ChatTurn key={question} user={questions[question]!.q}>
                   <Guide>
                     <p>{questions[question]!.a}</p>
                   </Guide>
@@ -503,7 +451,7 @@ export default function BusinessChat() {
                       ]}
                     />
                   </div>
-                </>
+                </ChatTurn>
               )}
             </>
           )}
@@ -606,18 +554,12 @@ export default function BusinessChat() {
               </div>
             </div>
           )}
-          {view !== "experience" && (
-            <div className={s.indent}>
-              <button className={s.back} onClick={() => navigate("experience")}>
-                <ArrowLeft size={17} />
-                {experience ? "体験の続きに戻る" : "仕事の体験を見る"}
-              </button>
-            </div>
-          )}
         </div>
       </main>
       <footer className={s.dock}>
-        {menu && (
+        <div ref={setChoiceTarget} className={s.choiceSlot} />
+        {!choicesVisible && activeChoice && <button className={s.resumeChoices} onClick={() => setDismissedChoice("")}>選択肢を表示</button>}
+        {!choicesVisible && menu && (
           <div
             className={s.menu}
             ref={menuBox}
@@ -659,7 +601,7 @@ export default function BusinessChat() {
             </button>
           </div>
         )}
-        <button
+        {!choicesVisible && <button
           ref={launcher}
           className={s.launcher}
           aria-expanded={menu}
@@ -672,7 +614,7 @@ export default function BusinessChat() {
           <Plus size={25} />
           <span>メニューから、できることを選ぶ</span>
           <CaretDown size={20} />
-        </button>
+        </button>}
         <div className={s.dockMeta}>
           <span>
             <Check size={12} />
@@ -690,5 +632,6 @@ export default function BusinessChat() {
         </p>
       </noscript>
     </div>
+    </ChoiceDockContext.Provider>
   );
 }

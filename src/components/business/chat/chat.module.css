@@ -40,7 +40,13 @@
   font-size: 21px;
   white-space: nowrap;
   letter-spacing: 0.12em;
+  padding: 5px 9px;
+  margin-left: -9px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 180ms, color 180ms;
 }
+.brand:hover, .brand:focus-visible { background: #edf3ef; color: #28513e; }
 .service {
   border-left: 1px solid #d9dfe3;
   padding-left: 24px;
@@ -185,13 +191,32 @@
   gap: 17px;
   margin: 12px 0 27px;
 }
-.userMessage p {
+.userBubble {
   background: #edf3fa;
   padding: 13px 20px;
   border-radius: 15px;
   max-width: 85%;
   font-size: 14px;
+  min-width: 0;
+  white-space: pre-wrap;
 }
+.userBubble p { margin: 0; }
+.attachments { margin-top: 16px; white-space: normal; }
+.attachments > span { display: block; font-size: 11px; color: #53606b; margin-bottom: 7px; }
+.attachments button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: 1px solid #d6dfe5; border-radius: 9px; padding: 12px; cursor: pointer; }
+.attachments button > svg { color: #178451; flex-shrink: 0; }
+.attachments strong { display: block; font-size: 13px; overflow-wrap: anywhere; }
+.attachments small { display: block; font-size: 11px; color: #53606b; }
+.attachments button:hover { border-color: #376956; background: #f8fbf9; }
+.turn { scroll-margin-top: 14px; }
+.botResponse { animation: messageIn 420ms ease-out; }
+.userBubble { animation: messageIn 220ms ease-out; }
+.turnStatus { color: #657080; font-size: 12px; }
+.turnStatus > button { display: block; margin: 10px 0 16px auto; padding: 7px 12px; border: 1px solid #d6dfe5; border-radius: 7px; }
+.cursor { animation: pulse 700ms infinite; }
+.guideText > .artifact { margin-top: 16px; }
+.guideText > .choices { font-size: 15px; }
+@keyframes messageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .userMessage > svg {
   color: #71818b;
   flex-shrink: 0;
@@ -642,7 +667,7 @@
   font-size: 14px;
 }
 .typing {
-  color: #829087;
+  color: #657080;
 }
 .typing span {
   animation: pulse 1s ease-in-out infinite;
@@ -776,7 +801,7 @@
     gap: 10px;
     margin-bottom: 20px;
   }
-  .userMessage p {
+  .userBubble {
     font-size: 12px;
     padding: 10px 14px;
   }
@@ -997,4 +1022,53 @@
   .trail {
     margin-bottom: 6px;
   }
+}
+.choiceSlot:empty { display: none; }
+.floatingChoices {
+  background: #fff;
+  border: 1px solid #dce2e6;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px #172e4214, 0 2px 8px #172e4208;
+  padding: 16px;
+  margin-bottom: 4px;
+  max-height: min(55dvh, 460px);
+  overflow-y: auto;
+  animation: messageIn 240ms ease-out;
+}
+.choicePanelHeader { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 12px; font-size: 13px; color: #53606b; }
+.choicePanelHeader > button { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; flex-shrink: 0; }
+.choicePanelHeader > button:hover { background: #eef3f0; }
+.floatingChoices .choices { margin: 0; border-radius: 10px; }
+.resumeChoices { display: block; margin: 0 0 9px auto; color: #376451; font-size: 12px !important; padding: 5px 12px; border: 1px solid #ccdcd3; border-radius: 20px; cursor: pointer; }
+.resumeChoices:hover { background: #edf3ef; }
+.workbookPreview { border: 0; border-radius: 16px; padding: 0; margin: auto; width: min(820px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); color: #202b36; box-shadow: 0 20px 70px #172e4233; }
+.workbookPreview::backdrop { background: #182c3d66; }
+.previewSurface { background: #fff; padding: 24px; }
+.previewHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.previewHeader > svg { color: #178451; flex-shrink: 0; }
+.previewHeader h2 { font-size: 17px; font-weight: 500; margin: 0; overflow-wrap: anywhere; }
+.previewHeader p { font-size: 12px; color: #657080; margin: 3px 0 0; }
+.previewHeader > button { margin-left: auto; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+.previewHeader > button:hover { background: #edf3ef; }
+.previewTable { overflow-x: auto; border: 1px solid #dce2e6; border-radius: 8px; }
+.previewTable table { width: 100%; min-width: 500px; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+.previewTable th, .previewTable td { padding: 16px 14px; border-bottom: 1px solid #dce2e6; border-right: 1px solid #dce2e6; text-align: left; }
+.previewTable thead th { background: #f3f5f7; font-weight: 500; }
+.previewTable tbody th { font-size: 11px; background: #f8fafb; color: #657080; font-weight: 400; }
+.previewTable tr:last-child td, .previewTable tr:last-child th { border-bottom: 0; }
+.previewTable tr:last-child td { background: #fff4d5; }
+.previewTable th:last-child, .previewTable td:last-child { border-right: 0; }
+.previewTable .numericCell { text-align: right; font-variant-numeric: tabular-nums; }
+.sheetTabs { display: flex; gap: 6px; padding-top: 16px; }
+.sheetTabs > button { padding: 9px 15px; border-radius: 7px; color: #53606b; cursor: pointer; font-size: 13px !important; }
+.sheetTabs > button[aria-pressed="true"] { background: #edf3ef; color: #28513e; box-shadow: inset 0 -2px #376451; }
+@media (max-width: 680px) {
+  .floatingChoices { padding: 10px; border-radius: 13px; max-height: 52dvh; }
+  .floatingChoices .choiceNumber { display: grid; width: 24px; height: 27px; }
+  .floatingChoices .choiceTail { gap: 6px; }
+  .previewSurface { padding: 16px; }
+  .previewHeader h2 { font-size: 14px; }
+  .previewHeader p { font-size: 10px; }
+  .previewHeader { gap: 8px; }
+  .sheetTabs > button { font-size: 12px !important; padding: 8px 12px; }
 }
