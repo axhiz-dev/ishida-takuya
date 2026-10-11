@@ -86,7 +86,7 @@ function StreamResponse({ children, immediate, onComplete }: { children: ReactNo
 }
 
 // Each turn owns its timers so navigating away cancels pending animation.
-export default function ChatTurn({ user, attachments = false, children }: { user: string; attachments?: boolean; children: ReactNode }) {
+export default function ChatTurn({ user, attachments = false, children, emphasize }: { user: string; attachments?: boolean; children: ReactNode; emphasize?: string }) {
   const [length, setLength] = useState(0);
   const [phase, setPhase] = useState<"user" | "thinking" | "streaming" | "ready">("user");
   const [immediate, setImmediate] = useState(false);
@@ -95,6 +95,7 @@ export default function ChatTurn({ user, attachments = false, children }: { user
   const sendUser = useRef<() => void>(() => {});
   const complete = useRef(() => setPhase("ready")).current;
   useEffect(() => {
+    root.current?.scrollIntoView({ block: "start" });
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const finish = () => { setImmediate(true); setLength(user.length); setPhase("ready"); };
     if (media.matches) { finish(); return; }
@@ -118,15 +119,13 @@ export default function ChatTurn({ user, attachments = false, children }: { user
     };
     const changed = () => { if (media.matches) { clearInterval(timer); clearTimeout(reply); finish(); } };
     media.addEventListener("change", changed);
-    root.current?.scrollIntoView({ block: "start" });
     return () => { clearInterval(timer); clearTimeout(reply); media.removeEventListener("change", changed); };
   }, [user]);
-  useEffect(() => {
-    if (phase === "ready") root.current?.lastElementChild?.scrollIntoView({ block: "nearest" });
-  }, [phase]);
+  const visibleUser = user.slice(0, length);
+  const emphasisAt = emphasize ? visibleUser.indexOf(emphasize) : -1;
   return <div ref={root} className={s.turn} data-chat-turn data-phase={phase}>
     <UserMessage attachments={attachments && phase !== "user"}>
-      <span aria-hidden="true">{user.slice(0, length)}{phase === "user" && <span className={s.cursor}>▍</span>}</span>
+      <span aria-hidden="true">{emphasisAt < 0 ? visibleUser : <>{visibleUser.slice(0, emphasisAt)}<strong>{emphasize}</strong>{visibleUser.slice(emphasisAt + emphasize!.length)}</>}{phase === "user" && <span className={s.cursor}>▍</span>}</span>
       <span className={s.srOnly}>{user}</span>
     </UserMessage>
     {phase === "user" || phase === "thinking" ? <div role="status" className={s.turnStatus}>

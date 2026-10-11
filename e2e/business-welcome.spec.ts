@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("導入文が順番に現れ、選択肢の位置は動かず、再訪時は省略される", async ({ page, baseURL }, testInfo) => {
+test("導入文の完了後に選択肢が現れ、再訪時は入力が省略される", async ({ page, baseURL }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const now = new Date("2026-10-11T00:00:00Z");
   await page.clock.install({ time: now });
@@ -10,11 +10,8 @@ test("導入文が順番に現れ、選択肢の位置は動かず、再訪時�
   const title = intro.locator('h1 > [aria-hidden="true"] > span').first();
   const lead = intro.locator('p > [aria-hidden="true"] > span').first();
   const choices = page.getByRole("region", { name: "選択肢パネル" });
-  await expect(choices).toBeVisible();
-  // Measure layout separately from the panel's entrance transform.
-  const panelTop = () => choices.evaluate((el) => el.getBoundingClientRect().y - new DOMMatrixReadOnly(getComputedStyle(el).transform).m42);
+  await expect(choices).toHaveCount(0);
   const before = await intro.boundingBox();
-  const panelBefore = await panelTop();
   await page.clock.runFor(500);
   expect((await title.innerText()).length).toBeGreaterThan(0);
   expect((await title.innerText()).length).toBeLessThan("AIって、自分の仕事にも使えるの？".length);
@@ -24,7 +21,7 @@ test("導入文が順番に現れ、選択肢の位置は動かず、再訪時�
   await expect(title).toHaveText("AIって、自分の仕事にも使えるの？");
   await expect(lead).toHaveText("まずは、いつもの仕事がどう変わるか、サンプルで体験してみてください。");
   expect((await intro.boundingBox())!.height).toBeCloseTo(before!.height, 0);
-  expect(await panelTop()).toBeCloseTo(panelBefore, 0);
+  await expect(choices).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("welcome-desktop.png") });
   await page.getByRole("button", { name: "費用・FAQ" }).click();
   await page.getByRole("button", { name: "最初の画面に戻る" }).click();
@@ -33,11 +30,13 @@ test("導入文が順番に現れ、選択肢の位置は動かず、再訪時�
   await expect(intro).toHaveAttribute("data-welcome-phase", "ready");
 });
 
-test("導入の表示中でも仕事を選べ、戻った後の演出は正常に完了する", async ({ page, baseURL }) => {
+test("導入の表示中は選択肢を出さず、完了後に仕事を選べる", async ({ page, baseURL }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.clock.install();
   await page.goto(`${baseURL}/business/`);
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "streaming");
+  await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+  await page.clock.runFor(6500);
   await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
   await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
   await page.getByRole("button", { name: "最初の画面に戻る" }).click();
@@ -62,7 +61,7 @@ for (const width of [320, 1440]) {
     expect(bot!.y - user!.y - user!.height).toBeGreaterThanOrEqual(width <= 680 ? 36 : 52);
     await page.locator("main").evaluate((el) => { el.scrollTop = 0; });
     await page.screenshot({ path: testInfo.outputPath(`conversation-${width}.png`) });
-    await page.getByRole("button", { name: /^取引先コードで照合する/ }).click();
+    await page.getByRole("button", { name: /^同じ会社です。このルールで照合して/ }).click();
     const next = page.locator("[data-chat-turn]").last();
     await expect(next).toHaveAttribute("data-phase", "ready");
     const firstBox = await turn.boundingBox();

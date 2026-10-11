@@ -1,6 +1,9 @@
 .app {
+  position: relative;
+  height: 100svh;
   height: 100dvh;
-  min-height: 420px;
+  min-height: 0;
+  overflow: clip;
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -679,6 +682,8 @@
 }
 .srOnly {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px;
   height: 1px;
   padding: 0;
@@ -1091,3 +1096,11 @@
   .turn + .turn { margin-top: 40px; }
   .welcomeLead { margin-bottom: 16px; }
 }
+
+.mailDraft dl { margin: 14px 0; font-size: 12px; }
+.mailDraft dl > div { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; padding: 6px 0; border-bottom: 1px solid #e3e7e9; }
+.mailDraft dd { overflow-wrap: anywhere; }
+.mailBody { white-space: pre-wrap; padding: 14px; background: #f7f9fb; border-radius: 8px; font-size: 13px; }
+.skillDetails { font-size: 13px; margin: 14px 0; }
+.skillDetails li { margin: 10px 0; }
+.skillPrompt { display: block; margin-top: 10px; padding: 12px; border-radius: 8px; background: #edf3ef; font-size: 13px; overflow-wrap: anywhere; }

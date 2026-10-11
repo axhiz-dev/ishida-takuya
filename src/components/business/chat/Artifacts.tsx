@@ -8,10 +8,8 @@ import s from "./chat.module.css";
 
 export function AggregateArtifact({
   resolved,
-  method,
 }: {
   resolved?: boolean;
-  method?: string;
 }) {
   return (
     <section className={s.artifact} aria-label="集計のサンプル">
@@ -23,8 +21,8 @@ export function AggregateArtifact({
           </p>
           <div className={s.sheets}>
             {[
-              ["売上データ", "田中工業（株）", "230,000"],
-              ["入金明細", "田中工業株式会社", "200,000"],
+              ["売上データ", "田中工業", "230,000"],
+              ["入金明細", "㈱田中工業", "200,000"],
             ].map(([title, name, amount]) => (
               <div className={s.sheet} key={title}>
                 <h3>
@@ -40,7 +38,7 @@ export function AggregateArtifact({
                   </thead>
                   <tbody>
                     <tr>
-                      <td>山田商事</td>
+                      <td>{title === "売上データ" ? "山田商事" : "山田商事 株式会社"}</td>
                       <td>120,000</td>
                     </tr>
                     <tr className={s.highlight}>
@@ -56,11 +54,7 @@ export function AggregateArtifact({
       ) : (
         <>
           <p className={s.artifactLead}>
-            {method === "hold"
-              ? "判断できない取引先を、確認用に分けました。"
-              : method === "code"
-                ? "取引先コードで照合すると、金額の違いが見つかりました。"
-                : "名前をそろえても、金額の違いが残りました。"}
+            確認した取引先を照合すると、金額の違いが見つかりました。
           </p>
           <table>
             <thead>
@@ -90,15 +84,47 @@ export function AggregateArtifact({
           </table>
           <p className={s.artifactNote}>
             <WarningCircle size={18} />
-            {method === "hold"
-              ? "取引先の対応と入金額を、人が確認します。"
-              : "差額は30,000円。分割入金か、入力漏れかを人が確認します。"}
+            差額は30,000円。理由を社内担当者に確認します。
           </p>
         </>
       )}
     </section>
   );
 }
+export function MailDraftArtifact() {
+  return <section className={`${s.artifact} ${s.mailDraft}`} aria-label="Gmail下書きのサンプル">
+    <span className={s.badge}>Gmail連携のサンプル体験 · 下書き保存</span>
+    <dl>
+      <div><dt>宛先</dt><dd>営業部 佐藤さん &lt;sato@example.com&gt;</dd></div>
+      <div><dt>件名</dt><dd>田中工業様の売上・入金差額について確認のお願い</dd></div>
+    </dl>
+    <div className={s.mailBody}>{`佐藤さん
+
+お疲れさまです。月末の売上・入金を確認したところ、田中工業様の売上230,000円に対して入金が200,000円となっており、30,000円の差額がありました。
+
+分割での入金予定や、明細への入力漏れがないか、ご確認いただけますか。差額の理由と、未入金の場合は入金予定日を教えてください。
+
+よろしくお願いします。`}</div>
+    <p className={s.sampleNote}>架空の宛先・データによるサンプルです。実際のGmail保存・メール送信は行いません。</p>
+  </section>;
+}
+
+export function FinanceSkillArtifact() {
+  return <section className={s.artifact} aria-label="finance-checkerスキルのサンプル">
+    <span className={s.badge}>スキル作成のサンプル体験</span>
+    <h3 className={s.artifactLead}>finance-checker</h3>
+    <ul className={s.skillDetails}>
+      <li><strong>照合ルール</strong>：㈱・株式会社・空白を整理。確認済みの表記だけをまとめ、判断できない取引先は確認用に残す。</li>
+      <li><strong>確認済みの対応</strong>：田中工業 ↔ ㈱田中工業、山田商事 ↔ 山田商事 株式会社。</li>
+      <li><strong>社内担当者</strong>：田中工業は営業部の佐藤さん（sato@example.com）。</li>
+      <li><strong>毎月の作業</strong>：売上・入金を照合し、差額一覧と担当者へのGmail下書きを作成。送信は人が確認して行う。</li>
+    </ul>
+    <p className={s.artifactLead}>次回の頼み方</p>
+    <code className={s.skillPrompt}>finance-checkerで今月分を確認して ＋ 今月のExcel</code>
+    <p className={s.sampleNote}>この画面では作成の流れを体験できます。実際のスキル保存や自動実行は行いません。</p>
+  </section>;
+}
+
 function Bubble({
   children,
   person = "シフト係",
