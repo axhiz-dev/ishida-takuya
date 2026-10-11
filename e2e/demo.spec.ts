@@ -12,12 +12,9 @@ test("集計：判断、結果、相談への引き継ぎと未設定時の送�
 }) => {
   await page.goto("/business/");
   await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
-  await page
-    .getByRole("button", { name: /^判断が難しいものは確認に回す/ })
-    .click();
-  await expect(
-    page.getByText("判断できない取引先を、確認用に分けました。"),
-  ).toBeVisible();
+  await page.getByRole("button", { name: "同じ会社です。このルールで照合して" }).click();
+  await page.getByRole("button", { name: "担当者を伝えて、確認メールを下書きして" }).click();
+  await page.getByRole("button", { name: "毎月使えるスキルにして" }).click();
   await page.getByRole("button", { name: "自分の仕事で考えてみる" }).click();
   await page
     .getByRole("button", { name: "数字の違いを確認する", exact: true })

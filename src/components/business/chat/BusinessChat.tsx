@@ -18,7 +18,7 @@ import {
   Question,
   X,
 } from "@phosphor-icons/react";
-import { AggregateArtifact, ShiftArtifact } from "./Artifacts";
+import { AggregateArtifact, MailDraftArtifact, FinanceSkillArtifact, ShiftArtifact } from "./Artifacts";
 import Consultation from "./Consultation";
 import {
   concerns,
@@ -31,11 +31,9 @@ import s from "./chat.module.css";
 
 
 const aggregateRequest = "私は経理担当をしています。\n毎月月末になると、売上データと入金明細のExcelを開いて、取引先ごとに金額を照合しています。\n会社名の書き方が違うこともあり、同じ取引先かどうかを一件ずつ確認するのが大変です。\n使っているExcelのサンプルはこちらです。毎月同じような作業なので、自動化したいのですが、できますか？";
-const aggregateMethods = [
-  { id: "code", label: "取引先コードで照合する", description: "共通のコードがあるか確認して、同じ取引先をまとめます。", reply: "両方のファイルに取引先コードがあります。名前の表記が違っても、コードが同じものを照合してください。" },
-  { id: "name", label: "名前をそろえるルールを決める", description: "「（株）」などの表記の違いを整理します。", reply: "「（株）」と「株式会社」の表記をそろえるルールを決めたいです。判断が難しいものは、確認できるように残してください。" },
-  { id: "hold", label: "判断が難しいものは確認に回す", description: "無理にまとめず、人が確認できるように残します。", reply: "同じ取引先か判断が難しいものは、無理にまとめず、私が確認する一覧に分けてください。" },
-];
+const aggregateConfirmation = "はい、田中工業と㈱田中工業は同じ取引先です。山田商事の表記違いもまとめてください。同じ会社か判断できないものは、確認用に残してください。";
+const aggregateMailRequest = "田中工業の社内担当者は営業部の佐藤さん（sato@example.com）です。差額の理由を確認するメールを作って、連携したGmailに下書き保存してください。まだ送信はしないでください。";
+const aggregateSkillRequest = "OKです。毎月月末に同じ作業をしたいので、スキルにしてください。取引先の表記ルールと社内担当者も保存して、次回は今月分のExcelだけで進められるようにしたいです。";
 
 type View = "experience" | "faq" | "pricing" | "process" | "contact";
 type Choice = { label: string; description?: string; action: () => void };
@@ -49,7 +47,13 @@ type ChoiceDock = {
 const ChoiceDockContext = createContext<ChoiceDock | null>(null);
 function Choices({ items, label }: { items: Choice[]; label: string }) {
   const id = useId();
-  const ready = useContext(ResponseReadyContext);
+  const complete = useContext(ResponseReadyContext);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (!complete) return;
+    const timer = setTimeout(() => setReady(true), 1000);
+    return () => clearTimeout(timer);
+  }, [complete]);
   const dock = useContext(ChoiceDockContext)!;
   const { setActive } = dock;
   useEffect(() => {
@@ -89,7 +93,6 @@ export default function BusinessChat() {
   const [view, setView] = useState<View>("experience");
   const [experience, setExperience] = useState<Experience | null>(null);
   const [step, setStep] = useState(0);
-  const [method, setMethod] = useState("code");
   const [concern, setConcern] = useState("");
   const [question, setQuestion] = useState<number | null>(null);
   const [menu, setMenu] = useState(false);
@@ -160,7 +163,7 @@ export default function BusinessChat() {
     navigate("contact");
   }
   const reflection =
-    experience !== null && step >= (experience === "shift" ? 6 : 2);
+    experience !== null && step >= (experience === "shift" ? 6 : 4);
   const menuItems = [
     {
       label: "仕事の体験",
@@ -229,7 +232,7 @@ export default function BusinessChat() {
           )}
           {view === "experience" && !experience && (
             <div className={s.welcome}>
-              <WelcomeIntro />
+              <WelcomeIntro>
               <div className={s.indent}>
                 <Choices
                   label="試したい仕事"
@@ -254,6 +257,7 @@ export default function BusinessChat() {
                   ]}
                 />
               </div>
+              </WelcomeIntro>
             </div>
           )}
           {view === "experience" && experience && (
@@ -262,21 +266,46 @@ export default function BusinessChat() {
                 <>
                   <ChatTurn user={aggregateRequest} attachments>
                     <Guide>
-                      <p>サンプルを確認しました。まず、集計する前に確認したいことがあります。</p>
+                      <p>Excelを確認しました。共通の取引先コードがなく、会社名にも表記の揺れがあります。</p>
                       <AggregateArtifact />
-                      <p>この2つ、どう扱いましょう？</p>
-                      {step === 0 && <Choices label="集計の進め方" items={aggregateMethods.map((item) => ({
-                        ...item, action: () => { setMethod(item.id); setStep(1); },
-                      }))} />}
+                      <p>まず「㈱」「株式会社」や空白をそろえて、同じ取引先の候補を探しましょう。</p>
+                      <p>売上の「田中工業」と入金明細の「㈱田中工業」は、同じ会社ですか？ 確認できた対応だけを照合に使います。</p>
+                      {step === 0 && <Choices label="取引先の確認" items={[{
+                        label: "同じ会社です。このルールで照合して", action: () => setStep(1),
+                      }]} />}
                     </Guide>
                   </ChatTurn>
-                  {step >= 1 && <ChatTurn key={method} user={aggregateMethods.find((item) => item.id === method)!.reply}>
+                  {step >= 1 && <ChatTurn user={aggregateConfirmation}>
                     <Guide>
-                      <p>確認が必要なものだけ、人が見られる形にしました。</p>
-                      <AggregateArtifact resolved method={method} />
-                      <p>この確認ルールを、来月も使える手順として残せます。</p>
-                      {step === 1 && <Choices label="集計の進め方" items={[{
-                        label: "自分の仕事で考えてみる", action: () => setStep(2),
+                      <p>確認いただいた表記をまとめて照合しました。田中工業だけ、売上と入金が3万円ずれています。</p>
+                      <AggregateArtifact resolved />
+                      <p>分割入金か、入力漏れかはExcelだけでは分かりません。田中工業を担当する社内の方に、確認するメールを用意しましょうか？</p>
+                      {step === 1 && <Choices label="差額を確認する" items={[{
+                        label: "担当者を伝えて、確認メールを下書きして", description: "宛先と依頼内容をAIに伝えます。", action: () => setStep(2),
+                      }]} />}
+                    </Guide>
+                  </ChatTurn>}
+                  {step >= 2 && <ChatTurn user={aggregateMailRequest}>
+                    <Guide>
+                      <p>連携したGmailに、佐藤さんへのメールを下書き保存しました。内容はこちらです。</p>
+                      <MailDraftArtifact />
+                      <p>送信はしていません。宛先と内容を確認してから、Gmailで送れます。</p>
+                      {step === 2 && <Choices label="毎月の仕事にする" items={[{
+                        label: "毎月使えるスキルにして", action: () => setStep(3),
+                      }]} />}
+                    </Guide>
+                  </ChatTurn>}
+                  {step >= 3 && <ChatTurn user={aggregateSkillRequest} emphasize="スキル">
+                    <Guide>
+                      <p><strong>finance-checker</strong> という<strong>スキル</strong>を作成します。</p>
+                      <FinanceSkillArtifact />
+                      <p>次の月末は「finance-checkerで今月分を確認して」と、売上・入金のExcelを添えるだけ。取引先の表記ルールや社内担当者の情報は、毎回渡す必要がありません。</p>
+                      <p>担当者や照合ルールが変わったときは、スキルを更新できます。</p>
+                      <p>僕に任せられる仕事は、これだけではありません。もっと仕事を楽にする方法を、一緒に考えてみませんか？</p>
+                      {step === 3 && <Choices label="あなたの仕事でも" items={[{
+                        label: "自分の仕事について相談する", action: contact,
+                      }, {
+                        label: "自分の仕事で考えてみる", action: () => setStep(4),
                       }, {
                         label: "他の事例も見てみる", action: home,
                       }]} />}

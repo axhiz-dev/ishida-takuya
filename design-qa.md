@@ -48,3 +48,15 @@
 - [ ] Run suites successfully in CI.
 - [ ] Complete mobile/LINE/contact visual QA and update final result.
 - [ ] Configure and verify real inquiry delivery before opening reception.
+
+## 2026-10-11 — finance-checker体験とスクロール修正
+
+- `npm run typecheck` / `npm run lint` / `npm run build:export`: 成功。
+- Chromium 141 Headless Shellで、静的exportに対する `business-conversation` / `business-welcome` / `demo` の16件が成功。
+- 320px・390px・1440pxで、コードなしExcelの確認 → 同一取引先の確認 → 3万円の差額 → 社内担当者へのGmail下書き → finance-checker作成 → 相談フォームへの引き継ぎを確認。
+- ページ外の縦・横溢れがなく、会話内をスクロールしてもヘッダーが画面上端に残る。外側のアプリは `overflow: clip` とし、スクリーンリーダー用の非表示テキストを原点に配置して外側のスクロール領域を増やさない。
+- 表・説明を含む回答全体の表示完了後、999msでは選択肢なし、1000msで表示を確認。回答を省略した場合も同様。回答完了時は読み位置を自動移動しない。画面を離れると遅延タイマーが解除される。
+- 390pxのメール本文・最終案内を目視確認。キャプチャ: `docs/design/business-finance-skill/mobile-mail.png` / `mobile-close.png`。
+- 添付ExcelのセルとプレビューJSONの一致、コード列の削除、230,000円 − 200,000円 = 30,000円を確認。
+- Gmail・スキル保存はサンプル演出。実接続・実メール送信は行わない。問い合わせ受信設定は既存の準備中状態を継続。
+- 今回は実機・Safari・Firefox・実受信は未確認。上記の過去のローカルブラウザー未実行の記録に対し、今回の対象16件は実行済み。

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Guide } from "./ChatTurn";
+import { useEffect, useState, type ReactNode } from "react";
+import { Guide, ResponseReadyContext } from "./ChatTurn";
 import s from "./chat.module.css";
 
 const lines = [
@@ -23,7 +23,7 @@ function Reveal({ text, length, active }: { text: string; length: number; active
   </>;
 }
 
-export default function WelcomeIntro() {
+export default function WelcomeIntro({ children }: { children: ReactNode }) {
   const [length, setLength] = useState(0);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -57,11 +57,11 @@ export default function WelcomeIntro() {
     offset += text.length;
     return <Reveal key={text} text={text} length={visible} active={active} />;
   });
-  return <div className={s.welcomeIntro} data-welcome-phase={length === total ? "ready" : "streaming"}>
+  return <ResponseReadyContext.Provider value={length === total}><div className={s.welcomeIntro} data-welcome-phase={length === total ? "ready" : "streaming"}>
     <Guide title>{content[0]}</Guide>
     <div className={s.indent}>
       <p className={s.welcomeLead}>{content[1]}</p>
       <p className={s.welcomeFollowup}>{content[2]}</p>
     </div>
-  </div>;
+  </div>{children}</ResponseReadyContext.Provider>;
 }
