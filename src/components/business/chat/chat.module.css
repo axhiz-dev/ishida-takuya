@@ -117,7 +117,7 @@
 }
 .welcomeLead {
   font-size: 17px;
-  margin: -12px 0 44px;
+  margin: 0 0 16px;
   color: #53606b;
 }
 .caption {
@@ -125,11 +125,15 @@
   color: var(--chat-muted);
   margin: 0 0 12px;
 }
-.welcomeNote {
-  font-size: 12px;
+.welcomeFollowup {
+  font-size: 14px;
   color: var(--chat-muted);
-  margin-top: 25px;
+  margin: 0;
 }
+.welcomeLine { position: relative; }
+.unrevealed { visibility: hidden; }
+.welcomeCursor { position: relative; }
+.welcomeCursor::after { content: ""; position: absolute; left: 100%; bottom: 0.1em; width: 2px; height: 1em; background: #376451; animation: pulse 700ms infinite; }
 .choices {
   border: 1px solid #dce2e6;
   border-radius: 12px;
@@ -774,8 +778,8 @@
     font-size: 13px;
     margin: 0 0 28px;
   }
-  .welcomeNote {
-    font-size: 11px;
+  .welcomeFollowup {
+    font-size: 12px;
   }
   .choices {
     padding: 3px;
@@ -1075,3 +1079,15 @@
 }
 
 .botResponse [data-stream-cursor]::after { content: "▍"; color: #376451; animation: pulse 700ms infinite; }
+
+/* Keep speaker separation even in the compact desktop layout above. */
+.turn { display: flow-root; }
+.turn > .userMessage { margin: 0 0 52px; }
+.turn + .turn { margin-top: 56px; }
+.turn > .botResponse > .guide:first-child,
+.turn > .turnStatus > .guide:first-child { margin-top: 0; }
+@media (max-width: 680px) {
+  .turn > .userMessage { margin-bottom: 36px; }
+  .turn + .turn { margin-top: 40px; }
+  .welcomeLead { margin-bottom: 16px; }
+}

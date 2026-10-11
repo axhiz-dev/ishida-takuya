@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ChatTurn, { Guide, ResponseReadyContext } from "./ChatTurn";
+import WelcomeIntro from "./WelcomeIntro";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -93,7 +94,6 @@ export default function BusinessChat() {
   const [question, setQuestion] = useState<number | null>(null);
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState("");
-  const [welcomed, setWelcomed] = useState(false);
   const [contactStarted, setContactStarted] = useState(false);
   const [contactContext, setContactContext] = useState({
     topic: "",
@@ -107,15 +107,9 @@ export default function BusinessChat() {
     if (activeChoice && dismissedChoice === activeChoice) launcher.current?.focus();
   }, [activeChoice, dismissedChoice]);
   useEffect(() => {
-    const timer = setTimeout(() => setWelcomed(true), 550);
-    return () => clearTimeout(timer);
-  }, []);
-  useEffect(() => {
-    if (welcomed) {
-      if (view !== "experience" || !experience) main.current?.scrollTo({ top: 0 });
-      main.current?.focus({ preventScroll: true });
-    }
-  }, [view, step, experience, question, welcomed]);
+    if (view !== "experience" || !experience) main.current?.scrollTo({ top: 0 });
+    main.current?.focus({ preventScroll: true });
+  }, [view, step, experience, question]);
   useEffect(() => {
     if (!menu) return;
     searchInput.current?.focus();
@@ -217,7 +211,7 @@ export default function BusinessChat() {
         className={s.main}
       >
         <div className={s.conversation}>
-          {(view !== "experience" || experience || !welcomed) && (
+          {(view !== "experience" || experience) && (
             <h1 className={s.srOnly}>AI導入・活用の伴走支援</h1>
           )}
           {view !== "experience" && experience && (
@@ -235,48 +229,31 @@ export default function BusinessChat() {
           )}
           {view === "experience" && !experience && (
             <div className={s.welcome}>
-              {!welcomed ? (
-                <Guide>
-                  <p className={s.typing} role="status">
-                    入力中<span>…</span>
-                  </p>
-                </Guide>
-              ) : (
-                <>
-                  <Guide title>いつもの仕事、AIと一緒なら？</Guide>
-                  <div className={s.indent}>
-                    <p className={s.welcomeLead}>
-                      気になる仕事から、試してみてください。
-                    </p>
-                    <p className={s.caption}>まずはサンプルで体験できます</p>
-                    <Choices
-                      label="試したい仕事"
-                      items={[
-                        {
-                          label: experienceNames.aggregate,
-                          description:
-                            "ファイルを照合して、確認が必要なものだけ手元に。",
-                          action: () => start("aggregate"),
-                        },
-                        {
-                          label: experienceNames.shift,
-                          description:
-                            "いつものLINEで、希望の回収から完成のお知らせまで。",
-                          action: () => start("shift"),
-                        },
-                        {
-                          label: "何に使えるか、まだ分からない",
-                          description: "支援の進め方から見てみる",
-                          action: () => navigate("process"),
-                        },
-                      ]}
-                    />
-                    <p className={s.welcomeNote}>
-                      いつもの仕事に合わせて、AIの使い方を一緒に考えます。
-                    </p>
-                  </div>
-                </>
-              )}
+              <WelcomeIntro />
+              <div className={s.indent}>
+                <Choices
+                  label="試したい仕事"
+                  items={[
+                    {
+                      label: experienceNames.aggregate,
+                      description:
+                        "ファイルを照合して、確認が必要なものだけ手元に。",
+                      action: () => start("aggregate"),
+                    },
+                    {
+                      label: experienceNames.shift,
+                      description:
+                        "いつものLINEで、希望の回収から完成のお知らせまで。",
+                      action: () => start("shift"),
+                    },
+                    {
+                      label: "何に使えるか、まだ分からない",
+                      description: "支援の進め方から見てみる",
+                      action: () => navigate("process"),
+                    },
+                  ]}
+                />
+              </div>
             </div>
           )}
           {view === "experience" && experience && (

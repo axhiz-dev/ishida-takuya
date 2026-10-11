@@ -65,7 +65,7 @@ test("320pxと動きを減らす設定でも相談文・添付・選択肢が使
   await page.getByRole("button", { name: "選択肢を表示" }).click();
   await expect(page.getByRole("button", { name: "他の事例も見てみる" })).toBeVisible();
   await page.getByRole("button", { name: "最初の画面に戻る" }).click();
-  await expect(page.getByRole("heading", { name: "いつもの仕事、AIと一緒なら？" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "AIって、自分の仕事にも使えるの？" })).toBeVisible();
 });
 
 
