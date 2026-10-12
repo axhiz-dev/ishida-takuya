@@ -2,7 +2,8 @@ import { test, expect } from "@playwright/test";
 
 const confirmLabel = "同じ会社です。このルールで照合して";
 const mailLabel = "担当者を伝えて、確認メールを下書きして";
-const skillLabel = "毎月使えるスキルにして";
+const reportLabel = "件数の多いサンプルで月次レポートを見てみる";
+const skillLabel = "月次レポートまで毎月使えるスキルにして";
 
 for (const width of [320, 390, 1440]) {
   test(`${width}px：コードなしのExcelからメール下書き・スキル保存・相談まで進む`, async ({ page }, testInfo) => {
@@ -28,17 +29,48 @@ for (const width of [320, 390, 1440]) {
     await expect(draft).toContainText("230,000円");
     await expect(draft).toContainText("30,000円");
     await expect(draft).toContainText("実際のGmail保存・メール送信は行いません");
-    await page.getByRole("button", { name: skillLabel }).waitFor();
+    await page.getByRole("button", { name: reportLabel }).waitFor();
     await page.locator("main").evaluate(el => { el.scrollTop = el.scrollHeight; });
     await page.screenshot({ path: testInfo.outputPath(`mail-${width}.png`) });
+    await page.getByRole("button", { name: reportLabel }).click();
+    const report = page.getByRole("region", { name: "月次レポートのサンプル" });
+    await expect(report).toContainText("5,360,000円");
+    await expect(report).toContainText("4,300,000円");
+    await expect(report).toContainText("1,060,000円");
+    await expect(report).toContainText("+13.6%");
+    await expect(report).toContainText("期限を迎えた未入金は2件");
+    await expect(report).toContainText("照合できない入金150,000円");
+    await report.getByLabel("レポートの対象月").selectOption("2026-04");
+    await expect(report).toContainText("3,500,000円");
+    await expect(report).toContainText("前月データなし");
+    await expect(report).toContainText("確認が必要なものはありません");
+    await report.getByLabel("レポートの対象月").selectOption("2026-09");
+    const reportAttachment = report.getByRole("button", { name: /月次レポート確認用サンプル2.xlsx/ });
+    await reportAttachment.click();
+    const reportPreview = page.getByRole("dialog");
+    await expect(reportPreview.getByRole("table").locator("tbody tr")).toHaveCount(48);
+    await reportPreview.getByRole("button", { name: "入金明細", exact: true }).click();
+    await expect(reportPreview.getByRole("table")).toContainText("アオバ");
+    await page.keyboard.press("Escape");
+    await expect(reportAttachment).toBeFocused();
+    const download = await Promise.all([
+      page.waitForEvent("download"), report.getByRole("link", { name: "Excelをダウンロード" }).click(),
+    ]);
+    expect(download[0].suggestedFilename()).toBe("monthly-report.xlsx");
+    await page.getByRole("button", { name: skillLabel }).waitFor();
+    await page.getByRole("button", { name: "選択肢を閉じる" }).click();
+    await report.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: testInfo.outputPath(`report-${width}.png`), fullPage: true });
+    await page.getByRole("button", { name: "選択肢を表示" }).click();
     await page.getByRole("button", { name: skillLabel }).click();
     const skill = page.getByRole("region", { name: "finance-checkerスキルのサンプル" });
     await expect(skill).toContainText("確認済みの対応");
     await expect(skill).toContainText("sato@example.com");
     await expect(skill).toContainText("送信は人が確認して行う");
+    await expect(skill).toContainText("月次レポート");
     await expect(page.locator('[aria-label="ユーザーの発言"]').last().locator("strong")).toHaveText("スキル");
     await expect(page.getByText(/取引先の表記ルールや社内担当者の情報は、毎回渡す必要がありません/)).toBeVisible();
-    await expect(page.locator("[data-chat-turn]")).toHaveCount(4);
+    await expect(page.locator("[data-chat-turn]")).toHaveCount(5);
     await expect(page.getByRole("button", { name: "回答をすべて表示" })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
     expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
@@ -110,5 +142,5 @@ test("回答をすべて表示しても1秒待ち、途中で離れた回答の�
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "ready");
   await page.clock.runFor(1000);
   await expect(page.getByRole("button", { name: /^毎月のExcel集計/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: skillLabel })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: reportLabel })).toHaveCount(0);
 });

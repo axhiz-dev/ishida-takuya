@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { FileXls, X } from "@phosphor-icons/react";
 import { BASE_PATH } from "@/config/site";
 import s from "./chat.module.css";
+import { reportSample } from "./monthlyReport";
 
 type SampleSheet = {
   name: string;
@@ -11,7 +12,7 @@ type SampleSheet = {
   rows: (string | number)[][];
 };
 
-export default function WorkbookPreview({ onClose }: { onClose: () => void }) {
+export default function WorkbookPreview({ onClose, variant = "accounting" }: { onClose: () => void; variant?: "accounting" | "report" }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [sheets, setSheets] = useState<SampleSheet[]>([]);
   const [active, setActive] = useState(0);
@@ -21,6 +22,14 @@ export default function WorkbookPreview({ onClose }: { onClose: () => void }) {
     const previousFocus = document.activeElement as HTMLElement | null;
     const controller = new AbortController();
     dialog.current?.showModal();
+    if (variant === "report") {
+      setSheets([
+        { name: "売上データ", headers: ["売上月", "請求番号", "取引先名", "金額（税込円）", "入金期限"], rows: reportSample.sales.map(row => [row.month, row.invoice, row.name, row.amount, row.due]) },
+        { name: "入金明細", headers: ["入金日", "入金番号", "請求番号", "取引先名", "金額（税込円）"], rows: reportSample.payments.map(row => [row.date, row.id, row.invoice, row.name, row.amount]) },
+        { name: "確認済み対応", headers: ["取引先", "確認済みの表記", "社内担当者"], rows: reportSample.customers.map(row => [row.name, row.names.join(" ／ "), row.owner]) },
+      ]);
+      return () => previousFocus?.focus();
+    }
     // The preview JSON is extracted from the attached workbook's source cells.
     fetch(`${BASE_PATH}/samples/monthly-accounting.json`, { signal: controller.signal })
       .then((response) => {
@@ -30,7 +39,7 @@ export default function WorkbookPreview({ onClose }: { onClose: () => void }) {
       .then((data: { sheets: SampleSheet[] }) => setSheets(data.sheets))
       .catch((error) => { if (error.name !== "AbortError") setError(true); });
     return () => { controller.abort(); previousFocus?.focus(); };
-  }, []);
+  }, [variant]);
 
   const sheet = sheets[active];
   return (
@@ -45,7 +54,7 @@ export default function WorkbookPreview({ onClose }: { onClose: () => void }) {
         <header className={s.previewHeader}>
           <FileXls size={28} aria-hidden="true" />
           <div>
-            <h2 id="workbook-preview-title">月末集計サンプル.xlsx</h2>
+            <h2 id="workbook-preview-title">{variant === "report" ? "月次レポート確認用サンプル2.xlsx" : "月末集計サンプル.xlsx"}</h2>
             <p>Excelプレビュー · 架空のサンプルデータ</p>
           </div>
           <button aria-label="プレビューを閉じる" onClick={() => dialog.current?.close()}><X size={22} /></button>

@@ -325,6 +325,56 @@
 .artifactNote svg {
   flex-shrink: 0;
 }
+.monthlyReport { background: #f8fafc; color: #263848; }
+.reportHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin: 22px 0; }
+.reportHeading h3 { font-size: 20px; margin: 0; }
+.reportHeading p { font-size: 12px; color: #566774; margin: 5px 0 0; }
+.reportHeading label { display: grid; gap: 6px; font-size: 11px; flex-shrink: 0; }
+.reportHeading select { background: white; border: 1px solid #cbd5df; border-radius: 8px; padding: 8px; color: #263848; font: inherit; font-size: 13px; }
+.reportMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+.reportMetrics > div { padding: 15px 12px; background: white; border: 1px solid #dde5eb; border-radius: 10px; }
+.reportMetrics dt { font-size: 12px; color: #566774; }
+.reportMetrics dd { font-size: 20px; font-weight: 600; letter-spacing: -.5px; margin: 8px 0; font-variant-numeric: tabular-nums; }
+.reportMetrics small { font-size: 10px; color: #566774; display: block; }
+.reportCharts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.reportChart { background: white; border: 1px solid #dde5eb; border-radius: 10px; padding: 16px; min-width: 0; }
+.monthlyReport h4 { font-size: 13px; margin: 0 0 16px; }
+.reportChart h4 small { font-size: 10px; color: #566774; font-weight: 400; margin-left: 8px; }
+.trendBars { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 35px; text-align: center; font-size: 10px; }
+.trendBars > div { min-width: 0; }
+.trendBars span { font-size: 10px; white-space: nowrap; }
+.trendTrack { height: 145px; display: flex; align-items: flex-end; border-bottom: 1px solid #cbd5df; margin: 7px 0; }
+.trendTrack i { width: 100%; background: #b9cfdd; border-radius: 5px 5px 0 0; }
+.trendTrack i[data-selected="true"] { background: #2d697b; }
+.customerBars { list-style: none; padding: 0; margin: 0; }
+.customerBars li + li { margin-top: 11px; }
+.customerBars li > div:first-child { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; }
+.customerBars strong { font-weight: 500; }
+.customerTrack { height: 5px; border-radius: 4px; background: #edf2f5; margin-top: 4px; }
+.customerTrack i { display: block; height: 100%; border-radius: inherit; background: #2d697b; }
+.reportSummary { margin: 18px 0 24px; border-left: 3px solid #2d697b; padding: 10px 14px; background: #edf3f6; font-size: 13px; }
+.reportSummary p { font-size: 13px; line-height: 1.8; margin: 8px 0 0; }
+.reportIssues { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.reportIssues li { padding: 12px; border: 1px solid #e6dcc1; border-radius: 8px; background: #fffaf0; }
+.reportIssues li > div { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.reportIssues p { font-size: 12px; line-height: 1.7; margin: 7px 0 2px; }
+.reportIssues small { font-size: 11px; color: #6b5c3d; }
+.reportSource { display: grid; gap: 10px; margin: 22px 0 12px; font-size: 12px; }
+.reportSource button { text-align: left; display: flex; align-items: center; gap: 10px; background: white; padding: 12px; border: 1px solid #cbd5df; border-radius: 8px; color: #263848; font: inherit; overflow-wrap: anywhere; }
+.reportSource button svg { flex-shrink: 0; color: #238366; }
+.reportSource small { display: block; margin-top: 5px; font-size: 10px; }
+.reportSource a { color: #265d70; text-decoration: underline; width: fit-content; }
+@media (max-width: 680px) {
+  .reportHeading { flex-direction: column; gap: 12px; }
+  .reportHeading h3 { font-size: 17px; }
+  .reportMetrics { grid-template-columns: 1fr; gap: 8px; }
+  .reportMetrics > div { padding: 12px; }
+  .reportMetrics dd { font-size: 22px; }
+  .reportCharts { grid-template-columns: 1fr; }
+  .reportChart { padding: 12px; }
+  .trendBars { gap: 4px; margin-top: 15px; }
+  .reportIssues li > div { flex-wrap: wrap; }
+}
 .lineArtifact {
   border: 1px solid #dce5e9;
   border-radius: 12px;
