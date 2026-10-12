@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { FileXls, User } from "@phosphor-icons/react";
 import guideImage from "../../../../public/images/business/chat-guide.png";
@@ -34,9 +34,18 @@ export function UserMessage({ children, attachments = false }: { children: React
 
 // Choices subscribe to completion, including when rendered through a portal.
 export const ResponseReadyContext = createContext(true);
+export const ConversationActiveContext = createContext(true);
+
+function useConversationActive() {
+  const active = useContext(ConversationActiveContext);
+  const ref = useRef(active);
+  useLayoutEffect(() => { ref.current = active; }, [active]);
+  return { active, ref };
+}
 
 function StreamResponse({ children, immediate, onComplete }: { children: ReactNode; immediate: boolean; onComplete: () => void }) {
   const root = useRef<HTMLDivElement>(null);
+  const { ref: active } = useConversationActive();
   // Work on text nodes so tables, inline emphasis and icons retain their markup.
   // Restore every node on cleanup before React updates or removes the response.
   useLayoutEffect(() => {
@@ -57,6 +66,7 @@ function StreamResponse({ children, immediate, onComplete }: { children: ReactNo
     let length = 0;
     let cursor: HTMLElement | null = null;
     const timer = setInterval(() => {
+      if (!active.current) return;
       const current = nodes[index];
       if (!current) {
         clearInterval(timer);
@@ -81,46 +91,55 @@ function StreamResponse({ children, immediate, onComplete }: { children: ReactNo
       nodes.forEach(({ node, text }) => { node.data = text; });
       blocks.forEach((block) => { block.hidden = false; });
     };
-  }, [immediate, onComplete]);
+  }, [immediate, onComplete, active]);
   return <div ref={root} className={s.botResponse}>{children}</div>;
 }
 
-// Each turn owns its timers so navigating away cancels pending animation.
+// Experience turns stay mounted across navigation; hidden turns pause in place.
 export default function ChatTurn({ user, attachments = false, children, emphasize }: { user: string; attachments?: boolean; children: ReactNode; emphasize?: string }) {
   const [length, setLength] = useState(0);
   const [phase, setPhase] = useState<"user" | "thinking" | "streaming" | "ready">("user");
   const [immediate, setImmediate] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const { active, ref: activeRef } = useConversationActive();
+  const thinkingRemaining = useRef(2000);
   const skipped = useRef(false);
   const sendUser = useRef<() => void>(() => {});
   const complete = useRef(() => setPhase("ready")).current;
   useEffect(() => {
-    root.current?.scrollIntoView({ block: "start" });
+    if (activeRef.current) root.current?.scrollIntoView({ block: "start" });
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const finish = () => { setImmediate(true); setLength(user.length); setPhase("ready"); };
     if (media.matches) { finish(); return; }
     let count = 0;
-    let reply: ReturnType<typeof setTimeout>;
     const timer = setInterval(() => {
+      if (!activeRef.current) return;
       if (skipped.current) { clearInterval(timer); return; }
       count = Math.min(count + 1, user.length);
       setLength(count);
       if (count === user.length) {
         clearInterval(timer);
         setPhase("thinking");
-        reply = setTimeout(() => { if (!skipped.current) setPhase("streaming"); }, 2000);
       }
     }, 45);
     sendUser.current = () => {
       clearInterval(timer);
       setLength(user.length);
       setPhase("thinking");
-      reply = setTimeout(() => { if (!skipped.current) setPhase("streaming"); }, 2000);
     };
-    const changed = () => { if (media.matches) { clearInterval(timer); clearTimeout(reply); finish(); } };
+    const changed = () => { if (media.matches) { clearInterval(timer); finish(); } };
     media.addEventListener("change", changed);
-    return () => { clearInterval(timer); clearTimeout(reply); media.removeEventListener("change", changed); };
-  }, [user]);
+    return () => { clearInterval(timer); media.removeEventListener("change", changed); };
+  }, [user, activeRef]);
+  useEffect(() => {
+    if (phase !== "thinking" || !active) return;
+    const started = Date.now();
+    const timer = setTimeout(() => { if (!skipped.current) setPhase("streaming"); }, thinkingRemaining.current);
+    return () => {
+      clearTimeout(timer);
+      thinkingRemaining.current = Math.max(0, thinkingRemaining.current - (Date.now() - started));
+    };
+  }, [phase, active]);
   const visibleUser = user.slice(0, length);
   const emphasisAt = emphasize ? visibleUser.indexOf(emphasize) : -1;
   return <div ref={root} className={s.turn} data-chat-turn data-phase={phase}>

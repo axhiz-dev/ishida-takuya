@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import base from './playwright.config';
 export default defineConfig({
   ...base,
-  testMatch: 'demo.spec.ts',
+  testMatch: ['demo.spec.ts', 'business-return.spec.ts'],
   outputDir: './test-results/compat',
   reporter: [['html', { open: 'never', outputFolder: 'playwright-compat-report' }], ['list']],
   use: { ...base.use, launchOptions: undefined },
