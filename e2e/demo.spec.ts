@@ -14,7 +14,9 @@ test("集計：判断、結果、相談への引き継ぎと未設定時の送�
   await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
   await page.getByRole("button", { name: "同じ会社です。このルールで照合して" }).click();
   await page.getByRole("button", { name: "担当者を伝えて、確認メールを下書きして" }).click();
-  await page.getByRole("button", { name: "毎月使えるスキルにして" }).click();
+  await page.getByRole("button", { name: "件数の多いサンプルで月次レポートを見てみる" }).click();
+  await expect(page.getByRole("region", { name: "月次レポートのサンプル" })).toContainText("5,360,000円");
+  await page.getByRole("button", { name: "月次レポートまで毎月使えるスキルにして" }).click();
   await page.getByRole("button", { name: "自分の仕事で考えてみる" }).click();
   await page
     .getByRole("button", { name: "数字の違いを確認する", exact: true })

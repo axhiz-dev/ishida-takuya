@@ -118,6 +118,8 @@ export function FinanceSkillArtifact() {
       <li><strong>確認済みの対応</strong>：田中工業 ↔ ㈱田中工業、山田商事 ↔ 山田商事 株式会社。</li>
       <li><strong>社内担当者</strong>：田中工業は営業部の佐藤さん（sato@example.com）。</li>
       <li><strong>毎月の作業</strong>：売上・入金を照合し、差額一覧と担当者へのGmail下書きを作成。送信は人が確認して行う。</li>
+      <li><strong>月次レポート</strong>：売上・照合済み入金・未入金残高、売上推移、取引先別売上、確認が必要なものをまとめる。前月データがある場合は前月比も表示。</li>
+      <li><strong>集計の範囲</strong>：対象月末までの入金を確認。期限前の未入金と期限到来分を分け、照合できない入金は別枠に残す。</li>
     </ul>
     <p className={s.artifactLead}>次回の頼み方</p>
     <code className={s.skillPrompt}>finance-checkerで今月分を確認して ＋ 今月のExcel</code>

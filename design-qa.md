@@ -1,5 +1,13 @@
 # Business chat design QA — 2026-10-10
 
+## 2026-10-12 monthly report
+
+- Added separate fictional sample 2 (six months, eight customers, 48 sales and 47 payments), monthly revenue/receipts/outstanding, month switcher, customer revenue, trend, issue list and workbook preview/download.
+- Finance-checker includes the monthly report as a standard output. Original small sample and reconciliation/mail scenes remain.
+- Local typecheck, lint, static export and browser-free monthly aggregation test passed. September revenue 5,360,000, matched receipts 4,300,000, outstanding 1,060,000 and unmatched receipts 150,000 verified; overdue and not-yet-due items separated.
+- Spreadsheet source sheets rendered and reviewed. XLSX and preview/report use the same generated JSON source.
+- Updated 320/390/1440px conversation E2E and Firefox/WebKit demo flow. Local browser download failed with a truncated archive; browser tests and web visual QA pending CI/manual review. Real-device verification pending.
+
 **final result: blocked**
 
 ## Evidence

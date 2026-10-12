@@ -20,6 +20,7 @@ import {
 } from "@phosphor-icons/react";
 import { AggregateArtifact, MailDraftArtifact, FinanceSkillArtifact, ShiftArtifact } from "./Artifacts";
 import Consultation from "./Consultation";
+import MonthlyReportArtifact from "./MonthlyReportArtifact";
 import {
   concerns,
   experienceNames,
@@ -33,7 +34,8 @@ import s from "./chat.module.css";
 const aggregateRequest = "私は経理担当をしています。\n毎月月末になると、売上データと入金明細のExcelを開いて、取引先ごとに金額を照合しています。\n会社名の書き方が違うこともあり、同じ取引先かどうかを一件ずつ確認するのが大変です。\n使っているExcelのサンプルはこちらです。毎月同じような作業なので、自動化したいのですが、できますか？";
 const aggregateConfirmation = "はい、田中工業と㈱田中工業は同じ取引先です。山田商事の表記違いもまとめてください。同じ会社か判断できないものは、確認用に残してください。";
 const aggregateMailRequest = "田中工業の社内担当者は営業部の佐藤さん（sato@example.com）です。差額の理由を確認するメールを作って、連携したGmailに下書き保存してください。まだ送信はしないでください。";
-const aggregateSkillRequest = "OKです。毎月月末に同じ作業をしたいので、スキルにしてください。取引先の表記ルールと社内担当者も保存して、次回は今月分のExcelだけで進められるようにしたいです。";
+const aggregateReportRequest = "確認した結果を、売上や入金状況がひと目で分かる月次レポートにできますか？ 件数が多いときの見え方も確かめたいので、架空の確認用サンプルを作って見せてください。";
+const aggregateSkillRequest = "OKです。毎月月末に、照合から月次レポートまで同じ形で作れるスキルにしてください。取引先の表記ルールと社内担当者も保存して、次回は今月分のExcelだけで進められるようにしたいです。前月との比較には過去のデータも使ってください。";
 
 type View = "experience" | "faq" | "pricing" | "process" | "contact";
 type Choice = { label: string; description?: string; action: () => void };
@@ -163,7 +165,7 @@ export default function BusinessChat() {
     navigate("contact");
   }
   const reflection =
-    experience !== null && step >= (experience === "shift" ? 6 : 4);
+    experience !== null && step >= (experience === "shift" ? 6 : 5);
   const menuItems = [
     {
       label: "仕事の体験",
@@ -290,22 +292,35 @@ export default function BusinessChat() {
                       <p>連携したGmailに、佐藤さんへのメールを下書き保存しました。内容はこちらです。</p>
                       <MailDraftArtifact />
                       <p>送信はしていません。宛先と内容を確認してから、Gmailで送れます。</p>
-                      {step === 2 && <Choices label="毎月の仕事にする" items={[{
-                        label: "毎月使えるスキルにして", action: () => setStep(3),
+                      <p>確認結果は、売上や入金状況が分かる月次レポートにもまとめられます。</p>
+                      {step === 2 && <Choices label="月次レポートを確かめる" items={[{
+                        label: "件数の多いサンプルで月次レポートを見てみる", action: () => setStep(3),
                       }]} />}
                     </Guide>
                   </ChatTurn>}
-                  {step >= 3 && <ChatTurn user={aggregateSkillRequest} emphasize="スキル">
+                  {step >= 3 && <ChatTurn user={aggregateReportRequest}>
+                    <Guide>
+                      <p>見え方を確かめるため、半年分・8社の架空データを「サンプル2」として作りました。表記の対応と担当者も、確認済みという設定のテストデータです。</p>
+                      <p>売上推移と取引先別の売上に加え、期限を迎えた未入金や、照合できない入金も分けて表示します。対象月を切り替えたり、元のExcelを確認したりできます。</p>
+                      <MonthlyReportArtifact />
+                      <p>この月次レポートまで、毎月の作業としてスキルに保存しましょうか？</p>
+                      {step === 3 && <Choices label="毎月の仕事にする" items={[{
+                        label: "月次レポートまで毎月使えるスキルにして", action: () => setStep(4),
+                      }]} />}
+                    </Guide>
+                  </ChatTurn>}
+                  {step >= 4 && <ChatTurn user={aggregateSkillRequest} emphasize="スキル">
                     <Guide>
                       <p><strong>finance-checker</strong> という<strong>スキル</strong>を作成します。</p>
                       <FinanceSkillArtifact />
+                      <p>照合とメール下書きに加えて、月次レポートまで同じ形で作れます。前月比較や売上推移には、過去のExcelも一緒に渡します。</p>
                       <p>次の月末は「finance-checkerで今月分を確認して」と、売上・入金のExcelを添えるだけ。取引先の表記ルールや社内担当者の情報は、毎回渡す必要がありません。</p>
                       <p>担当者や照合ルールが変わったときは、スキルを更新できます。</p>
                       <p>僕に任せられる仕事は、これだけではありません。もっと仕事を楽にする方法を、一緒に考えてみませんか？</p>
-                      {step === 3 && <Choices label="あなたの仕事でも" items={[{
+                      {step === 4 && <Choices label="あなたの仕事でも" items={[{
                         label: "自分の仕事について相談する", action: contact,
                       }, {
-                        label: "自分の仕事で考えてみる", action: () => setStep(4),
+                        label: "自分の仕事で考えてみる", action: () => setStep(5),
                       }, {
                         label: "他の事例も見てみる", action: home,
                       }]} />}
