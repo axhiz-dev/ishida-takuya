@@ -26,6 +26,7 @@ for (const width of [390, 1440]) {
     await expect(page.getByLabel("レポートの対象月")).toHaveValue("2026-04");
     await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "回答をすべて表示" })).toHaveCount(0);
+    await expect(page.locator('[data-chat-turn]').first().locator('[class*="botResponse"]')).toHaveCSS("animation-name", "none");
     expect(await page.locator("[data-chat-turn]").allTextContents()).toEqual(before);
     await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(scroll);
     await expect(page.getByRole("button", { name: "月次レポートまで毎月使えるスキルにして" })).toBeVisible();
@@ -33,7 +34,7 @@ for (const width of [390, 1440]) {
     await page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ }).click();
     await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(scroll);
     await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
-    await page.screenshot({ path: testInfo.outputPath(`return-${width}.png`) });
+    await page.screenshot({ path: testInfo.outputPath(`return-${width}.png`), animations: "disabled" });
     await testInfo.attach(`チャット復帰-${width}px`, { path: testInfo.outputPath(`return-${width}.png`), contentType: "image/png" });
   });
 }
