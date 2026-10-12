@@ -219,6 +219,8 @@
 .botResponse [hidden] { display: none !important; }
 .botResponse { animation: messageIn 420ms ease-out; }
 .userBubble { animation: messageIn 220ms ease-out; }
+.turn[data-phase="ready"] .userBubble,
+.turn[data-phase="ready"] .botResponse { animation: none; }
 .turnStatus { color: #657080; font-size: 12px; }
 .turnStatus > button { display: block; margin: 10px 0 16px auto; padding: 7px 12px; border: 1px solid #d6dfe5; border-radius: 7px; }
 .cursor { animation: pulse 700ms infinite; }

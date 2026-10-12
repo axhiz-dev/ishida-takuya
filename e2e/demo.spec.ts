@@ -17,14 +17,10 @@ test("集計：判断、結果、相談への引き継ぎと未設定時の送�
   await page.getByRole("button", { name: "件数の多いサンプルで月次レポートを見てみる" }).click();
   await expect(page.getByRole("region", { name: "月次レポートのサンプル" })).toContainText("5,360,000円");
   await page.getByRole("button", { name: "月次レポートまで毎月使えるスキルにして" }).click();
-  await page.getByRole("button", { name: "自分の仕事で考えてみる" }).click();
-  await page
-    .getByRole("button", { name: "数字の違いを確認する", exact: true })
-    .click();
-  await page.getByRole("button", { name: /^この仕事について相談する/ }).click();
+  await expect(page.getByRole("button", { name: "自分の仕事で考えてみる" })).toHaveCount(0);
+  await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).click();
   const form = page.getByRole("region", { name: "相談フォーム" });
   await expect(form).toContainText("毎月のExcel集計");
-  await expect(form).toContainText("数字の違いを確認する");
   await form.getByLabel("お名前", { exact: true }).fill("確認 太郎");
   await form.getByLabel("メールアドレス").fill("test@example.com");
   await form.getByRole("checkbox").check();
@@ -68,10 +64,7 @@ test("LINE：FAQへ寄り道しても進行を保ち、最後まで体験でき�
     await page
       .getByRole("button", { name: shiftSteps[i]!.next, exact: true })
       .click();
-  await page.getByRole("button", { name: "希望を集める", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: /^この仕事について相談する/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "相談フォーム" })).toContainText("シフトの回収・調整をおまかせ");
 });
 
 test("メニューは検索・キーボード・閉じた後のフォーカス復帰が動く", async ({

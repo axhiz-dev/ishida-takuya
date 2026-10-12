@@ -3,14 +3,6 @@ export const experienceNames: Record<Experience, string> = {
   aggregate: "毎月のExcel集計",
   shift: "シフトの回収・調整をおまかせ",
 };
-export const concerns: Record<Experience, string[]> = {
-  aggregate: [
-    "ファイルをまとめる",
-    "数字の違いを確認する",
-    "毎月の手順を引き継ぐ",
-  ],
-  shift: ["希望を集める", "不足や偏りを見つける", "変更のたびに組み直す"],
-};
 export const questions = [
   {
     q: "何から相談すればいいですか？",
@@ -66,6 +58,6 @@ export const shiftSteps = [
   {
     title: "完成してお知らせ",
     line: "条件がそろったら、完成したシフトを投稿します。",
-    next: "自分のお店で考えてみる",
+    next: "自分の仕事について相談する",
   },
 ];

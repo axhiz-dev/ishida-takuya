@@ -1,0 +1,88 @@
+import { test, expect } from "@playwright/test";
+
+const confirm = "同じ会社です。このルールで照合して";
+const mail = "担当者を伝えて、確認メールを下書きして";
+const report = "件数の多いサンプルで月次レポートを見てみる";
+
+for (const width of [390, 1440]) {
+  test(`${width}px：問い合わせから戻っても履歴・月の選択・読み位置が変わらない`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/business/");
+    await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+    await page.getByRole("button", { name: confirm }).click();
+    await page.getByRole("button", { name: mail }).click();
+    await page.getByRole("button", { name: report }).click();
+    await page.getByLabel("レポートの対象月").selectOption("2026-04");
+    await page.getByRole("button", { name: "月次レポートまで毎月使えるスキルにして" }).waitFor();
+    await page.locator("main").evaluate(el => { el.scrollTop = 150; });
+    const scroll = await page.locator("main").evaluate(el => el.scrollTop);
+    const before = await page.locator("[data-chat-turn]").allTextContents();
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.getByRole("button", { name: "相談する", exact: true }).click();
+    await expect(page.getByRole("region", { name: "相談フォーム" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+    await page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ }).click();
+    await expect(page.getByLabel("レポートの対象月")).toHaveValue("2026-04");
+    await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "回答をすべて表示" })).toHaveCount(0);
+    await expect(page.locator('[data-chat-turn]').first().locator('[class*="botResponse"]')).toHaveCSS("animation-name", "none");
+    expect(await page.locator("[data-chat-turn]").allTextContents()).toEqual(before);
+    await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(scroll);
+    await expect(page.getByRole("button", { name: "月次レポートまで毎月使えるスキルにして" })).toBeVisible();
+    await page.getByRole("button", { name: "費用・FAQ" }).click();
+    await page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ }).click();
+    await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(scroll);
+    await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
+    await page.screenshot({ path: testInfo.outputPath(`return-${width}.png`), animations: "disabled" });
+    await testInfo.attach(`チャット復帰-${width}px`, { path: testInfo.outputPath(`return-${width}.png`), contentType: "image/png" });
+  });
+}
+
+test("入力中・考え中・回答中は画面を離れると止まり、戻ると同じ続きから再開する", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/business/");
+  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: confirm }).waitFor();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const now = new Date("2026-10-12T00:00:00Z");
+  await page.clock.install({ time: now });
+  await page.clock.pauseAt(now);
+  await page.getByRole("button", { name: confirm }).click();
+  await page.clock.runFor(135);
+  const turn = page.locator("[data-chat-turn]").last();
+  const user = turn.locator('[aria-label="ユーザーの発言"] p > span[aria-hidden="true"]');
+  const text = await user.textContent();
+  expect(text!.length).toBeGreaterThan(1);
+  await page.getByRole("button", { name: "相談する", exact: true }).click();
+  await page.clock.runFor(10000);
+  expect(await user.textContent()).toBe(text);
+  await expect(turn).toHaveAttribute("data-phase", "user");
+  const back = page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ });
+  await back.click();
+  expect(await user.textContent()).toBe(text);
+  await page.clock.runFor(90);
+  expect((await user.textContent())!.length).toBeGreaterThan(text!.length);
+  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  await page.clock.runFor(500);
+  await page.getByRole("button", { name: "相談する", exact: true }).click();
+  await page.clock.runFor(10000);
+  await expect(turn).toHaveAttribute("data-phase", "thinking");
+  await back.click();
+  await page.clock.runFor(1499);
+  await expect(turn).toHaveAttribute("data-phase", "thinking");
+  await page.clock.runFor(1);
+  await expect(turn).toHaveAttribute("data-phase", "streaming");
+  await page.clock.runFor(135);
+  const response = turn.locator('[class*="botResponse"]');
+  const partial = await response.textContent();
+  await page.getByRole("button", { name: "相談する", exact: true }).click();
+  await page.clock.runFor(10000);
+  expect(await response.textContent()).toBe(partial);
+  await expect(turn).toHaveAttribute("data-phase", "streaming");
+  await expect(page.getByRole("button", { name: mail })).toHaveCount(0);
+  await back.click();
+  expect(await response.textContent()).toBe(partial);
+  await page.clock.runFor(90);
+  expect((await response.textContent())!.length).toBeGreaterThan(partial!.length);
+});

@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import ChatTurn, { Guide, ResponseReadyContext } from "./ChatTurn";
+import ChatTurn, { ConversationActiveContext, Guide, ResponseReadyContext } from "./ChatTurn";
 import WelcomeIntro from "./WelcomeIntro";
 import Link from "next/link";
 import {
@@ -22,7 +22,6 @@ import { AggregateArtifact, MailDraftArtifact, FinanceSkillArtifact, ShiftArtifa
 import Consultation from "./Consultation";
 import MonthlyReportArtifact from "./MonthlyReportArtifact";
 import {
-  concerns,
   experienceNames,
   questions,
   shiftSteps,
@@ -50,20 +49,21 @@ const ChoiceDockContext = createContext<ChoiceDock | null>(null);
 function Choices({ items, label }: { items: Choice[]; label: string }) {
   const id = useId();
   const complete = useContext(ResponseReadyContext);
+  const active = useContext(ConversationActiveContext);
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (!complete) return;
+    if (!complete || !active) return;
     const timer = setTimeout(() => setReady(true), 1000);
     return () => clearTimeout(timer);
-  }, [complete]);
+  }, [complete, active]);
   const dock = useContext(ChoiceDockContext)!;
   const { setActive } = dock;
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !active) return;
     setActive(id);
     return () => setActive((current) => current === id ? "" : current);
-  }, [id, ready, setActive]);
-  if (!ready || !dock.target || dock.active !== id || dock.dismissed === id) return null;
+  }, [id, ready, active, setActive]);
+  if (!active || !ready || !dock.target || dock.active !== id || dock.dismissed === id) return null;
   return createPortal(
     <section className={s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
       if (event.key === "Escape") dock.setDismissed(id);
@@ -95,7 +95,6 @@ export default function BusinessChat() {
   const [view, setView] = useState<View>("experience");
   const [experience, setExperience] = useState<Experience | null>(null);
   const [step, setStep] = useState(0);
-  const [concern, setConcern] = useState("");
   const [question, setQuestion] = useState<number | null>(null);
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState("");
@@ -105,16 +104,28 @@ export default function BusinessChat() {
     concern: "",
   });
   const main = useRef<HTMLElement>(null);
+  const scrollPositions = useRef<Partial<Record<View, number>>>({});
   const launcher = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (activeChoice && dismissedChoice === activeChoice) launcher.current?.focus();
   }, [activeChoice, dismissedChoice]);
+  useLayoutEffect(() => {
+    const restore = () => main.current?.scrollTo({ top: scrollPositions.current[view] ?? 0 });
+    restore();
+    // Choices return through a portal after effects run; restore once more
+    // after the dock has its original height.
+    const frame = requestAnimationFrame(restore);
+    return () => cancelAnimationFrame(frame);
+  }, [view]);
   useEffect(() => {
-    if (view !== "experience" || !experience) main.current?.scrollTo({ top: 0 });
+    if (view === "experience" && !experience) main.current?.scrollTo({ top: 0 });
     main.current?.focus({ preventScroll: true });
   }, [view, step, experience, question]);
+  useEffect(() => {
+    if (view === "faq") main.current?.scrollTo({ top: 0 });
+  }, [question, view]);
   useEffect(() => {
     if (!menu) return;
     searchInput.current?.focus();
@@ -139,6 +150,7 @@ export default function BusinessChat() {
     };
   }, [menu]);
   function navigate(next: View) {
+    if (next !== view && main.current) scrollPositions.current[view] = main.current.scrollTop;
     setView(next);
     setMenu(false);
     setSearch("");
@@ -147,25 +159,23 @@ export default function BusinessChat() {
   function start(kind: Experience) {
     setExperience(kind);
     setStep(0);
-    setConcern("");
+    scrollPositions.current.experience = 0;
     navigate("experience");
   }
   function home() {
     setExperience(null);
     setStep(0);
-    setConcern("");
+    scrollPositions.current.experience = 0;
     navigate("experience");
   }
   function contact() {
     setContactStarted(true);
     setContactContext({
       topic: experience ? experienceNames[experience] : "AI活用について",
-      concern,
+      concern: "",
     });
     navigate("contact");
   }
-  const reflection =
-    experience !== null && step >= (experience === "shift" ? 6 : 5);
   const menuItems = [
     {
       label: "仕事の体験",
@@ -262,8 +272,9 @@ export default function BusinessChat() {
               </WelcomeIntro>
             </div>
           )}
-          {view === "experience" && experience && (
-            <>
+          {experience && (
+            <ConversationActiveContext.Provider value={view === "experience"}>
+            <div hidden={view !== "experience"}>
               {experience === "aggregate" && (
                 <>
                   <ChatTurn user={aggregateRequest} attachments>
@@ -320,15 +331,13 @@ export default function BusinessChat() {
                       {step === 4 && <Choices label="あなたの仕事でも" items={[{
                         label: "自分の仕事について相談する", action: contact,
                       }, {
-                        label: "自分の仕事で考えてみる", action: () => setStep(5),
-                      }, {
                         label: "他の事例も見てみる", action: home,
                       }]} />}
                     </Guide>
                   </ChatTurn>}
                 </>
               )}
-              {!reflection && experience === "shift" && (
+              {experience === "shift" && (
                 <ChatTurn key={`shift-${step}`} user={step === 0 ? "スタッフのシフト希望を毎月LINEで集めています。返信の確認や、足りない時間帯の調整に時間がかかるので、自動化できるか知りたいです。" : shiftSteps[step - 1]!.next}>
                   <Guide>
                     <p>{shiftSteps[step]!.line}</p>
@@ -345,7 +354,10 @@ export default function BusinessChat() {
                     )}
                     <Choices
                       label="シフト体験を進める"
-                      items={[
+                      items={step === 5 ? [
+                        { label: "自分の仕事について相談する", action: contact },
+                        { label: "他の事例も見てみる", action: home },
+                      ] : [
                         {
                           label: shiftSteps[step]!.next,
                           action: () => setStep(step + 1),
@@ -355,53 +367,8 @@ export default function BusinessChat() {
                   </div>
                 </ChatTurn>
               )}
-              {reflection && (
-                <>
-                  <ChatTurn user={experience === "aggregate" ? "自分の仕事で考えてみる" : "自分のお店で考えてみる"}>
-                  <Guide>
-                    <p>
-                      {experience === "shift"
-                        ? "シフトづくりの、どこを楽にしたいですか？"
-                        : "ご自身の集計では、どこに時間がかかっていますか？"}
-                    </p>
-                  </Guide>
-                  <div className={s.indent}>
-                    {!concern && <Choices
-                      label="困っていること"
-                      items={concerns[experience].map((label) => ({
-                        label,
-                        action: () => setConcern(label),
-                      }))}
-                    />}
-                  </div>
-                  </ChatTurn>
-                  {concern && (
-                    <ChatTurn key={concern} user={concern}>
-                      <Guide>
-                        <p>今のやり方も含めて、ご相談いただけます。</p>
-                      </Guide>
-                      <div className={s.indent}>
-                        <Choices
-                          label="体験のあとに"
-                          items={[
-                            {
-                              label: "この仕事について相談する",
-                              description: "選んだ内容を引き継ぎます。",
-                              action: contact,
-                            },
-                            {
-                              label: "費用・支援内容を見る",
-                              action: () => navigate("pricing"),
-                            },
-                            { label: "別の仕事を試す", action: home },
-                          ]}
-                        />
-                      </div>
-                    </ChatTurn>
-                  )}
-                </>
-              )}
-            </>
+            </div>
+            </ConversationActiveContext.Provider>
           )}
           {view === "faq" && (
             <>
