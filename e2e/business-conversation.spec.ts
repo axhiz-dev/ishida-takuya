@@ -61,6 +61,7 @@ for (const width of [320, 390, 1440]) {
     await page.getByRole("button", { name: "選択肢を閉じる" }).click();
     await report.scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath(`report-${width}.png`), fullPage: true });
+    await testInfo.attach(`月次レポート-${width}px`, { path: testInfo.outputPath(`report-${width}.png`), contentType: "image/png" });
     await page.getByRole("button", { name: "選択肢を表示" }).click();
     await page.getByRole("button", { name: skillLabel }).click();
     const skill = page.getByRole("region", { name: "finance-checkerスキルのサンプル" });
