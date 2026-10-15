@@ -8,18 +8,18 @@ test("導入文の完了後に選択肢が現れ、再訪時は入力が省略�
   await page.goto(`${baseURL}/business/`);
   const intro = page.locator("[data-welcome-phase]");
   const title = intro.locator('h1 > [aria-hidden="true"] > span').first();
-  const lead = intro.locator('p > [aria-hidden="true"] > span').first();
+  const lead = intro.getByText("そんな仕事、ありませんか？");
   const choices = page.getByRole("region", { name: "選択肢パネル" });
   await expect(choices).toHaveCount(0);
   const before = await intro.boundingBox();
   await page.clock.runFor(500);
   expect((await title.innerText()).length).toBeGreaterThan(0);
-  expect((await title.innerText()).length).toBeLessThan("AIって、自分の仕事にも使えるの？".length);
-  await expect(lead).toBeEmpty();
+  expect((await title.innerText()).length).toBeLessThan("毎回やっているけれど、毎回ちょっと大変。".length);
+  await expect(lead).toBeVisible();
   await page.clock.runFor(6000);
   await expect(intro).toHaveAttribute("data-welcome-phase", "ready");
-  await expect(title).toHaveText("AIって、自分の仕事にも使えるの？");
-  await expect(lead).toHaveText("まずは、いつもの仕事がどう変わるか、サンプルで体験してみてください。");
+  await expect(title).toHaveText("毎回やっているけれど、毎回ちょっと大変。");
+  await expect(lead).toHaveText("そんな仕事、ありませんか？");
   expect((await intro.boundingBox())!.height).toBeCloseTo(before!.height, 0);
   await expect(choices).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("welcome-desktop.png") });
@@ -37,12 +37,12 @@ test("導入の表示中は選択肢を出さず、完了後に仕事を選べ�
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "streaming");
   await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
   await page.clock.runFor(6500);
-  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
   await page.getByRole("button", { name: "最初の画面に戻る" }).click();
   await page.clock.runFor(6500);
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "ready");
-  await expect(page.getByRole("button", { name: /^毎月のExcel集計/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ })).toBeVisible();
 });
 
 for (const width of [320, 1440]) {
@@ -53,7 +53,7 @@ for (const width of [320, 1440]) {
     await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "ready");
     await page.screenshot({ path: testInfo.outputPath(`welcome-${width}.png`) });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
-    await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+    await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
     const turn = page.locator("[data-chat-turn]").first();
     await expect(turn).toHaveAttribute("data-phase", "ready");
     const user = await turn.locator('[aria-label="ユーザーの発言"]').boundingBox();

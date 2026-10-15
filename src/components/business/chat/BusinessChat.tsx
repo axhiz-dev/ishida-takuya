@@ -46,7 +46,7 @@ type ChoiceDock = {
   setDismissed: React.Dispatch<React.SetStateAction<string>>;
 };
 const ChoiceDockContext = createContext<ChoiceDock | null>(null);
-function Choices({ items, label }: { items: Choice[]; label: string }) {
+function Choices({ items, label, inline = false }: { items: Choice[]; label: string; inline?: boolean }) {
   const id = useId();
   const complete = useContext(ResponseReadyContext);
   const active = useContext(ConversationActiveContext);
@@ -59,18 +59,17 @@ function Choices({ items, label }: { items: Choice[]; label: string }) {
   const dock = useContext(ChoiceDockContext)!;
   const { setActive } = dock;
   useEffect(() => {
-    if (!ready || !active) return;
+    if (!ready || !active || inline) return;
     setActive(id);
     return () => setActive((current) => current === id ? "" : current);
-  }, [id, ready, active, setActive]);
-  if (!active || !ready || !dock.target || dock.active !== id || dock.dismissed === id) return null;
-  return createPortal(
-    <section className={s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
+  }, [id, ready, active, setActive, inline]);
+  if (!active || !ready || (!inline && (!dock.target || dock.active !== id || dock.dismissed === id))) return null;
+  const panel = <section className={inline ? s.introChoices : s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
       if (event.key === "Escape") dock.setDismissed(id);
     }}>
       <div className={s.choicePanelHeader}>
         <span>{label}</span>
-        <button aria-label="選択肢を閉じる" onClick={() => dock.setDismissed(id)}><X size={20} /></button>
+        {!inline && <button aria-label="選択肢を閉じる" onClick={() => dock.setDismissed(id)}><X size={20} /></button>}
       </div>
       <div className={s.choices} role="group" aria-label={label}>
         {items.map((item, index) => (
@@ -83,8 +82,8 @@ function Choices({ items, label }: { items: Choice[]; label: string }) {
           </button>
         ))}
       </div>
-    </section>, dock.target,
-  );
+    </section>;
+  return inline ? panel : createPortal(panel, dock.target!);
 }
 
 export default function BusinessChat() {
@@ -247,22 +246,23 @@ export default function BusinessChat() {
               <WelcomeIntro>
               <div className={s.indent}>
                 <Choices
-                  label="試したい仕事"
+                  inline
+                  label="あなたの仕事に似ている場面を選んでみてください"
                   items={[
                     {
-                      label: experienceNames.aggregate,
+                      label: "毎月、数字の照合と確認に時間がかかる",
                       description:
-                        "ファイルを照合して、確認が必要なものだけ手元に。",
+                        "Excelの集計・照合の例を見る",
                       action: () => start("aggregate"),
                     },
                     {
-                      label: experienceNames.shift,
+                      label: "返信の確認や催促、シフト調整に追われる",
                       description:
-                        "いつものLINEで、希望の回収から完成のお知らせまで。",
+                        "LINEでシフトを回収・調整する例を見る",
                       action: () => start("shift"),
                     },
                     {
-                      label: "何に使えるか、まだ分からない",
+                      label: "自分の仕事で、何を任せられるか知りたい",
                       description: "支援の進め方から見てみる",
                       action: () => navigate("process"),
                     },

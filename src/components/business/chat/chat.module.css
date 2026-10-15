@@ -134,6 +134,22 @@
   margin: 0;
 }
 .welcomeLine { position: relative; }
+.welcomeQuestion { margin: 0 0 24px; font-size: 20px; font-weight: 500; }
+.welcomeScenes { border-left: 3px solid #b5cdbf; padding: 3px 0 3px 20px; margin-bottom: 24px; color: #53606b; font-size: 15px; line-height: 1.95; }
+.welcomeScenes p { margin: 0; }
+.welcomeScenes p + p { margin-top: 10px; }
+.welcomeReflection { margin: 0 0 24px; font-size: 14px; color: #657080; line-height: 2; }
+.welcomePossibility { margin: 0 0 10px; color: #28513e; font-size: 19px; font-weight: 500; }
+.introChoices { margin-top: 24px; }
+.introChoices .choices { margin: 0; }
+@media (max-width: 680px) {
+  .welcome .indent { margin-left: 0; }
+  .welcomeQuestion { font-size: 17px; margin-bottom: 20px; }
+  .welcomeScenes { font-size: 14px; padding-left: 15px; margin-bottom: 20px; }
+  .welcomeReflection { font-size: 13px; margin-bottom: 20px; }
+  .welcomePossibility { font-size: 17px; }
+  .introChoices .choicePanelHeader { font-size: 12px; }
+}
 .unrevealed { visibility: hidden; }
 .welcomeCursor { position: relative; }
 .welcomeCursor::after { content: ""; position: absolute; left: 100%; bottom: 0.1em; width: 2px; height: 1em; background: #376451; animation: pulse 700ms infinite; }
@@ -1156,3 +1172,8 @@
 .skillDetails { font-size: 13px; margin: 14px 0; }
 .skillDetails li { margin: 10px 0; }
 .skillPrompt { display: block; margin-top: 10px; padding: 12px; border-radius: 8px; background: #edf3ef; font-size: 13px; overflow-wrap: anywhere; }
+
+/* Let the introduction and its choices read as one continuous page. */
+.welcome { padding-top: 16px; }
+@media (min-width: 1400px) { .welcome { padding-top: 20px; } }
+@media (max-width: 680px) { .welcome { padding-top: 8px; } }

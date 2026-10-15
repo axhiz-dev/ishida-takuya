@@ -4,13 +4,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Guide, ResponseReadyContext } from "./ChatTurn";
 import s from "./chat.module.css";
 
-const lines = [
-  "AIって、自分の仕事にも使えるの？",
-  "まずは、いつもの仕事がどう変わるか、サンプルで体験してみてください。",
-  "そこから、あなたの仕事での使い方を一緒に考えましょう。",
-] as const;
-const total = lines.join("").length;
-const seenKey = "business-welcome-seen-v1";
+const heading = "毎回やっているけれど、毎回ちょっと大変。";
+const total = heading.length;
+const seenKey = "business-welcome-seen-v2";
 
 // The hidden remainder reserves the final line wrapping throughout the animation.
 function Reveal({ text, length, active }: { text: string; length: number; active: boolean }) {
@@ -41,8 +37,7 @@ export default function WelcomeIntro({ children }: { children: ReactNode }) {
       count++;
       setLength(count);
       if (count >= total) { finish(); return; }
-      const endOfLine = count === lines[0].length || count === lines[0].length + lines[1].length;
-      timer = setTimeout(tick, endOfLine ? 260 : 35);
+      timer = setTimeout(tick, 35);
     };
     const changed = () => { if (media.matches) finish(); };
     media.addEventListener("change", changed);
@@ -50,18 +45,18 @@ export default function WelcomeIntro({ children }: { children: ReactNode }) {
     return () => { clearTimeout(timer); media.removeEventListener("change", changed); };
   }, []);
 
-  let offset = 0;
-  const content = lines.map((text) => {
-    const visible = Math.max(0, Math.min(text.length, length - offset));
-    const active = length >= offset && length < offset + text.length;
-    offset += text.length;
-    return <Reveal key={text} text={text} length={visible} active={active} />;
-  });
   return <ResponseReadyContext.Provider value={length === total}><div className={s.welcomeIntro} data-welcome-phase={length === total ? "ready" : "streaming"}>
-    <Guide title>{content[0]}</Guide>
+    <Guide title><Reveal text={heading} length={length} active={length < total} /></Guide>
     <div className={s.indent}>
-      <p className={s.welcomeLead}>{content[1]}</p>
-      <p className={s.welcomeFollowup}>{content[2]}</p>
+      <p className={s.welcomeQuestion}>そんな仕事、ありませんか？</p>
+      <div className={s.welcomeScenes}>
+        <p>あちこちの資料を開いて、数字を写して、間違いがないか確かめる。</p>
+        <p>返事が来ていない人に連絡して、変更があればまた調整する。</p>
+        <p>前にも似た対応をしたはずなのに、探すところから始める。</p>
+      </div>
+      <p className={s.welcomeReflection}>一つひとつは小さくても、気づけば時間が過ぎている。<br />「もう少し楽になったら」と思いながら、いつものやり方で続けている。</p>
+      <p className={s.welcomePossibility}>その仕事の一部を、AIに任せられるとしたら。</p>
+      <p className={s.welcomeFollowup}>まずは身近な例で、どこまで任せられるのか見てみませんか。</p>
     </div>
   </div>{children}</ResponseReadyContext.Provider>;
 }
