@@ -37,7 +37,7 @@ const aggregateReportRequest = "確認した結果を、売上や入金状況が
 const aggregateSkillRequest = "OKです。毎月月末に、照合から月次レポートまで同じ形で作れるスキルにしてください。取引先の表記ルールと社内担当者も保存して、次回は今月分のExcelだけで進められるようにしたいです。前月との比較には過去のデータも使ってください。";
 
 type View = "experience" | "faq" | "pricing" | "process" | "contact";
-type Choice = { label: string; description?: string; action: () => void };
+type Choice = { label: string; description?: string; badge?: string; action: () => void };
 type ChoiceDock = {
   target: HTMLDivElement | null;
   active: string;
@@ -74,6 +74,7 @@ function Choices({ items, label, inline = false }: { items: Choice[]; label: str
       <div className={s.choices} role="group" aria-label={label}>
         {items.map((item, index) => (
           <button key={item.label} onClick={() => { dock.setDismissed(id); item.action(); }} data-multiline>
+            {item.badge && <span className={s.choiceExampleBadge} aria-hidden="true">{item.badge}</span>}
             <span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span>
             <span className={s.choiceTail}>
               <span className={s.choiceNumber} aria-hidden="true">{index + 1}</span>
@@ -251,12 +252,14 @@ export default function BusinessChat() {
                   items={[
                     {
                       label: "毎月、数字の照合と確認に時間がかかる",
+                      badge: "例1",
                       description:
                         "Excelの集計・照合の例を見る",
                       action: () => start("aggregate"),
                     },
                     {
                       label: "返信の確認や催促、シフト調整に追われる",
+                      badge: "例2",
                       description:
                         "LINEでシフトを回収・調整する例を見る",
                       action: () => start("shift"),
