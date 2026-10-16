@@ -52,11 +52,11 @@ test("導入の表示中は選択肢を出さず、完了後に仕事を選べ�
   await page.goto(`${baseURL}/business/`);
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "streaming");
   await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
-  await page.clock.runFor(7500);
+  await page.clock.runFor(8500);
   await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
   await page.getByRole("button", { name: "最初の画面に戻る" }).click();
-  await page.clock.runFor(7500);
+  await page.clock.runFor(8500);
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "ready");
   await expect(page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ })).toBeVisible();
 });
@@ -93,4 +93,29 @@ test("表示中に動きを減らす設定に切り替えると全文が現れ�
   await page.clock.runFor(500);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "ready");
+});
+
+test("スマホは再訪でも3コマ目まで自動送りし、その後に案内とカードを出す", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => sessionStorage.setItem("business-welcome-seen-v3", "true"));
+  await page.goto("/business/");
+  const invitation = page.locator('[class*="comicInvitation"]');
+  const choices = page.getByRole("region", { name: "選択肢パネル" });
+  await expect(page.getByRole("button", { name: "1コマ目を見る" })).toHaveAttribute("aria-current", "step");
+  await expect(invitation).toHaveAttribute("data-comic-visible", "false");
+  // A tap on the first panel must not cancel automatic playback.
+  await page.getByAltText('部長が資料を渡す。「これ、いつもの感じでやっておいて！」').click();
+  await expect(page.getByRole("button", { name: "2コマ目を見る" })).toHaveAttribute("aria-current", "step", { timeout: 4500 });
+  await expect(invitation).toHaveAttribute("data-comic-visible", "false");
+  await expect(choices).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "3コマ目を見る" })).toHaveAttribute("aria-current", "step", { timeout: 4500 });
+  await expect(invitation).toHaveAttribute("data-comic-visible", "false");
+  await expect(choices).toHaveCount(0);
+  await expect(invitation).toHaveAttribute("data-comic-visible", "true", { timeout: 4000 });
+  await expect(choices).toBeVisible();
+  const strip = await page.locator('[class*="comicStrip"]').boundingBox();
+  const last = await page.getByAltText('AI君が声をかける。「その準備、ぼくも手伝えそうです」').locator('..').boundingBox();
+  expect(Math.abs(last!.x - strip!.x)).toBeLessThanOrEqual(2);
+  await page.screenshot({ path: testInfo.outputPath("mobile-comic-complete.png") });
 });
