@@ -118,22 +118,20 @@
 .welcome {
   padding-top: 65px;
 }
-.welcomeLead {
-  font-size: 17px;
-  margin: 0 0 16px;
-  color: #53606b;
-}
 .caption {
   font-size: 12px;
   color: var(--chat-muted);
   margin: 0 0 12px;
 }
-.welcomeFollowup {
-  font-size: 14px;
-  color: var(--chat-muted);
-  margin: 0;
+.choices { margin: 0; }
+@media (max-width: 680px) {
+  .welcome .indent { margin-left: 0; }
+  .welcomeQuestion { font-size: 17px; margin-bottom: 20px; }
+  .welcomeScenes { font-size: 14px; padding-left: 15px; margin-bottom: 20px; }
+  .welcomeReflection { font-size: 13px; margin-bottom: 20px; }
+  .welcomePossibility { font-size: 17px; }
+  .introChoices .choicePanelHeader { font-size: 12px; }
 }
-.welcomeLine { position: relative; }
 .unrevealed { visibility: hidden; }
 .welcomeCursor { position: relative; }
 .welcomeCursor::after { content: ""; position: absolute; left: 100%; bottom: 0.1em; width: 2px; height: 1em; background: #376451; animation: pulse 700ms infinite; }
@@ -831,13 +829,6 @@
   .welcome {
     padding-top: 35px;
   }
-  .welcomeLead {
-    font-size: 13px;
-    margin: 0 0 28px;
-  }
-  .welcomeFollowup {
-    font-size: 12px;
-  }
   .choices {
     padding: 3px;
     border-radius: 9px;
@@ -1146,7 +1137,6 @@
 @media (max-width: 680px) {
   .turn > .userMessage { margin-bottom: 36px; }
   .turn + .turn { margin-top: 40px; }
-  .welcomeLead { margin-bottom: 16px; }
 }
 
 .mailDraft dl { margin: 14px 0; font-size: 12px; }
@@ -1156,3 +1146,63 @@
 .skillDetails { font-size: 13px; margin: 14px 0; }
 .skillDetails li { margin: 10px 0; }
 .skillPrompt { display: block; margin-top: 10px; padding: 12px; border-radius: 8px; background: #edf3ef; font-size: 13px; overflow-wrap: anywhere; }
+
+/* Let the introduction and its choices read as one continuous page. */
+.welcome { padding-top: 16px; }
+@media (min-width: 1400px) { .welcome { padding-top: 20px; } }
+@media (max-width: 680px) { .welcome { padding-top: 8px; } }
+
+/* The comic is the welcome screen; leave room around the three quiet scenes. */
+.welcome { padding-top: clamp(12px, 3vh, 28px); }
+.welcome .indent { margin-left: 0; }
+.comicHeading { position: relative; padding: 0 0 22px; text-align: center; }
+.comicHeading h1 { margin: 0; font-size: clamp(21px, 2.3vw, 28px); font-weight: 600; color: #183f32; line-height: 1.5; }
+.comicSkip { position: absolute; right: 0; bottom: 0; margin: 0; padding: 2px 0 2px 12px; font-size: 11px !important; color: #657080; cursor: pointer; }
+.comicStrip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.comicPanel { position: relative; aspect-ratio: 648 / 560; overflow: hidden; border-radius: 15px; opacity: 0; transform: translateY(12px); transition: opacity 750ms ease, transform 750ms ease; }
+.comicPanel[data-comic-visible="true"] { opacity: 1; transform: translateY(0); }
+.comicArt { position: absolute; width: 306.01852%; max-width: none; height: auto; top: -22.857143%; }
+.comicPages { display: none; }
+.comicInvitation { text-align: center; font-size: 14px; color: #53606b; line-height: 1.8; margin: 24px 0 0; opacity: 0; transition: opacity 600ms ease; }
+.comicInvitation[data-comic-visible="true"] { opacity: 1; }
+.introChoices { margin-top: 18px; }
+.introChoices .choicePanelHeader { display: none; }
+.introChoices .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; border: 0; padding: 0; background: none; }
+.introChoices .choices > button { position: relative; border: 1px solid #dce2e6; border-radius: 10px; min-height: 82px; padding: 13px 16px; }
+.choiceExampleBadge { position: absolute; top: -10px; left: 12px; padding: 1px 9px; border: 2px solid #fff; border-radius: 999px; background: #e8f1eb; color: #376451; font-size: 10px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
+.introChoices .choices > button strong { font-size: 14px; }
+.introChoices .choiceNumber { display: none; }
+.introChoices .choices > button:last-child { grid-column: 1 / -1; justify-self: center; width: auto; border: 0; min-height: 30px; padding: 2px 12px; }
+.introChoices .choices > button:last-child strong { font-size: 12px; color: #657080; font-weight: 400; }
+.introChoices .choices > button:last-child small { display: none; }
+@media (max-width: 680px) {
+  .welcome { padding-top: 6px; }
+  .comicHeading { padding-bottom: 16px; }
+  .comicHeading h1 { font-size: 21px; max-width: 310px; margin: auto; text-wrap: balance; }
+  .comicStrip { position: relative; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .comicStrip::-webkit-scrollbar { display: none; }
+  .comicPanel { flex: 0 0 100%; scroll-snap-align: start; border-radius: 14px; }
+  .comicPages { display: flex; justify-content: center; gap: 2px; margin-top: 6px; }
+  .comicPages button { width: 32px; height: 28px; display: grid; place-items: center; cursor: pointer; }
+  .comicPages span { width: 6px; height: 6px; background: #d4ded7; border-radius: 50%; }
+  .comicPages [aria-current="step"] span { background: #376451; }
+  .comicInvitation { font-size: 12px; margin-top: 10px; padding: 0 8px; }
+  .introChoices { margin-top: 14px; }
+  .introChoices .choices { gap: 8px; }
+  .introChoices .choices > button { padding: 10px; gap: 4px; min-height: 86px; }
+  .introChoices .choices > button strong { font-size: 12px; }
+  .introChoices .choices > button small { font-size: 10px; }
+  .introChoices .choices > button:last-child { padding: 5px 0; }
+  .introChoices .choices > button:last-child strong { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .comicPanel, .comicInvitation { transition: none; transform: none; }
+  .comicStrip { scroll-behavior: auto; }
+}
+@media (min-width: 681px) and (max-height: 760px) {
+  .welcome { padding-top: 8px; }
+  .comicHeading { padding-bottom: 18px; }
+  .comicInvitation { margin-top: 16px; }
+  .introChoices { margin-top: 12px; }
+  .introChoices .choices > button { min-height: 74px; }
+}

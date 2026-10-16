@@ -11,7 +11,7 @@ test("集計：判断、結果、相談への引き継ぎと未設定時の送�
   page,
 }) => {
   await page.goto("/business/");
-  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   await page.getByRole("button", { name: "同じ会社です。このルールで照合して" }).click();
   await page.getByRole("button", { name: "担当者を伝えて、確認メールを下書きして" }).click();
   await page.getByRole("button", { name: "件数の多いサンプルで月次レポートを見てみる" }).click();
@@ -42,7 +42,7 @@ test("LINE：FAQへ寄り道しても進行を保ち、最後まで体験でき�
 }) => {
   await page.goto("/business/");
   await page
-    .getByRole("button", { name: /^シフトの回収・調整をおまかせ/ })
+    .getByRole("button", { name: /^返信の確認や催促、シフト調整に追われる/ })
     .click();
   for (let i = 0; i < 3; i++)
     await page
@@ -94,7 +94,7 @@ for (const width of [320, 390, 768])
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/business/");
     await page
-      .getByRole("button", { name: /^シフトの回収・調整をおまかせ/ })
+      .getByRole("button", { name: /^返信の確認や催促、シフト調整に追われる/ })
       .click();
     for (const step of shiftSteps) {
       expect(

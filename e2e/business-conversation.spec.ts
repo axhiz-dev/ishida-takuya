@@ -10,7 +10,7 @@ for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/business/");
-    await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+    await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
     const attachment = page.getByRole("button", { name: /月末集計サンプル.xlsx/ });
     await attachment.click();
     const preview = page.getByRole("dialog");
@@ -92,7 +92,7 @@ for (const width of [320, 390, 1440]) {
 test("応答全体の表示完了から1秒後に選択肢を出し、読み位置を動かさない", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/business/");
-  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   await page.getByRole("button", { name: "入力を完了して送信" }).click();
   await page.getByRole("button", { name: "回答をすべて表示" }).click();
   await page.getByRole("button", { name: confirmLabel }).waitFor();
@@ -124,7 +124,7 @@ test("応答全体の表示完了から1秒後に選択肢を出し、読み位�
 test("回答をすべて表示しても1秒待ち、途中で離れた回答の選択肢は出ない", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/business/");
-  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.getByRole("button", { name: confirmLabel }).waitFor();
   const now = new Date("2026-10-11T00:00:00Z");
@@ -142,6 +142,6 @@ test("回答をすべて表示しても1秒待ち、途中で離れた回答の�
   await page.clock.runFor(30000);
   await expect(page.locator("[data-welcome-phase]")).toHaveAttribute("data-welcome-phase", "ready");
   await page.clock.runFor(1000);
-  await expect(page.getByRole("button", { name: /^毎月のExcel集計/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ })).toBeVisible();
     await expect(page.getByRole("button", { name: reportLabel })).toHaveCount(0);
 });

@@ -37,7 +37,7 @@ const aggregateReportRequest = "確認した結果を、売上や入金状況が
 const aggregateSkillRequest = "OKです。毎月月末に、照合から月次レポートまで同じ形で作れるスキルにしてください。取引先の表記ルールと社内担当者も保存して、次回は今月分のExcelだけで進められるようにしたいです。前月との比較には過去のデータも使ってください。";
 
 type View = "experience" | "faq" | "pricing" | "process" | "contact";
-type Choice = { label: string; description?: string; action: () => void };
+type Choice = { label: string; description?: string; badge?: string; action: () => void };
 type ChoiceDock = {
   target: HTMLDivElement | null;
   active: string;
@@ -46,7 +46,7 @@ type ChoiceDock = {
   setDismissed: React.Dispatch<React.SetStateAction<string>>;
 };
 const ChoiceDockContext = createContext<ChoiceDock | null>(null);
-function Choices({ items, label }: { items: Choice[]; label: string }) {
+function Choices({ items, label, inline = false }: { items: Choice[]; label: string; inline?: boolean }) {
   const id = useId();
   const complete = useContext(ResponseReadyContext);
   const active = useContext(ConversationActiveContext);
@@ -59,22 +59,22 @@ function Choices({ items, label }: { items: Choice[]; label: string }) {
   const dock = useContext(ChoiceDockContext)!;
   const { setActive } = dock;
   useEffect(() => {
-    if (!ready || !active) return;
+    if (!ready || !active || inline) return;
     setActive(id);
     return () => setActive((current) => current === id ? "" : current);
-  }, [id, ready, active, setActive]);
-  if (!active || !ready || !dock.target || dock.active !== id || dock.dismissed === id) return null;
-  return createPortal(
-    <section className={s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
+  }, [id, ready, active, setActive, inline]);
+  if (!active || !ready || (!inline && (!dock.target || dock.active !== id || dock.dismissed === id))) return null;
+  const panel = <section className={inline ? s.introChoices : s.floatingChoices} aria-label="選択肢パネル" onKeyDown={(event) => {
       if (event.key === "Escape") dock.setDismissed(id);
     }}>
       <div className={s.choicePanelHeader}>
         <span>{label}</span>
-        <button aria-label="選択肢を閉じる" onClick={() => dock.setDismissed(id)}><X size={20} /></button>
+        {!inline && <button aria-label="選択肢を閉じる" onClick={() => dock.setDismissed(id)}><X size={20} /></button>}
       </div>
       <div className={s.choices} role="group" aria-label={label}>
         {items.map((item, index) => (
           <button key={item.label} onClick={() => { dock.setDismissed(id); item.action(); }} data-multiline>
+            {item.badge && <span className={s.choiceExampleBadge} aria-hidden="true">{item.badge}</span>}
             <span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span>
             <span className={s.choiceTail}>
               <span className={s.choiceNumber} aria-hidden="true">{index + 1}</span>
@@ -83,8 +83,8 @@ function Choices({ items, label }: { items: Choice[]; label: string }) {
           </button>
         ))}
       </div>
-    </section>, dock.target,
-  );
+    </section>;
+  return inline ? panel : createPortal(panel, dock.target!);
 }
 
 export default function BusinessChat() {
@@ -247,22 +247,25 @@ export default function BusinessChat() {
               <WelcomeIntro>
               <div className={s.indent}>
                 <Choices
-                  label="試したい仕事"
+                  inline
+                  label="あなたの仕事に似ている場面を選んでみてください"
                   items={[
                     {
-                      label: experienceNames.aggregate,
+                      label: "毎月、数字の照合と確認に時間がかかる",
+                      badge: "例1",
                       description:
-                        "ファイルを照合して、確認が必要なものだけ手元に。",
+                        "Excelの集計・照合の例を見る",
                       action: () => start("aggregate"),
                     },
                     {
-                      label: experienceNames.shift,
+                      label: "返信の確認や催促、シフト調整に追われる",
+                      badge: "例2",
                       description:
-                        "いつものLINEで、希望の回収から完成のお知らせまで。",
+                        "LINEでシフトを回収・調整する例を見る",
                       action: () => start("shift"),
                     },
                     {
-                      label: "何に使えるか、まだ分からない",
+                      label: "自分の仕事で、何を任せられるか知りたい",
                       description: "支援の進め方から見てみる",
                       action: () => navigate("process"),
                     },

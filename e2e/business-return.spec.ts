@@ -9,7 +9,7 @@ for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/business/");
-    await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+    await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
     await page.getByRole("button", { name: confirm }).click();
     await page.getByRole("button", { name: mail }).click();
     await page.getByRole("button", { name: report }).click();
@@ -42,7 +42,7 @@ for (const width of [390, 1440]) {
 test("入力中・考え中・回答中は画面を離れると止まり、戻ると同じ続きから再開する", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/business/");
-  await page.getByRole("button", { name: /^毎月のExcel集計/ }).click();
+  await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   await page.getByRole("button", { name: confirm }).waitFor();
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const now = new Date("2026-10-12T00:00:00Z");
