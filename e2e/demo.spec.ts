@@ -74,7 +74,6 @@ test("メニューは検索・キーボード・閉じた後のフォーカス�
   const launcher = page.getByRole("button", {
     name: "メニューから、できることを選ぶ",
   });
-  await page.getByRole("button", { name: "選択肢を閉じる" }).click();
   await launcher.click();
   await page.getByLabel("メニューを検索").fill("費用");
   await expect(
