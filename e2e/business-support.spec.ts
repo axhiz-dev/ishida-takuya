@@ -56,9 +56,13 @@ test("事例の最後から支援内容を確認し、続きと別の事例に�
   await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   for (const name of ["同じ会社です。このルールで照合して", "担当者を伝えて、確認メールを下書きして", "件数の多いサンプルで月次レポートを見てみる", "月次レポートまで毎月使えるスキルにして"]) await page.getByRole("button", { name }).click();
   await expect(page.getByRole("region", { name: "実際の仕事で使うには" })).toContainText("実際の導入は、私、石田がお手伝いします。");
+  await page.getByRole("button", { name: "費用や支援の進め方を確認する" }).waitFor();
+  await page.locator("main").evaluate(el => { el.scrollTop = el.scrollHeight; });
+  const readingPosition = await page.locator("main").evaluate(el => el.scrollTop);
   await page.getByRole("button", { name: "費用や支援の進め方を確認する" }).click();
   await expect(page.getByRole("dialog")).toContainText("5万円〜");
   await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
+  await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(readingPosition);
   await page.getByRole("button", { name: "もうひとつの事例を見る" }).click();
   await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
   await expect(page.locator("[data-chat-turn]")).toContainText("毎月LINEでシフト希望を集めています");

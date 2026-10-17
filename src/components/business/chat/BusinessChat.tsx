@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ChatTurn, { ConversationActiveContext, Guide, ResponseReadyContext } from "./ChatTurn";
 import WelcomeIntro from "./WelcomeIntro";
@@ -109,6 +109,18 @@ export default function BusinessChat() {
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState("");
   const main = useRef<HTMLElement>(null);
+  const backgroundScroll = useRef(0);
+  const panelRef = useRef<BusinessPanel | null>(null);
+  useLayoutEffect(() => {
+    panelRef.current = panel;
+    if (panel) return;
+    // Pausing removes the choice dock temporarily. Restore after its portal returns,
+    // including when the growing viewport clamped a scroll position near the end.
+    const restore = () => main.current?.scrollTo({ top: backgroundScroll.current });
+    restore();
+    const frame = requestAnimationFrame(restore);
+    return () => cancelAnimationFrame(frame);
+  }, [panel]);
   const launcher = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -117,7 +129,7 @@ export default function BusinessChat() {
   }, [activeChoice, dismissedChoice]);
   // URL-addressable overlays preserve the mounted conversation and form.
   useEffect(() => {
-    const sync = () => { const next = readBusinessPanel(window.location.hash); setPanel(next); setMenu(false); if (!next) setDismissedChoice(""); };
+    const sync = () => { const next = readBusinessPanel(window.location.hash); if (next && !panelRef.current && main.current) backgroundScroll.current = main.current.scrollTop; setPanel(next); setMenu(false); if (!next) setDismissedChoice(""); };
     sync();
     window.addEventListener("popstate", sync);
     window.addEventListener("hashchange", sync);
@@ -150,6 +162,7 @@ export default function BusinessChat() {
     };
   }, [menu]);
   function navigate(next: BusinessPanel) {
+    if (!panel && main.current) backgroundScroll.current = main.current.scrollTop;
     const url = `${window.location.pathname}${window.location.search}#${next}`;
     if (panel) window.history.replaceState(window.history.state, "", url);
     else window.history.pushState({ ...window.history.state, businessPanel: true }, "", url);
@@ -168,12 +181,14 @@ export default function BusinessChat() {
     setStep(0);
     setMenu(false);
     setDismissedChoice("");
+    backgroundScroll.current = 0;
     main.current?.scrollTo({ top: 0 });
   }
   function home() {
     setExperience(null);
     setStep(0);
     setMenu(false);
+    backgroundScroll.current = 0;
     main.current?.scrollTo({ top: 0 });
   }
   function contact() { navigate("contact"); }
