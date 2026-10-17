@@ -75,7 +75,17 @@ test("LINE：相談でルールを決め、FAQへ寄り道しても会話を保�
       .getByRole("button", { name: shiftSteps[i]!.next, exact: true })
       .click();
   const trial = page.locator("[data-chat-turn]").last();
-  await expect(trial).toContainText("店長の最終承認待ち");
+  const timeline = trial.getByRole("region", { name: "募集から確定までのLINEトーク" });
+  await expect(timeline).toContainText("20日 · 設定した日に自動で募集");
+  await expect(timeline).toContainText("24日 · 未回答の人に1回だけ催促");
+  await expect(timeline).toContainText("募集から確認・共有まで完了");
+  expect(await timeline.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
+  await timeline.focus();
+  const mainScroll = await page.locator("main").evaluate(el => el.scrollTop);
+  await page.keyboard.press("End");
+  await expect.poll(() => timeline.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+  expect(await page.locator("main").evaluate(el => el.scrollTop)).toBe(mainScroll);
+  await trial.getByText("AIと整理した指示文を見る", { exact: true }).click();
   await expect(page.getByRole("region", { name: "シフト調整の指示文の見本" })).toContainText("24日に未回答者へ1回だけ");
   await expect(page.locator("[data-chat-turn]")).toHaveCount(7);
   await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).click();

@@ -2,6 +2,18 @@
 
 ## 2026-10-17 — LINE shift consultation
 
+### Follow-up: scrollable full LINE journey
+
+- User requested the final sample show the complete exchange beginning with automatic recruitment on the 20th, with scrolling inside LINE. This is an authorized extension of the selected flow; example 1's choice UI stays unchanged.
+- Added five staff members, 20th/21st replies, 24th private reminder, 25th shortage report, manager approval before outreach, additional staff reply, final manager approval and group confirmation. Private chats and group messages are labeled separately.
+- Instruction summary is now collapsed by default. LINE header, scroll hint and sample disclaimer remain outside the scrolling message body. Keyboard focus is visible; wheel overscroll is contained. Long static preview text is excluded from AI streaming.
+- Initial 55dvh timeline clipped its header when the outer pane was at the bottom on a 671×884 window. Reduced to `clamp(240px, 38dvh, 460px)` with `clamp(220px, 32dvh, 320px)` below 680px so the complete LINE frame fits more comfortably above the existing choice dock.
+- Browser check: wheel changed LINE scrollTop 0→1768 while main remained 3712. Focusing the region and pressing End changed inner scrollTop to 2688 with the same main scrollTop. Full transcript is reachable without lengthening the page by the entire conversation.
+- Static build, lint and types passed. Regression test now verifies the complete journey exists and the inner region scrolls independently using the keyboard. Earlier commit's GitHub CI passed; updated commit CI is separate.
+- Follow-up evidence: `docs/business-qa/shift-timeline.png` and `docs/business-qa/shift-timeline-mobile.png`. Existing font, palette, mascot and choice styles reused. No new raster imagery or visual-system change.
+
+final result: passed
+
 **Scope and visual truth**
 - Selected first displayed ImageGen concept: `exec-ae697be3-7322-4176-89aa-11c8eac34998.png`, captured locally as `screenshots/shift/reference.png` (1487×1058).
 - User override: keep example 1's choice design and behavior exactly; adapt the selected concept's conversational flow to the existing chat, rather than copying its green CTA and back button. Reuse the existing mascot, icons, fonts, header, scrolling pane and Choices component.

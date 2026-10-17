@@ -147,7 +147,9 @@ function Bubble({
 export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
   return (
     <>
-    {sample === "trial" && <section className={s.artifact} aria-label="シフト調整の指示文の見本">
+    {sample === "trial" && <details className={s.shiftInstructions} data-static-preview>
+      <summary>AIと整理した指示文を見る</summary>
+      <section className={s.artifact} aria-label="シフト調整の指示文の見本">
       <span className={s.badge}>AIと整理した指示文 · 見本</span>
       <h3 className={s.artifactLead}>LINEでシフトを集め、店長確認用の案を作って</h3>
       <ul className={s.skillDetails}>
@@ -158,16 +160,20 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
         <li>条件を満たさなければ店長に知らせる。シフト案は店長の最終承認後に共有する。</li>
       </ul>
       <p className={s.sampleNote}>試行用の指示文の見本です。この画面では保存・実行されません。</p>
-    </section>}
-    <section className={s.lineArtifact} aria-label="LINE連携のサンプル体験">
+    </section></details>}
+    <section className={s.lineArtifact} aria-label="LINE連携のサンプル体験" data-static-preview={sample === "trial" ? "" : undefined}>
       <div className={s.lineHeader}>
         <ChatCircle size={21} weight="fill" />
         <strong>
-          {sample === "reminder" || sample === "reply" ? "スタッフとシフト係bot" : sample === "trial" ? "店長とシフト係bot" : "お店のシフト連絡"}
+          {sample === "reminder" || sample === "reply" ? "スタッフとシフト係bot" : sample === "trial" ? "募集からシフト確定まで" : "お店のシフト連絡"}
         </strong>
         <span>動作見本</span>
       </div>
-      <div className={s.lineBody}>
+      {sample === "trial" && <p className={s.lineScrollHint}>20日の自動募集から順に見られます。トーク内をスクロールしてください。</p>}
+      <div className={sample === "trial" ? `${s.lineBody} ${s.lineTimeline}` : s.lineBody}
+        role={sample === "trial" ? "region" : undefined}
+        aria-label={sample === "trial" ? "募集から確定までのLINEトーク" : undefined}
+        tabIndex={sample === "trial" ? 0 : undefined}>
         {sample === "recruit" && (
           <Bubble>
             来月のシフトを作ります。25日までに予定を教えてください。
@@ -214,9 +220,42 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
         )}
         {sample === "trial" && (
           <>
-            <Bubble>
-              店長へ：スタッフ5人の架空データで作ったシフト案です。土曜の夜の追加募集は承認済み、鈴木さんの返信を反映しています。最終確認をお願いします。
-            </Bubble>
+            <p className={s.lineDay}>20日 · 設定した日に自動で募集</p>
+            <p className={s.lineChannel}>お店のシフト連絡 · グループ</p>
+            <Bubble>来月のシフトを作ります。25日までに、勤務できる日時やお休みの希望を教えてください。いつもの言葉で、このLINEに返信してください。</Bubble>
+            <Bubble person="田中さん · 責任者" own>土曜は18〜22時で入れます。日曜は休みでお願いします。</Bubble>
+            <Bubble>田中さん、土曜18〜22時、日曜はお休みで登録しました！</Bubble>
+            <Bubble person="山田さん" own>火曜は夕方から入れます</Bubble>
+            <Bubble>火曜日は何時から勤務できますか？</Bubble>
+            <Bubble person="山田さん" own>17時からです</Bubble>
+            <Bubble>火曜日17時からLASTで登録しました！</Bubble>
+            <Bubble person="山田さん" own>土日も18〜22時で入れます。</Bubble>
+            <Bubble>山田さん、土曜・日曜18〜22時も登録しました！</Bubble>
+            <p className={s.lineDay}>21日 · 届いた希望を整理</p>
+            <Bubble person="高橋さん · 責任者" own>日曜18〜22時でお願いします。土曜は休みです。</Bubble>
+            <Bubble>高橋さん、日曜18〜22時、土曜はお休みで登録しました！</Bubble>
+            <Bubble person="鈴木さん" own>平日は17時から入れます。土日はお休み希望です。</Bubble>
+            <Bubble>鈴木さん、平日17時からLAST、土日はお休み希望で登録しました！</Bubble>
+            <p className={s.lineDay}>24日 · 未回答の人に1回だけ催促</p>
+            <p className={s.lineChannel}>佐藤さんとシフト係bot · 個別トーク</p>
+            <Bubble>佐藤さん、来月のシフト希望の締切は明日25日です。勤務できる日時を、このトークで教えてください。</Bubble>
+            <Bubble person="佐藤さん" own>遅くなりました！ 日曜18〜22時で入れます。土曜は休み希望です。</Bubble>
+            <Bubble>佐藤さん、日曜18〜22時、土曜はお休み希望で登録しました！</Bubble>
+            <p className={s.lineDay}>25日 · 集計して、不足を店長に相談</p>
+            <p className={s.lineChannel}>店長とシフト係bot · 個別トーク</p>
+            <Bubble>5人の希望がそろいました。日曜の夜は3人・責任者1人で組めますが、土曜18〜22時は田中さんと山田さんの2人で、あと1人必要です。</Bubble>
+            <ShiftRow />
+            <Bubble>土曜をお休み希望の鈴木さん・佐藤さんに、変更できるか聞いてもよいですか？ 文面案：「土曜18〜22時が1人足りません。もし予定の変更が可能であれば、ご協力いただけますか？ 難しければお休み希望のままで大丈夫です。」</Bubble>
+            <Bubble person="店長" own>その2人に、その文面でお願いします。</Bubble>
+            <p className={s.lineChannel}>鈴木さんとシフト係bot · 個別トーク（佐藤さんにも同じ依頼）</p>
+            <Bubble>土曜18〜22時が1人足りません。もし予定の変更が可能であれば、ご協力いただけますか？ 難しければお休み希望のままで大丈夫です。</Bubble>
+            <Bubble person="鈴木さん" own>その土曜なら予定が空いたので、18〜22時で入れます！</Bubble>
+            <Bubble>鈴木さん、ありがとうございます。土曜18〜22時でシフト案に反映しました！</Bubble>
+            <p className={s.lineChannel}>佐藤さんとシフト係bot · 個別トーク</p>
+            <Bubble>土曜の不足枠は埋まりました。追加の勤務は不要です。お休み希望のままにしています。</Bubble>
+            <p className={s.lineDay}>25日 · シフト案を店長が最終確認</p>
+            <p className={s.lineChannel}>店長とシフト係bot · 個別トーク</p>
+            <Bubble>鈴木さんの返信を反映しました。土日の夜は各3人・責任者1人になっています。こちらの案で確定してよいですか？</Bubble>
             <div className={s.schedule}>
               <strong>店長確認用のシフト案 · 固定の見本</strong>
               <table>
@@ -244,7 +283,11 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
                 </tbody>
               </table>
             </div>
-            <p className={s.lineFoot}>土日の夜は各3人・責任者1人。店長の最終承認待ちです。</p>
+            <p className={s.lineFoot}>土日の夜は各3人・責任者1人。店長の最終承認を待ちます。</p>
+            <Bubble person="店長" own>確認しました。この内容で確定して、みんなに知らせてください。</Bubble>
+            <p className={s.lineChannel}>お店のシフト連絡 · グループ</p>
+            <Bubble>店長の確認が完了し、来月のシフトが確定しました！ 土曜の夜は田中さん・山田さん・鈴木さん、日曜の夜は高橋さん・山田さん・佐藤さんです。変更が必要なときは、このLINEで連絡してください。</Bubble>
+            <p className={s.lineFoot}><CheckCircle size={16} />募集から確認・共有まで完了</p>
           </>
         )}
       </div>

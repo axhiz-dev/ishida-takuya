@@ -51,7 +51,7 @@ function StreamResponse({ children, immediate, onComplete }: { children: ReactNo
   useLayoutEffect(() => {
     if (!root.current || immediate) { onComplete(); return; }
     const walker = document.createTreeWalker(root.current, NodeFilter.SHOW_TEXT, {
-      acceptNode: (node) => node.textContent?.trim() && !node.parentElement?.closest('svg, [aria-hidden="true"]')
+      acceptNode: (node) => node.textContent?.trim() && !node.parentElement?.closest('svg, [aria-hidden="true"], [data-static-preview]')
         ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
     });
     const nodes: { node: Text; text: string }[] = [];
