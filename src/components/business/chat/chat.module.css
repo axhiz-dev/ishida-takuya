@@ -404,6 +404,7 @@
 }
 .lineMessage,
 .lineOwn {
+  width: fit-content;
   max-width: 85%;
   margin-bottom: 18px;
   font-size: 14px;

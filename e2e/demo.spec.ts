@@ -37,20 +37,28 @@ test("集計：判断、結果、相談への引き継ぎと未設定時の送�
   );
 });
 
-test("LINE：FAQへ寄り道しても進行を保ち、最後まで体験できる", async ({
+test("LINE：相談でルールを決め、FAQへ寄り道しても会話を保つ", async ({
   page,
 }) => {
   await page.goto("/business/");
   await page
     .getByRole("button", { name: /^返信の確認や催促、シフト調整に追われる/ })
     .click();
-  for (let i = 0; i < 3; i++)
+  // Start with questions about the work, before showing a finished bot.
+  await expect(page.getByText(/毎月いつ募集して、いつまでに希望を集めていますか/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "LINE連携のサンプル体験" })).toHaveCount(0);
+  for (let i = 0; i < 2; i++)
     await page
       .getByRole("button", { name: shiftSteps[i]!.next, exact: true })
       .click();
-  await expect(
-    page.getByText("金曜の18〜22時が1人足りません。入れる方はいますか？"),
-  ).toBeVisible();
+  const replySample = page.getByRole("region", { name: "LINE連携のサンプル体験" }).last();
+  await expect(replySample.locator("small + div")).toHaveText([
+    "火曜は夕方から入れます",
+    "火曜日は何時から勤務できますか？",
+    "17時からです",
+    "火曜日17時からLASTで登録しました！",
+  ]);
+  await expect(page.locator("[data-chat-turn]")).toHaveCount(3);
   await page.getByRole("button", { name: "費用・FAQ", exact: true }).click();
   await page
     .getByRole("button", { name: "月額には何が含まれますか？", exact: true })
@@ -60,11 +68,18 @@ test("LINE：FAQへ寄り道しても進行を保ち、最後まで体験でき�
     .getByRole("group", { name: "回答のあとに" })
     .getByRole("button", { name: "体験の続きに戻る" })
     .click();
-  for (let i = 3; i < 6; i++)
+  await expect(page.locator("[data-chat-turn]:visible")).toHaveCount(3);
+  await expect(replySample).toContainText("火曜日17時からLASTで登録しました！");
+  for (let i = 2; i < shiftSteps.length - 1; i++)
     await page
       .getByRole("button", { name: shiftSteps[i]!.next, exact: true })
       .click();
-  await expect(page.getByRole("region", { name: "相談フォーム" })).toContainText("シフトの回収・調整をおまかせ");
+  const trial = page.locator("[data-chat-turn]").last();
+  await expect(trial).toContainText("店長の最終承認待ち");
+  await expect(page.getByRole("region", { name: "シフト調整の指示文の見本" })).toContainText("24日に未回答者へ1回だけ");
+  await expect(page.locator("[data-chat-turn]")).toHaveCount(7);
+  await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).click();
+  await expect(page.getByRole("region", { name: "相談フォーム" })).toContainText("LINEのシフト調整をAIと仕組みにする");
 });
 
 test("メニューは検索・キーボード・閉じた後のフォーカス復帰が動く", async ({

@@ -5,6 +5,7 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import s from "./chat.module.css";
+import type { ShiftSample } from "./content";
 
 export function AggregateArtifact({
   resolved,
@@ -129,7 +130,7 @@ export function FinanceSkillArtifact() {
 
 function Bubble({
   children,
-  person = "シフト係",
+  person = "シフト係bot",
   own = false,
 }: {
   children: React.ReactNode;
@@ -143,63 +144,66 @@ function Bubble({
     </div>
   );
 }
-export function ShiftArtifact({ step }: { step: number }) {
+export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
   return (
+    <>
+    {sample === "trial" && <section className={s.artifact} aria-label="シフト調整の指示文の見本">
+      <span className={s.badge}>AIと整理した指示文 · 見本</span>
+      <h3 className={s.artifactLead}>LINEでシフトを集め、店長確認用の案を作って</h3>
+      <ul className={s.skillDetails}>
+        <li>毎月20日に募集、25日締切。自由な文章で希望を受け付ける。</li>
+        <li>曖昧な開始時間だけ聞き返す。終了時間の指定がなければLASTとして登録し、内容を返す。訂正も受け付ける。</li>
+        <li>24日に未回答者へ1回だけ個別に催促。締切後の未回答・返信は店長に知らせる。</li>
+        <li>土日の夜は3人、責任者を1人配置。不足時は対象者と追加募集の文面を店長に確認してから送る。</li>
+        <li>条件を満たさなければ店長に知らせる。シフト案は店長の最終承認後に共有する。</li>
+      </ul>
+      <p className={s.sampleNote}>試行用の指示文の見本です。この画面では保存・実行されません。</p>
+    </section>}
     <section className={s.lineArtifact} aria-label="LINE連携のサンプル体験">
       <div className={s.lineHeader}>
         <ChatCircle size={21} weight="fill" />
         <strong>
-          {step === 2 ? "シフト係とのトーク" : "お店のシフト連絡"}
+          {sample === "reminder" || sample === "reply" ? "スタッフとシフト係bot" : sample === "trial" ? "店長とシフト係bot" : "お店のシフト連絡"}
         </strong>
-        <span>サンプル</span>
+        <span>動作見本</span>
       </div>
       <div className={s.lineBody}>
-        {step === 0 && (
+        {sample === "recruit" && (
           <Bubble>
             来月のシフトを作ります。25日までに予定を教えてください。
           </Bubble>
         )}
-        {step === 1 && (
+        {sample === "reply" && (
           <>
-            <Bubble person="山田さん" own>
-              火・木の夕方に入れます。12日は休みたいです。
+            <Bubble person="スタッフ" own>
+              火曜は夕方から入れます
             </Bubble>
             <Bubble>
-              火・木の夕方、12日はお休みで登録します。違っていたら教えてください。
+              火曜日は何時から勤務できますか？
+            </Bubble>
+            <Bubble person="スタッフ" own>17時からです</Bubble>
+            <Bubble>火曜日17時からLASTで登録しました！</Bubble>
+          </>
+        )}
+        {sample === "reminder" && (
+          <>
+            <Bubble>
+              佐藤さん、来月のシフト希望の締切は明日25日です。勤務できる日時を、このトークで教えてください。
             </Bubble>
             <div className={s.availability}>
-              勤務希望：火・木 夕方
-              <br />
-              休み希望：12日
+              24日・未回答の人に1回だけ個別に送る見本
             </div>
           </>
         )}
-        {step === 2 && (
+        {sample === "shortage" && (
           <>
-            <Bubble>
-              佐藤さん、来月の希望がまだ届いていません。明日までに教えてください。
-            </Bubble>
-            <div className={s.availability}>
-              提出済み <strong>9人</strong>
-              <span>
-                未提出 <strong>1人</strong>
-              </span>
-            </div>
-          </>
-        )}
-        {step === 3 && (
-          <>
-            <Bubble>金曜の18〜22時が1人足りません。入れる方はいますか？</Bubble>
-            <ShiftRow />
-          </>
-        )}
-        {step === 4 && (
-          <>
-            <Bubble person="佐藤さん" own>
+            <p className={s.lineFoot}>店長が対象者と文面を承認した後の見本</p>
+            <Bubble>土曜の18〜22時が1人足りません。入れる方はいますか？</Bubble>
+            <Bubble person="鈴木さん" own>
               その日なら入れます！
             </Bubble>
             <Bubble>
-              佐藤さん、ありがとうございます。金曜18〜22時に反映しました。
+              鈴木さん、ありがとうございます。土曜18〜22時でシフト案に反映しました！
             </Bubble>
             <ShiftRow filled />
             <p className={s.lineFoot}>
@@ -208,38 +212,39 @@ export function ShiftArtifact({ step }: { step: number }) {
             </p>
           </>
         )}
-        {step === 5 && (
+        {sample === "trial" && (
           <>
             <Bubble>
-              来月のシフトができました。こちらから確認してください。
+              店長へ：スタッフ5人の架空データで作ったシフト案です。土曜の夜の追加募集は承認済み、鈴木さんの返信を反映しています。最終確認をお願いします。
             </Bubble>
             <div className={s.schedule}>
-              <strong>シフト表のプレビュー</strong>
+              <strong>店長確認用のシフト案 · 固定の見本</strong>
               <table>
                 <thead>
                   <tr>
-                    <th>時間帯</th>
-                    <th>木</th>
-                    <th>金</th>
-                    <th>土</th>
+                    <th>曜日・時間帯</th>
+                    <th>責任者</th>
+                    <th>スタッフ</th>
+                    <th>人数</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <th>昼</th>
-                    <td>山田・田中</td>
-                    <td>山田・鈴木</td>
-                    <td>田中・鈴木</td>
+                    <th>土曜 夜</th>
+                    <td>田中</td>
+                    <td className={s.filled}>山田・鈴木</td>
+                    <td>3人</td>
                   </tr>
                   <tr>
-                    <th>夜</th>
-                    <td>山田・鈴木</td>
-                    <td className={s.filled}>田中・佐藤</td>
+                    <th>日曜 夜</th>
+                    <td>高橋</td>
                     <td>山田・佐藤</td>
+                    <td>3人</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <p className={s.lineFoot}>土日の夜は各3人・責任者1人。店長の最終承認待ちです。</p>
           </>
         )}
       </div>
@@ -247,13 +252,14 @@ export function ShiftArtifact({ step }: { step: number }) {
         架空のデータによる体験です。実際のLINEには送信されません。
       </p>
     </section>
+    </>
   );
 }
 function ShiftRow({ filled = false }: { filled?: boolean }) {
   return (
     <div className={s.shiftRow}>
-      <span>金曜 18–22時</span>
-      <strong>{filled ? "田中・佐藤" : "田中"}</strong>
+      <span>土曜 18–22時</span>
+      <strong>{filled ? "田中（責任者）・山田・鈴木" : "田中（責任者）・山田"}</strong>
       <span className={filled ? s.ok : s.shortage}>
         {filled ? "配置済み" : "あと1人"}
       </span>

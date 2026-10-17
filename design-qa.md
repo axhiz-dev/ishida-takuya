@@ -1,4 +1,43 @@
-# Business chat design QA — 2026-10-10
+# Business chat design QA
+
+## 2026-10-17 — LINE shift consultation
+
+**Scope and visual truth**
+- Selected first displayed ImageGen concept: `exec-ae697be3-7322-4176-89aa-11c8eac34998.png`, captured locally as `screenshots/shift/reference.png` (1487×1058).
+- User override: keep example 1's choice design and behavior exactly; adapt the selected concept's conversational flow to the existing chat, rather than copying its green CTA and back button. Reuse the existing mascot, icons, fonts, header, scrolling pane and Choices component.
+- Implementation: static export served at `http://127.0.0.1:4175/business/`; captured at 1487×1058 CSS/pixels, density 1. `docs/business-qa/shift-conversation.png` and `docs/business-qa/shift-mobile.png`.
+- State: third consultation turn, free-format staff reply and default LAST. Both references show the same four-message LINE example. The implementation retains earlier turns in a scrollable pane, so the preceding manager bubble is above the captured reading position; the mock is a standalone composition. This is intentional to match example 1.
+
+**Comparison evidence**
+- Source and implementation opened in one composite input: `screenshots/shift/comparison.jpg` (2974×1058). No density scaling used.
+- Focused readable LINE-region comparison opened: `screenshots/shift/detail-comparison.jpg`. Verified all four messages, order, alignment and labels; no extra confirmation after 17時.
+- Fonts/typography: existing Zen Kaku Gothic New and existing chat scale retained to match example 1. Mock display headline and enlarged text deliberately not introduced into the scrolling chat.
+- Spacing/layout: single-column consultation with embedded LINE artifact preserved. Existing floating Choices dock reused without markup/CSS changes. All content remains reachable by scrolling; dock does not overlay the main pane.
+- Colors/tokens: existing white surface, pale-blue user/LINE backgrounds, green staff bubbles and dark-green mascot retained. No new palette or gradients.
+- Images/assets: original `chat-guide.png` and Phosphor icons reused; no generated-image text rasterized into the UI, no replacement drawings.
+- Copy/content: seven complete manager/AI exchanges define recruitment, free replies, LAST, one reminder, staffing and approvals. Fixed samples are labeled, and actual integration is described as a subsequent step. Final draft has 3 people including one responsible person on each weekend night.
+
+**Findings and history**
+- [P2, resolved] Initial LINE bubbles filled 85% of the panel even for short replies (`screenshots/shift/desktop-before.png`). Added `width: fit-content` to existing message styles. Recaptured static build (`desktop-final.png`) and compared full and focused images again; bubbles now follow message length while preserving max-width and mobile wrapping.
+- No remaining actionable P0/P1/P2 findings. Responsive screenshots checked at 390×844 (reply sample) and 320×844 (final draft); horizontal document overflow 0, choices remain in viewport.
+
+**Validation**
+- TypeScript, scoped ESLint and complete static export (including lint/types) passed.
+- In-app browser: seven turns to final draft, conversation history, FAQ round trip, consultation-topic handoff, close/reopen choices and focus restoration, desktop and mobile scrolling. Static export reply flow also checked.
+- Browser logs inspected: no errors; development LCP hint for the unchanged welcome illustration only.
+- Existing Playwright regression updated for initial consultation, exact LAST reply order, persistent history, final approval and topic handoff. Automated browser suite not run locally; CI is the remaining automated check. Real-device Safari/Android not covered.
+
+**Implementation checklist**
+- [x] Reuse example 1 Choices and ChatTurn.
+- [x] Keep requested four-message LINE exchange exactly.
+- [x] Show rule-setting before bot behavior and preserve conversation history.
+- [x] Verify static export and browser interactions; inspect full and focused visual comparisons.
+
+final result: passed
+
+---
+
+## Historical QA — 2026-10-10
 
 ## 2026-10-12 monthly report
 

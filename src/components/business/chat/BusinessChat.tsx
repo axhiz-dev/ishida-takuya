@@ -261,7 +261,7 @@ export default function BusinessChat() {
                       label: "返信の確認や催促、シフト調整に追われる",
                       badge: "例2",
                       description:
-                        "LINEでシフトを回収・調整する例を見る",
+                        "LINEのシフト調整を、AIと相談して仕組みにする",
                       action: () => start("shift"),
                     },
                     {
@@ -341,34 +341,26 @@ export default function BusinessChat() {
                 </>
               )}
               {experience === "shift" && (
-                <ChatTurn key={`shift-${step}`} user={step === 0 ? "スタッフのシフト希望を毎月LINEで集めています。返信の確認や、足りない時間帯の調整に時間がかかるので、自動化できるか知りたいです。" : shiftSteps[step - 1]!.next}>
-                  <Guide>
-                    <p>{shiftSteps[step]!.line}</p>
-                  </Guide>
-                  <div className={s.indent}>
-                    <p className={s.caption}>
-                      {shiftSteps[step]!.title} · LINE連携のサンプル体験
-                    </p>
-                    <ShiftArtifact step={step} />
-                    {step === 5 && (
-                      <p className={s.subtext}>
-                        調整がつかない場合は、責任者にお知らせします。確定前の承認も、運用に合わせて設定します。
-                      </p>
-                    )}
-                    <Choices
-                      label="シフト体験を進める"
-                      items={step === 5 ? [
-                        { label: "自分の仕事について相談する", action: contact },
-                        { label: "他の事例も見てみる", action: home },
-                      ] : [
-                        {
-                          label: shiftSteps[step]!.next,
-                          action: () => setStep(step + 1),
-                        },
-                      ]}
-                    />
-                  </div>
-                </ChatTurn>
+                <>
+                  {shiftSteps.slice(0, step + 1).map((scene, index) => (
+                    <ChatTurn key={`shift-${index}`} user={scene.user}>
+                      <Guide>
+                        {scene.replies.map((reply) => <p key={reply}>{reply}</p>)}
+                        {scene.sample && <ShiftArtifact sample={scene.sample} />}
+                        {step === index && <Choices
+                          label={scene.choiceLabel}
+                          items={index === shiftSteps.length - 1 ? [
+                            { label: scene.next, action: contact },
+                            { label: "他の事例も見てみる", action: home },
+                          ] : [{
+                            label: scene.next,
+                            action: () => setStep(index + 1),
+                          }]}
+                        />}
+                      </Guide>
+                    </ChatTurn>
+                  ))}
+                </>
               )}
             </div>
             </ConversationActiveContext.Provider>
