@@ -28,7 +28,7 @@ import support from "./support.module.css";
 import BusinessHeader from "../BusinessHeader";
 import { owner } from "@/config/owner";
 import SupportPanel from "./SupportPanel";
-import { PersonIdentity } from "./SelfIntroduction";
+import { PersonAvatar } from "./SelfIntroduction";
 import { readBusinessPanel, type BusinessPanel } from "./supportContent";
 
 
@@ -89,14 +89,12 @@ function Choices({ items, label, inline = false }: { items: Choice[]; label: str
 }
 
 function CompletionBridge({ onAbout }: { onAbout: () => void }) {
-    return <section className={support.bridge} data-static-preview aria-label="実際の仕事で使うには">
-      <PersonIdentity compact />
-      <h2>あなたの仕事でも、使える形に。</h2>
-      <p>実際の導入は、私、石田がお手伝いします。</p>
-      <ul><li>今の仕事と、使っている資料を伺います</li><li>AIに任せる作業と、人が確認する部分を一緒に決めます</li><li>見本で試し、実際に使える形にするところまで支援します</li></ul>
-      <button className={support.textLink} onClick={onAbout}>自己紹介を読む</button>
-    </section>;
-  }
+  return <section data-static-preview aria-label="自己紹介へのリンク"><button className={support.personLink} onClick={onAbout} aria-label="石田ってどんな人？">
+    <PersonAvatar compact />
+    <span>石田ってどんな人？</span>
+    <CaretRight size={18} aria-hidden="true" />
+  </button></section>;
+}
 
 export default function BusinessChat() {
   const [choiceTarget, setChoiceTarget] = useState<HTMLDivElement | null>(null);

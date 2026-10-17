@@ -4,17 +4,22 @@ import { profile } from "@/content/profile";
 import { BASE_PATH } from "@/config/site";
 import s from "./support.module.css";
 
-/** Set profile.photo to a public asset path when the owner's photo is supplied. */
-export function PersonIdentity({ compact = false }: { compact?: boolean }) {
-  return <div className={compact ? s.personCompact : s.person}>
-    {profile.photo ? <Image className={s.avatar} src={`${BASE_PATH}${profile.photo}`} alt="石田卓也の顔写真" width={96} height={96} /> : <div className={s.avatar} aria-label="顔写真は準備中です"><span aria-hidden="true">石田</span></div>}
-    <div><p className={s.personName}>石田 卓也</p><p className={s.personRole}>エンジニア・AI活用支援</p></div>
-  </div>;
+/** Reuse the owner's photo; never substitute a reference person's portrait. */
+export function PersonAvatar({ compact = false }: { compact?: boolean }) {
+  const className = compact ? `${s.avatar} ${s.avatarCompact}` : s.avatar;
+  return profile.photo
+    ? <Image className={className} src={`${BASE_PATH}${profile.photo}`} alt="石田卓也の顔写真" width={96} height={96} />
+    : <span className={className} aria-label="顔写真は準備中です"><span aria-hidden="true">石田</span></span>;
+}
+export function PersonIdentity() {
+  return <div className={s.person}><PersonAvatar /><p className={s.personName}>石田 卓也</p></div>;
 }
 export default function SelfIntroduction() {
   return <article className={s.letter}>
+    <header className={s.letterCover}>
+      <h2 className={s.letterTitle}><span>大切にしたいことに、</span><span>もっと時間を使ってほしい。</span></h2>
+    </header>
     <PersonIdentity />
-    <h2 className={s.letterTitle}>大切にしたいことに、もっと時間を使ってほしい。</h2>
     <div className={s.letterGroup}><p>みなさま、こんにちは。</p><p>石田と申します。<br />普段はエンジニアとして、人事向けのWebサービスを開発しています。</p></div>
     <div className={s.letterGroup}><p>ここではなぜこの支援を始めたのかを少しお話しさせてください。</p><p>私が何を大切にしているかを知ってもらうほうがお互いにとってよい仕事ができると思うからです。</p></div>
     <div className={s.letterGroup}><p>これまで、ピアニストや美容師、飲食店やライブハウスを営む方など、自分の好きなこと・強みを仕事にしている方々に出会ってきました。</p></div>

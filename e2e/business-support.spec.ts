@@ -17,6 +17,25 @@ for (const width of [320, 390, 1440]) {
     const shot = testInfo.outputPath(`self-introduction-${width}.png`);
     await page.screenshot({ path: shot });
     await testInfo.attach(`自己紹介-${width}px`, { path: shot, contentType: "image/png" });
+    await expect(dialog.getByText("エンジニア・AI活用支援", { exact: true })).toHaveCount(0);
+    for (const [label, key] of [["支援内容・費用", "pricing"], ["相談から利用開始まで", "process"]]) {
+      await dialog.getByRole("button", { name: label, exact: true }).click();
+      const cta = dialog.getByRole("button", { name: "自分の仕事について相談する", exact: true });
+      const box = await cta.boundingBox();
+      const parent = await dialog.locator('[class*="panelCta"]').boundingBox();
+      expect(Math.abs((box!.x + box!.width / 2) - (parent!.x + parent!.width / 2))).toBeLessThan(2);
+      expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+      if (key === "process") {
+        const process = dialog.getByRole("region", { name: "相談から利用開始まで", exact: true });
+        await expect(process.getByRole("listitem")).toHaveCount(4);
+        await expect(process.getByRole("img")).toHaveCount(4);
+        await expect.poll(() => process.getByRole("img").first().evaluate(img => (img as HTMLImageElement).naturalWidth > 0)).toBe(true);
+      }
+      const path = testInfo.outputPath(`${key}-${width}.png`);
+      await page.screenshot({ path });
+      await testInfo.attach(`${label}-${width}px`, { path, contentType: "image/png" });
+    }
+    await expect(dialog.getByText("相談から利用開始までを見る", { exact: true })).toHaveCount(0);
     await dialog.getByRole("button", { name: "よくある質問", exact: true }).click();
     await dialog.getByText("AIを使ったことがなくても相談できますか？", { exact: true }).click();
     await expect(dialog.getByText(/個人事業の方も、会社の担当者の方も/)).toBeVisible();
@@ -55,7 +74,7 @@ test("事例の最後から支援内容を確認し、続きと別の事例に�
   await page.goto("/business/");
   await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   for (const name of ["同じ会社です。このルールで照合して", "担当者を伝えて、確認メールを下書きして", "件数の多いサンプルで月次レポートを見てみる", "月次レポートまで毎月使えるスキルにして"]) await page.getByRole("button", { name }).click();
-  await expect(page.getByRole("region", { name: "実際の仕事で使うには" })).toContainText("実際の導入は、私、石田がお手伝いします。");
+  await expect(page.getByRole("button", { name: "石田ってどんな人？", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "費用や支援の進め方を確認する" }).waitFor();
   await page.locator("main").evaluate(el => { el.scrollTop = el.scrollHeight; });
   const readingPosition = await page.locator("main").evaluate(el => el.scrollTop);
