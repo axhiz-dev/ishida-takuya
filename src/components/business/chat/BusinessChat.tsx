@@ -74,9 +74,9 @@ function Choices({ items, label, inline = false }: { items: Choice[]; label: str
       </div>
       <div className={s.choices} role="group" aria-label={label}>
         {items.map((item, index) => (
-          <button key={item.label} onClick={() => { dock.setDismissed(id); item.action(); }} data-multiline>
+          <button key={item.label} aria-label={item.label} aria-describedby={item.description ? `${id}-description-${index}` : undefined} onClick={() => { dock.setDismissed(id); item.action(); }} data-multiline>
             {item.badge && <span className={s.choiceExampleBadge} aria-hidden="true">{item.badge}</span>}
-            <span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span>
+            <span><strong>{item.label}</strong>{item.description && <small id={`${id}-description-${index}`}>{item.description}</small>}</span>
             <span className={s.choiceTail}>
               <span className={s.choiceNumber} aria-hidden="true">{index + 1}</span>
               <CaretRight size={17} />
