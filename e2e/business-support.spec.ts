@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 for (const width of [320, 390, 1440]) {
-  test(`${width}px：案内・自己紹介・相談と履歴操作`, async ({ page }) => {
+  test(`${width}px：案内・自己紹介・相談と履歴操作`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/business/");
@@ -13,6 +13,10 @@ for (const width of [320, 390, 1440]) {
     await expect(dialog).toContainText("というか、してほしいのです。");
     await expect(dialog).toContainText("大切な時間が増えることには変わりありません。");
     await expect(dialog.getByRole("heading", { name: "自己紹介", exact: true })).toBeFocused();
+    expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+    const shot = testInfo.outputPath(`self-introduction-${width}.png`);
+    await page.screenshot({ path: shot });
+    await testInfo.attach(`自己紹介-${width}px`, { path: shot, contentType: "image/png" });
     await dialog.getByRole("button", { name: "よくある質問", exact: true }).click();
     await dialog.getByText("AIを使ったことがなくても相談できますか？", { exact: true }).click();
     await expect(dialog.getByText(/個人事業の方も、会社の担当者の方も/)).toBeVisible();
@@ -35,6 +39,9 @@ for (const width of [320, 390, 1440]) {
 test("法定ページから無料相談に直接移動でき、旧ナビが出ない", async ({ page }) => {
   await page.goto("/business/privacy/");
   await expect(page.getByText("ダミー", { exact: true })).toHaveCount(0);
+  await page.goto("/business/legal/");
+  await expect(page.locator("main")).toContainText("月5万円から");
+  await expect(page.locator("main")).not.toContainText("3か月から");
   await page.getByRole("banner").getByRole("link", { name: "相談する", exact: true }).click();
   await expect(page).toHaveURL(/\/business\/?#contact$/);
   await expect(page.getByRole("dialog", { name: "無料相談" })).toBeVisible();
