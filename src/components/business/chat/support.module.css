@@ -19,7 +19,7 @@
 .priceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 28px; }
 .priceCard { border: 1px solid #dce5df; padding: 24px; border-radius: 12px; }
 .priceCard:first-child { background: #f4f8f5; }
-.priceCard h3 { font-size: 18px; margin: 15px 0; }
+.priceCard h2 { font-size: 18px; margin: 15px 0; }
 .priceCard > p { font-size: 13px; }
 .priceCard ul, .letter ul { list-style: disc; padding-left: 1.4em; }
 .priceCard li { font-size: 13px; margin: 8px 0; }
@@ -29,14 +29,14 @@
 .price small { font-size: 11px; }
 .note { color: #53635a; margin-top: 20px; font-size: 12px !important; }
 .costNote { padding: 20px 0; margin-bottom: 16px; border-bottom: 1px solid #e1e8e3; }
-.costNote h3 { font-size: 15px; margin: 0 0 8px; }
+.costNote h2 { font-size: 15px; margin: 0 0 8px; }
 .costNote p { font-size: 13px; margin: 0; }
 .textLink { display: inline-flex; align-items: center; gap: 8px; color: #315f47; text-decoration: underline; text-underline-offset: 4px; font-size: 13px; min-height: 44px; }
 .process { list-style: none; padding: 0; margin: 0; }
 .process > li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 230px; align-items: center; gap: 30px; padding: 0 0 58px; margin-bottom: 24px; }
 .process > li:last-child { padding-bottom: 0; margin-bottom: 0; }
 .stepNumber { display: block; color: #526b5c; font-size: 13px; letter-spacing: .1em; margin-bottom: 8px; }
-.process h3 { margin: 0 0 12px; font-size: 18px; }
+.process h2 { margin: 0 0 12px; font-size: 18px; }
 .process p { margin: 0; font-size: 14px; line-height: 1.85; }
 .process .result { margin-top: 14px; padding-top: 12px; border-top: 1px solid #dce5df; font-size: 12px; color: #526b5c; }
 .result strong { font-size: 12px; font-weight: 500; }
@@ -90,7 +90,7 @@
   .letterTitle { padding: 24px 16px; font-size: 21px; }
   .process > li { grid-template-columns: minmax(0, 1fr) clamp(96px, 28vw, 160px); gap: 14px; align-items: start; padding-bottom: 44px; }
   .processComic { margin-top: 30px; }
-  .process h3 { font-size: 16px; }
+  .process h2 { font-size: 16px; }
   .process p { font-size: 13px; }
   .processArrow { bottom: 0; }
   .primary { width: 100%; }

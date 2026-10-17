@@ -29,16 +29,16 @@ export default function SupportPanel({ panel, reference, onOpen, onClose }: Prop
     <div ref={body} className={s.panelBody} onScroll={() => { if (panel && body.current) positions.current[panel] = body.current.scrollTop; }}>
       <section hidden={panel !== "pricing"} aria-label="支援内容・費用">
         <div className={s.priceGrid}>
-          <article className={s.priceCard}><span className={s.tag}>使い方を身につけたい方へ</span><h3>AI活用の伴走支援</h3><p className={s.price}>月<span>{supportPricing.accompaniment}万円〜</span><small>（税別）</small></p><p>普段の仕事を、繰り返し使えるAIの手順に。</p><ul><li>打ち合わせ・チャットでのご相談</li><li>業務に合う指示文・スキルづくり</li><li>見本での動作確認と、使いながらの改善</li></ul><p className={s.note}>打ち合わせの頻度・相談の範囲・支援期間は、ご提案時に決めます。</p></article>
-          <article className={s.priceCard}><span className={s.tag}>制作を任せたい方へ</span><h3>仕組みづくり・受託開発</h3><p className={s.price}><span>{supportPricing.implementation}万円〜</span><small>（税別・要見積もり）</small></p><p>対象の仕事を決めて、使える仕組みに。</p><ul><li>ファイル形式や仕事の手順に合わせた制作</li><li>動作確認と、使い方のご案内</li><li>手順書とあわせてお渡し</li></ul><p className={s.note}>納品後の修正・保守は別途ご相談となります。</p></article>
+          <article className={s.priceCard}><span className={s.tag}>使い方を身につけたい方へ</span><h2>AI活用の伴走支援</h2><p className={s.price}>月<span>{supportPricing.accompaniment}万円〜</span><small>（税別）</small></p><p>普段の仕事を、繰り返し使えるAIの手順に。</p><ul><li>打ち合わせ・チャットでのご相談</li><li>業務に合う指示文・スキルづくり</li><li>見本での動作確認と、使いながらの改善</li></ul><p className={s.note}>打ち合わせの頻度・相談の範囲・支援期間は、ご提案時に決めます。</p></article>
+          <article className={s.priceCard}><span className={s.tag}>制作を任せたい方へ</span><h2>仕組みづくり・受託開発</h2><p className={s.price}><span>{supportPricing.implementation}万円〜</span><small>（税別・要見積もり）</small></p><p>対象の仕事を決めて、使える仕組みに。</p><ul><li>ファイル形式や仕事の手順に合わせた制作</li><li>動作確認と、使い方のご案内</li><li>手順書とあわせてお渡し</li></ul><p className={s.note}>納品後の修正・保守は別途ご相談となります。</p></article>
         </div>
-        <div className={s.costNote}><h3>外部サービスの利用料について</h3><p>AIの有料プランやLINEなどの利用料は別途必要です。必要な契約・費用の見込みと、追加費用が発生する条件は、ご依頼前にご案内します。</p></div>
+        <div className={s.costNote}><h2>外部サービスの利用料について</h2><p>AIの有料プランやLINEなどの利用料は別途必要です。必要な契約・費用の見込みと、追加費用が発生する条件は、ご依頼前にご案内します。</p></div>
       </section>
       <section hidden={panel !== "process"} aria-label="相談から利用開始まで">
         <ol className={s.process}>{consultationSteps.map((step, index) => <li key={step.title}>
           <div className={s.processCopy}>
             <span className={s.stepNumber}>{String(index + 1).padStart(2, "0")}</span>
-            <h3>{step.title}</h3><p>{step.body}</p>
+            <h2>{step.title}</h2><p>{step.body}</p>
             <p className={s.result}><strong>{step.result}</strong></p>
           </div>
           <div className={s.processComic}>
