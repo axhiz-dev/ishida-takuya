@@ -5,7 +5,7 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import s from "./chat.module.css";
-import type { ShiftSample } from "./content";
+import { weeklyShiftSample, type ShiftSample } from "./content";
 
 export function AggregateArtifact({
   resolved,
@@ -156,7 +156,7 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
         <li>毎月20日に募集、25日締切。自由な文章で希望を受け付ける。</li>
         <li>曖昧な開始時間だけ聞き返す。終了時間の指定がなければLASTとして登録し、内容を返す。訂正も受け付ける。</li>
         <li>24日に未回答者へ1回だけ個別に催促。締切後の未回答・返信は店長に知らせる。</li>
-        <li>土日の夜は3人、責任者を1人配置。不足時は対象者と追加募集の文面を店長に確認してから送る。</li>
+        <li>平日は17〜22時に2人、土日は18〜22時に3人。毎日責任者を1人配置。不足時は対象者と追加募集の文面を店長に確認してから送る。</li>
         <li>条件を満たさなければ店長に知らせる。シフト案は店長の最終承認後に共有する。</li>
       </ul>
       <p className={s.sampleNote}>試行用の指示文の見本です。この画面では保存・実行されません。</p>
@@ -181,14 +181,14 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
         )}
         {sample === "reply" && (
           <>
-            <Bubble person="スタッフ" own>
+            <Bubble person="山田さん" own>
               火曜は夕方から入れます
             </Bubble>
             <Bubble>
               火曜日は何時から勤務できますか？
             </Bubble>
-            <Bubble person="スタッフ" own>17時からです</Bubble>
-            <Bubble>火曜日17時からLASTで登録しました！</Bubble>
+            <Bubble person="山田さん" own>17時からです</Bubble>
+            <Bubble>山田さん、火曜日17時からLASTで登録しました！</Bubble>
           </>
         )}
         {sample === "reminder" && (
@@ -222,28 +222,29 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
           <>
             <p className={s.lineDay}>20日 · 設定した日に自動で募集</p>
             <p className={s.lineChannel}>お店のシフト連絡 · グループ</p>
-            <Bubble>来月のシフトを作ります。25日までに、勤務できる日時やお休みの希望を教えてください。いつもの言葉で、このLINEに返信してください。</Bubble>
-            <Bubble person="田中さん · 責任者" own>土曜は18〜22時で入れます。日曜は休みでお願いします。</Bubble>
-            <Bubble>田中さん、土曜18〜22時、日曜はお休みで登録しました！</Bubble>
+            <Bubble>来月のシフトを作ります。25日までに、勤務できる日時やお休みの希望を教えてください。</Bubble>
+            <p className={s.lineChannel}>ここからは月曜〜日曜の1週間分の見本です。このお店のLASTは22時です。</p>
+            <Bubble person="田中さん · 責任者" own>月・水は17〜22時、土曜は18〜22時で入れます。ほかの曜日は休みでお願いします。</Bubble>
+            <Bubble>田中さん、月曜・水曜17〜22時、土曜18〜22時、ほかの曜日はお休みで登録しました！</Bubble>
             <Bubble person="山田さん" own>火曜は夕方から入れます</Bubble>
             <Bubble>火曜日は何時から勤務できますか？</Bubble>
             <Bubble person="山田さん" own>17時からです</Bubble>
-            <Bubble>火曜日17時からLASTで登録しました！</Bubble>
+            <Bubble>山田さん、火曜日17時からLASTで登録しました！</Bubble>
             <Bubble person="山田さん" own>土日も18〜22時で入れます。</Bubble>
             <Bubble>山田さん、土曜・日曜18〜22時も登録しました！</Bubble>
             <p className={s.lineDay}>21日 · 届いた希望を整理</p>
-            <Bubble person="高橋さん · 責任者" own>日曜18〜22時でお願いします。土曜は休みです。</Bubble>
-            <Bubble>高橋さん、日曜18〜22時、土曜はお休みで登録しました！</Bubble>
-            <Bubble person="鈴木さん" own>平日は17時から入れます。土日はお休み希望です。</Bubble>
-            <Bubble>鈴木さん、平日17時からLAST、土日はお休み希望で登録しました！</Bubble>
+            <Bubble person="高橋さん · 責任者" own>火・木・金は17〜22時、日曜は18〜22時でお願いします。ほかの曜日は休みです。</Bubble>
+            <Bubble>高橋さん、火曜・木曜・金曜17〜22時、日曜18〜22時、ほかの曜日はお休みで登録しました！</Bubble>
+            <Bubble person="鈴木さん" own>月・水・金は17時から入れます。ほかの曜日はお休み希望です。</Bubble>
+            <Bubble>鈴木さん、月曜・水曜・金曜17時からLAST、ほかの曜日はお休み希望で登録しました！</Bubble>
             <p className={s.lineDay}>24日 · 未回答の人に1回だけ催促</p>
             <p className={s.lineChannel}>佐藤さんとシフト係bot · 個別トーク</p>
             <Bubble>佐藤さん、来月のシフト希望の締切は明日25日です。勤務できる日時を、このトークで教えてください。</Bubble>
-            <Bubble person="佐藤さん" own>遅くなりました！ 日曜18〜22時で入れます。土曜は休み希望です。</Bubble>
-            <Bubble>佐藤さん、日曜18〜22時、土曜はお休み希望で登録しました！</Bubble>
+            <Bubble person="佐藤さん" own>遅くなりました！ 木曜17〜22時と日曜18〜22時で入れます。ほかの曜日は休み希望です。</Bubble>
+            <Bubble>佐藤さん、木曜17〜22時、日曜18〜22時、ほかの曜日はお休み希望で登録しました！</Bubble>
             <p className={s.lineDay}>25日 · 集計して、不足を店長に相談</p>
             <p className={s.lineChannel}>店長とシフト係bot · 個別トーク</p>
-            <Bubble>5人の希望がそろいました。日曜の夜は3人・責任者1人で組めますが、土曜18〜22時は田中さんと山田さんの2人で、あと1人必要です。</Bubble>
+            <Bubble>5人の希望がそろいました。平日は各2人・責任者1人、日曜の夜は3人・責任者1人で組めます。土曜18〜22時だけは田中さんと山田さんの2人で、あと1人必要です。</Bubble>
             <ShiftRow />
             <Bubble>土曜をお休み希望の鈴木さん・佐藤さんに、変更できるか聞いてもよいですか？ 文面案：「土曜18〜22時が1人足りません。もし予定の変更が可能であれば、ご協力いただけますか？ 難しければお休み希望のままで大丈夫です。」</Bubble>
             <Bubble person="店長" own>その2人に、その文面でお願いします。</Bubble>
@@ -255,38 +256,13 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
             <Bubble>土曜の不足枠は埋まりました。追加の勤務は不要です。お休み希望のままにしています。</Bubble>
             <p className={s.lineDay}>25日 · シフト案を店長が最終確認</p>
             <p className={s.lineChannel}>店長とシフト係bot · 個別トーク</p>
-            <Bubble>鈴木さんの返信を反映しました。土日の夜は各3人・責任者1人になっています。こちらの案で確定してよいですか？</Bubble>
-            <div className={s.schedule}>
-              <strong>店長確認用のシフト案 · 固定の見本</strong>
-              <table>
-                <thead>
-                  <tr>
-                    <th>曜日・時間帯</th>
-                    <th>責任者</th>
-                    <th>スタッフ</th>
-                    <th>人数</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th>土曜 夜</th>
-                    <td>田中</td>
-                    <td className={s.filled}>山田・鈴木</td>
-                    <td>3人</td>
-                  </tr>
-                  <tr>
-                    <th>日曜 夜</th>
-                    <td>高橋</td>
-                    <td>山田・佐藤</td>
-                    <td>3人</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className={s.lineFoot}>土日の夜は各3人・責任者1人。店長の最終承認を待ちます。</p>
+            <Bubble>鈴木さんの返信を反映し、月曜〜日曜の1週間分をまとめました。平日は各2人、土日は各3人で、毎日責任者が1人います。こちらの案で確定してよいですか？</Bubble>
+            <WeeklySchedule />
+            <p className={s.lineFoot}>平日は各2人・土日は各3人。毎日責任者1人。店長の最終承認を待ちます。</p>
             <Bubble person="店長" own>確認しました。この内容で確定して、みんなに知らせてください。</Bubble>
             <p className={s.lineChannel}>お店のシフト連絡 · グループ</p>
-            <Bubble>店長の確認が完了し、来月のシフトが確定しました！ 土曜の夜は田中さん・山田さん・鈴木さん、日曜の夜は高橋さん・山田さん・佐藤さんです。変更が必要なときは、このLINEで連絡してください。</Bubble>
+            <Bubble>店長の確認が完了し、月曜〜日曜の1週間分のシフトが確定しました！ シフト表を共有します。自分の勤務日と時間を確認してください。変更が必要なときは、このLINEで連絡してください。</Bubble>
+            <WeeklySchedule confirmed />
             <p className={s.lineFoot}><CheckCircle size={16} />募集から確認・共有まで完了</p>
           </>
         )}
@@ -297,6 +273,27 @@ export function ShiftArtifact({ sample }: { sample: ShiftSample }) {
     </section>
     </>
   );
+}
+function WeeklySchedule({ confirmed = false }: { confirmed?: boolean }) {
+  const title = confirmed ? "確定した1週間のシフト" : "1週間のシフト案";
+  return <div className={s.schedule}>
+    <strong>{title} · 月曜〜日曜</strong>
+    <p className={s.lineFoot}>夕方〜夜の勤務 · このお店のLASTは22時</p>
+    <table aria-label={title}>
+      <thead><tr>
+        <th scope="col">曜日・時間帯</th>
+        <th scope="col">責任者</th>
+        <th scope="col">スタッフ</th>
+        <th scope="col">人数</th>
+      </tr></thead>
+      <tbody>{weeklyShiftSample.map((shift) => <tr key={shift.day}>
+        <th scope="row">{shift.day}曜<br />{shift.hours}</th>
+        <td>{shift.leader}</td>
+        <td className={shift.day === "土" ? s.filled : undefined}>{shift.staff.join("・")}</td>
+        <td>{shift.staff.length + 1}人</td>
+      </tr>)}</tbody>
+    </table>
+  </div>;
 }
 function ShiftRow({ filled = false }: { filled?: boolean }) {
   return (

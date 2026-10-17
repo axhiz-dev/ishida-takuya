@@ -2,6 +2,17 @@
 
 ## 2026-10-17 — LINE shift consultation
 
+### Follow-up: one full week and message wording
+
+- Removed the requested extra recruitment sentence. Both short reply preview and full timeline now say `山田さん、火曜日17時からLASTで登録しました！`, with matching speaker names.
+- Replaced the weekend-only schedule with Monday–Sunday evening shifts. Sample rules are weekdays 17–22:00 with two people, weekends 18–22:00 with three, and one responsible person every day. LAST is explicitly 22:00 for this fictional shop.
+- Updated all five staff replies to match their weekly assignments. Saturday's extra assignment still follows manager approval and Suzuki's acceptance. Both manager's draft and the final table shared to the staff group use the same seven-row data.
+- Static export, lint/types and in-app browser passed: seven rows in both draft and confirmed tables, correct weekday/weekend counts, requested sentence absent, named reply present, inner scrolling retained, no horizontal page overflow at 390px. No browser errors observed.
+- Screenshots: `docs/business-qa/shift-week.png` (1440×1024) and `docs/business-qa/shift-week-mobile.png` (390×844). Tables are read inside the existing scrolling LINE viewport; seven rows need not fit simultaneously on a phone. Existing Noto Sans JP, palette, mascot, choice dock and layout remain.
+- Regression expectations updated for the exact named reply, removed sentence, Monday–Sunday rows and counts, and final staff-group table. The preceding commit's CI passed; this update's CI is separate.
+
+final result: passed
+
 ### Follow-up: scrollable full LINE journey
 
 - User requested the final sample show the complete exchange beginning with automatic recruitment on the 20th, with scrolling inside LINE. This is an authorized extension of the selected flow; example 1's choice UI stays unchanged.

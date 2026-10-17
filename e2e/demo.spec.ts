@@ -56,7 +56,7 @@ test("LINE：相談でルールを決め、FAQへ寄り道しても会話を保�
     "火曜は夕方から入れます",
     "火曜日は何時から勤務できますか？",
     "17時からです",
-    "火曜日17時からLASTで登録しました！",
+    "山田さん、火曜日17時からLASTで登録しました！",
   ]);
   await expect(page.locator("[data-chat-turn]")).toHaveCount(3);
   await page.getByRole("button", { name: "費用・FAQ", exact: true }).click();
@@ -69,7 +69,7 @@ test("LINE：相談でルールを決め、FAQへ寄り道しても会話を保�
     .getByRole("button", { name: "体験の続きに戻る" })
     .click();
   await expect(page.locator("[data-chat-turn]:visible")).toHaveCount(3);
-  await expect(replySample).toContainText("火曜日17時からLASTで登録しました！");
+  await expect(replySample).toContainText("山田さん、火曜日17時からLASTで登録しました！");
   for (let i = 2; i < shiftSteps.length - 1; i++)
     await page
       .getByRole("button", { name: shiftSteps[i]!.next, exact: true })
@@ -79,6 +79,14 @@ test("LINE：相談でルールを決め、FAQへ寄り道しても会話を保�
   await expect(timeline).toContainText("20日 · 設定した日に自動で募集");
   await expect(timeline).toContainText("24日 · 未回答の人に1回だけ催促");
   await expect(timeline).toContainText("募集から確認・共有まで完了");
+  await expect(timeline).not.toContainText("いつもの言葉で、このLINEに返信してください。");
+  const weeklyRows = timeline.getByRole("table", { name: "1週間のシフト案" }).locator("tbody tr");
+  await expect(weeklyRows).toHaveCount(7);
+  await expect(timeline.getByRole("table", { name: "確定した1週間のシフト" }).locator("tbody tr")).toHaveCount(7);
+  await expect(weeklyRows.locator("th")).toHaveText([
+    "月曜17〜22時", "火曜17〜22時", "水曜17〜22時", "木曜17〜22時", "金曜17〜22時", "土曜18〜22時", "日曜18〜22時",
+  ]);
+  await expect(weeklyRows.locator("td:last-child")).toHaveText(["2人", "2人", "2人", "2人", "2人", "3人", "3人"]);
   expect(await timeline.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
   await timeline.focus();
   const mainScroll = await page.locator("main").evaluate(el => el.scrollTop);
