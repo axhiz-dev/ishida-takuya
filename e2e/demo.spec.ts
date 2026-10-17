@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
   expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
 });
 
-test("集計：判断、結果、相談への引き継ぎと未設定時の送信防止", async ({
+test("集計：判断、結果、相談への引き継ぎとメール受付", async ({
   page,
 }) => {
   await page.goto("/business/");
@@ -24,12 +24,14 @@ test("集計：判断、結果、相談への引き継ぎと未設定時の送�
   await form.getByLabel("お名前", { exact: true }).fill("確認 太郎");
   await form.getByLabel("メールアドレス").fill("test@example.com");
   await form.getByRole("checkbox").check();
-  await form.getByRole("button", { name: "相談内容を確認する" }).click();
-  await expect(
-    form.getByRole("button", { name: "送信受付は準備中" }),
-  ).toBeDisabled();
-  await page.getByRole("button", { name: "費用・FAQ", exact: true }).click();
-  await page.getByRole("button", { name: "相談する", exact: true }).click();
+  await form.getByRole("button", { name: "メールに載せる内容を確認する" }).click();
+  const emailLink = form.getByRole("link", { name: "メールアプリで開く" });
+  await expect(emailLink).toHaveAttribute("href", /^mailto:axhiz.ozi@gmail.com\?/);
+  expect(decodeURIComponent((await emailLink.getAttribute("href"))!)).toContain("確認 太郎");
+  await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
+  await page.getByRole("banner").getByRole("button", { name: "支援内容・費用", exact: true }).click();
+  await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
+  await page.getByRole("banner").getByRole("button", { name: "相談する", exact: true }).click();
   await expect(form).toContainText("test@example.com");
   await form.getByRole("button", { name: "戻って修正" }).click();
   await expect(form.getByLabel("お名前", { exact: true })).toHaveValue(
@@ -59,15 +61,11 @@ test("LINE：相談でルールを決め、FAQへ寄り道しても会話を保�
     "山田さん、火曜日17時からLASTで登録しました！",
   ]);
   await expect(page.locator("[data-chat-turn]")).toHaveCount(3);
-  await page.getByRole("button", { name: "費用・FAQ", exact: true }).click();
-  await page
-    .getByRole("button", { name: "月額には何が含まれますか？", exact: true })
-    .click();
-  await expect(page.getByText(/一定量のLINE・AI利用料/)).toBeVisible();
-  await page
-    .getByRole("group", { name: "回答のあとに" })
-    .getByRole("button", { name: "体験の続きに戻る" })
-    .click();
+  await page.getByRole("banner").getByRole("button", { name: "支援内容・費用", exact: true }).click();
+  await page.getByRole("button", { name: "よくある質問", exact: true }).click();
+  await page.getByText("外部サービスの利用料も含まれますか？", { exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("支援費用とは別です");
+  await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
   await expect(page.locator("[data-chat-turn]:visible")).toHaveCount(3);
   await expect(replySample).toContainText("山田さん、火曜日17時からLASTで登録しました！");
   for (let i = 2; i < shiftSteps.length - 1; i++)

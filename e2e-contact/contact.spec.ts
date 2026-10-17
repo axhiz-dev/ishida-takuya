@@ -35,7 +35,7 @@ test("確認後に送信：内容が揃い、連打でも1件だけ送信する"
   const form = await openForm(page);
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
   expect(count).toBe(0);
-  const send = form.getByRole("button", { name: "この内容で相談を送信" });
+  const send = form.getByRole("button", { name: "この内容で無料相談を申し込む" });
   await send.evaluate((button) => {
     (button as HTMLButtonElement).click();
     (button as HTMLButtonElement).click();
@@ -46,11 +46,11 @@ test("確認後に送信：内容が揃い、連打でも1件だけ送信する"
     name: "確認 太郎",
     email: "test@example.com",
     message: "日本語の送信・再送を確認します。",
-    業務: "AI活用について",
+    参考に見た事例: "なし",
   });
   release();
   await expect(page.getByRole("status")).toContainText(
-    "お問い合わせを受け付けました",
+    "無料相談のお申し込みを受け付けました",
   );
   expect(count).toBe(1);
 });
@@ -65,7 +65,7 @@ for (const failure of ["http", "network", "timeout"] as const)
     });
     const form = await openForm(page);
     await form.getByRole("button", { name: "相談内容を確認する" }).click();
-    await form.getByRole("button", { name: "この内容で相談を送信" }).click();
+    await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
     await expect(form.getByRole("alert")).toContainText(
       "入力内容は残っています",
       { timeout: 20000 },
@@ -76,9 +76,9 @@ for (const failure of ["http", "network", "timeout"] as const)
     );
     await expect(form.getByRole("checkbox")).toBeChecked();
     await form.getByRole("button", { name: "相談内容を確認する" }).click();
-    await form.getByRole("button", { name: "この内容で相談を送信" }).click();
+    await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
     await expect(page.getByRole("status")).toContainText(
-      "お問い合わせを受け付けました",
+      "無料相談のお申し込みを受け付けました",
     );
     expect(count).toBe(2);
   });
@@ -97,7 +97,7 @@ test("必須入力・不正メール・同意なしは確認へ進めない", as
   await confirm.click();
   await expect(form.getByRole("checkbox")).toBeFocused();
   await expect(
-    form.getByRole("button", { name: "この内容で相談を送信" }),
+    form.getByRole("button", { name: "この内容で無料相談を申し込む" }),
   ).toHaveCount(0);
 });
 test("honeypotが埋まっていたら送信しない", async ({ page }) => {
@@ -109,9 +109,9 @@ test("honeypotが埋まっていたら送信しない", async ({ page }) => {
   const form = await openForm(page);
   await form.locator('input[name="_gotcha"]').fill("bot", { force: true });
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
-  await form.getByRole("button", { name: "この内容で相談を送信" }).click();
+  await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
   await expect(
-    form.getByRole("button", { name: "この内容で相談を送信" }),
+    form.getByRole("button", { name: "この内容で無料相談を申し込む" }),
   ).toBeEnabled();
   expect(count).toBe(0);
 });

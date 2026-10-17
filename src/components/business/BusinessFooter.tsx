@@ -23,7 +23,7 @@ export function BusinessFooter({ withSign = true }: { withSign?: boolean }) {
           トップ
         </Link>
         <Link className={styles.textLink} href={`${ROUTES.business.path}/profile`}>
-          プロフィール
+          自己紹介
         </Link>
         <Link className={styles.textLink} href={`${ROUTES.business.path}/legal`}>
           特定商取引法に基づく表記

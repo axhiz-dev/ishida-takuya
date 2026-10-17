@@ -1,14 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ChatTurn, { ConversationActiveContext, Guide, ResponseReadyContext } from "./ChatTurn";
 import WelcomeIntro from "./WelcomeIntro";
 import Link from "next/link";
 import {
-  ArrowLeft,
   ArrowCounterClockwise,
-  BookmarkSimple,
   ChatCircle,
   Check,
   CaretDown,
@@ -19,15 +17,19 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { AggregateArtifact, MailDraftArtifact, FinanceSkillArtifact, ShiftArtifact } from "./Artifacts";
-import Consultation from "./Consultation";
 import MonthlyReportArtifact from "./MonthlyReportArtifact";
 import {
   experienceNames,
-  questions,
   shiftSteps,
   type Experience,
 } from "./content";
 import s from "./chat.module.css";
+import support from "./support.module.css";
+import BusinessHeader from "../BusinessHeader";
+import { owner } from "@/config/owner";
+import SupportPanel from "./SupportPanel";
+import { PersonIdentity } from "./SelfIntroduction";
+import { readBusinessPanel, type BusinessPanel } from "./supportContent";
 
 
 const aggregateRequest = "私は経理担当をしています。\n毎月月末になると、売上データと入金明細のExcelを開いて、取引先ごとに金額を照合しています。\n会社名の書き方が違うこともあり、同じ取引先かどうかを一件ずつ確認するのが大変です。\n使っているExcelのサンプルはこちらです。毎月同じような作業なので、自動化したいのですが、できますか？";
@@ -36,7 +38,6 @@ const aggregateMailRequest = "田中工業の社内担当者は営業部の佐�
 const aggregateReportRequest = "確認した結果を、売上や入金状況がひと目で分かる月次レポートにできますか？ 件数が多いときの見え方も確かめたいので、架空の確認用サンプルを作って見せてください。";
 const aggregateSkillRequest = "OKです。毎月月末に、照合から月次レポートまで同じ形で作れるスキルにしてください。取引先の表記ルールと社内担当者も保存して、次回は今月分のExcelだけで進められるようにしたいです。前月との比較には過去のデータも使ってください。";
 
-type View = "experience" | "faq" | "pricing" | "process" | "contact";
 type Choice = { label: string; description?: string; badge?: string; action: () => void };
 type ChoiceDock = {
   target: HTMLDivElement | null;
@@ -87,45 +88,44 @@ function Choices({ items, label, inline = false }: { items: Choice[]; label: str
   return inline ? panel : createPortal(panel, dock.target!);
 }
 
+function CompletionBridge({ onAbout }: { onAbout: () => void }) {
+    return <section className={support.bridge} data-static-preview aria-label="実際の仕事で使うには">
+      <PersonIdentity compact />
+      <h2>あなたの仕事でも、使える形に。</h2>
+      <p>実際の導入は、私、石田がお手伝いします。</p>
+      <ul><li>今の仕事と、使っている資料を伺います</li><li>AIに任せる作業と、人が確認する部分を一緒に決めます</li><li>見本で試し、実際に使える形にするところまで支援します</li></ul>
+      <button className={support.textLink} onClick={onAbout}>自己紹介を読む</button>
+    </section>;
+  }
+
 export default function BusinessChat() {
   const [choiceTarget, setChoiceTarget] = useState<HTMLDivElement | null>(null);
   const [activeChoice, setActiveChoice] = useState("");
   const [dismissedChoice, setDismissedChoice] = useState("");
   const choicesVisible = !!activeChoice && dismissedChoice !== activeChoice;
-  const [view, setView] = useState<View>("experience");
+  const [panel, setPanel] = useState<BusinessPanel | null>(null);
   const [experience, setExperience] = useState<Experience | null>(null);
   const [step, setStep] = useState(0);
-  const [question, setQuestion] = useState<number | null>(null);
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState("");
-  const [contactStarted, setContactStarted] = useState(false);
-  const [contactContext, setContactContext] = useState({
-    topic: "",
-    concern: "",
-  });
   const main = useRef<HTMLElement>(null);
-  const scrollPositions = useRef<Partial<Record<View, number>>>({});
   const launcher = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (activeChoice && dismissedChoice === activeChoice) launcher.current?.focus();
   }, [activeChoice, dismissedChoice]);
-  useLayoutEffect(() => {
-    const restore = () => main.current?.scrollTo({ top: scrollPositions.current[view] ?? 0 });
-    restore();
-    // Choices return through a portal after effects run; restore once more
-    // after the dock has its original height.
-    const frame = requestAnimationFrame(restore);
-    return () => cancelAnimationFrame(frame);
-  }, [view]);
+  // URL-addressable overlays preserve the mounted conversation and form.
   useEffect(() => {
-    if (view === "experience" && !experience) main.current?.scrollTo({ top: 0 });
+    const sync = () => { const next = readBusinessPanel(window.location.hash); setPanel(next); setMenu(false); if (!next) setDismissedChoice(""); };
+    sync();
+    window.addEventListener("popstate", sync);
+    window.addEventListener("hashchange", sync);
+    return () => { window.removeEventListener("popstate", sync); window.removeEventListener("hashchange", sync); };
+  }, []);
+  useEffect(() => {
     main.current?.focus({ preventScroll: true });
-  }, [view, step, experience, question]);
-  useEffect(() => {
-    if (view === "faq") main.current?.scrollTo({ top: 0 });
-  }, [question, view]);
+  }, [experience, step]);
   useEffect(() => {
     if (!menu) return;
     searchInput.current?.focus();
@@ -149,41 +149,47 @@ export default function BusinessChat() {
       document.removeEventListener("pointerdown", outside);
     };
   }, [menu]);
-  function navigate(next: View) {
-    if (next !== view && main.current) scrollPositions.current[view] = main.current.scrollTop;
-    setView(next);
+  function navigate(next: BusinessPanel) {
+    const url = `${window.location.pathname}${window.location.search}#${next}`;
+    if (panel) window.history.replaceState(window.history.state, "", url);
+    else window.history.pushState({ ...window.history.state, businessPanel: true }, "", url);
+    setPanel(next);
     setMenu(false);
     setSearch("");
-    if (next === "faq") setQuestion(null);
+  }
+  function closePanel() {
+    // In-app openings use one history entry; direct links close in place.
+    if (window.history.state?.businessPanel) window.history.back();
+    else { window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}`); setPanel(null); }
+    setDismissedChoice("");
   }
   function start(kind: Experience) {
     setExperience(kind);
     setStep(0);
-    scrollPositions.current.experience = 0;
-    navigate("experience");
+    setMenu(false);
+    setDismissedChoice("");
+    main.current?.scrollTo({ top: 0 });
   }
   function home() {
     setExperience(null);
     setStep(0);
-    scrollPositions.current.experience = 0;
-    navigate("experience");
+    setMenu(false);
+    main.current?.scrollTo({ top: 0 });
   }
-  function contact() {
-    setContactStarted(true);
-    setContactContext({
-      topic: experience ? experienceNames[experience] : "AI活用について",
-      concern: "",
-    });
-    navigate("contact");
-  }
+  function contact() { navigate("contact"); }
+  const completionChoices: Choice[] = [
+    { label: "自分の仕事について相談する", description: "初回30分・無料。メールで日程を調整します。", action: contact },
+    { label: "費用や支援の進め方を確認する", action: () => navigate("pricing") },
+    { label: "もうひとつの事例を見る", action: () => start(experience === "aggregate" ? "shift" : "aggregate") },
+  ];
   const menuItems = [
     {
       label: "仕事の体験",
       icon: ListChecks,
-      action: () => navigate("experience"),
+      action: () => { setMenu(false); main.current?.focus({ preventScroll: true }); },
     },
     {
-      label: "費用・支援内容",
+      label: "支援内容・費用",
       icon: ListChecks,
       action: () => navigate("pricing"),
     },
@@ -193,6 +199,7 @@ export default function BusinessChat() {
       icon: ListChecks,
       action: () => navigate("process"),
     },
+    { label: "自己紹介", icon: Question, action: () => navigate("about") },
     { label: "相談する", icon: ChatCircle, action: contact },
   ].filter((item) => item.label.includes(search.trim()));
   return (
@@ -201,24 +208,7 @@ export default function BusinessChat() {
       <a className={s.skip} href="#business-conversation">
         会話へ移動
       </a>
-      <header className={s.header}>
-        <button
-          onClick={home}
-          className={s.brand}
-          aria-label="最初の画面に戻る"
-          title="最初の画面に戻る"
-        >
-          石田 卓也
-        </button>
-        <span className={s.service}>AI導入・活用の伴走支援</span>
-        <nav aria-label="ご案内">
-          <button onClick={() => navigate("faq")}>費用・FAQ</button>
-          <button onClick={contact}>
-            <ChatCircle size={21} />
-            相談する
-          </button>
-        </nav>
-      </header>
+      <BusinessHeader onHome={home} onOpen={navigate} />
       <main
         ref={main}
         id="business-conversation"
@@ -226,23 +216,8 @@ export default function BusinessChat() {
         className={s.main}
       >
         <div className={s.conversation}>
-          {(view !== "experience" || experience) && (
-            <h1 className={s.srOnly}>AI導入・活用の伴走支援</h1>
-          )}
-          {view !== "experience" && experience && (
-            <button
-              className={s.context}
-              onClick={() => navigate("experience")}
-              data-multiline
-            >
-              <BookmarkSimple size={18} />
-              <span>
-                {experienceNames[experience]}の体験を途中まで見ています
-              </span>
-              <ArrowLeft size={17} />
-            </button>
-          )}
-          {view === "experience" && !experience && (
+          {experience && <h1 className={s.srOnly}>AI導入・活用の伴走支援</h1>}
+          <div hidden={!!experience}>
             <div className={s.welcome}>
               <WelcomeIntro>
               <div className={s.indent}>
@@ -265,8 +240,8 @@ export default function BusinessChat() {
                       action: () => start("shift"),
                     },
                     {
-                      label: "自分の仕事で、何を任せられるか知りたい",
-                      description: "支援の進め方から見てみる",
+                      label: "支援の進め方を見る",
+                      description: "無料相談から利用開始までをご案内",
                       action: () => navigate("process"),
                     },
                   ]}
@@ -274,10 +249,10 @@ export default function BusinessChat() {
               </div>
               </WelcomeIntro>
             </div>
-          )}
+          </div>
           {experience && (
-            <ConversationActiveContext.Provider value={view === "experience"}>
-            <div hidden={view !== "experience"}>
+            <ConversationActiveContext.Provider value={!panel}>
+            <div>
               {experience === "aggregate" && (
                 <>
                   <ChatTurn user={aggregateRequest} attachments>
@@ -330,12 +305,8 @@ export default function BusinessChat() {
                       <p>照合とメール下書きに加えて、月次レポートまで同じ形で作れます。前月比較や売上推移には、過去のExcelも一緒に渡します。</p>
                       <p>次の月末は「finance-checkerで今月分を確認して」と、売上・入金のExcelを添えるだけ。取引先の表記ルールや社内担当者の情報は、毎回渡す必要がありません。</p>
                       <p>担当者や照合ルールが変わったときは、スキルを更新できます。</p>
-                      <p>僕に任せられる仕事は、これだけではありません。もっと仕事を楽にする方法を、一緒に考えてみませんか？</p>
-                      {step === 4 && <Choices label="あなたの仕事でも" items={[{
-                        label: "自分の仕事について相談する", action: contact,
-                      }, {
-                        label: "他の事例も見てみる", action: home,
-                      }]} />}
+                      <CompletionBridge onAbout={() => navigate("about")} />
+                      {step === 4 && <Choices label="あなたの仕事でも" items={completionChoices} />}
                     </Guide>
                   </ChatTurn>}
                 </>
@@ -347,12 +318,10 @@ export default function BusinessChat() {
                       <Guide>
                         {scene.replies.map((reply) => <p key={reply}>{reply}</p>)}
                         {scene.sample && <ShiftArtifact sample={scene.sample} />}
+                        {index === shiftSteps.length - 1 && <CompletionBridge onAbout={() => navigate("about")} />}
                         {step === index && <Choices
                           label={scene.choiceLabel}
-                          items={index === shiftSteps.length - 1 ? [
-                            { label: scene.next, action: contact },
-                            { label: "他の事例も見てみる", action: home },
-                          ] : [{
+                          items={index === shiftSteps.length - 1 ? completionChoices : [{
                             label: scene.next,
                             action: () => setStep(index + 1),
                           }]}
@@ -365,186 +334,12 @@ export default function BusinessChat() {
             </div>
             </ConversationActiveContext.Provider>
           )}
-          {view === "faq" && (
-            <>
-              {question === null ? (
-                <>
-                  <Guide>
-                    <p>気になることはありますか？</p>
-                  </Guide>
-                  <div className={s.indent}>
-                    <div className={s.tabs}>
-                      <button aria-pressed="true">よくある質問</button>
-                      <button onClick={() => navigate("pricing")}>
-                        費用・支援内容
-                      </button>
-                    </div>
-                    <Choices
-                      label="よくある質問"
-                      items={questions.map((q, i) => ({
-                        label: q.q,
-                        action: () => setQuestion(i),
-                      }))}
-                    />
-                  </div>
-                </>
-              ) : (
-                <ChatTurn key={question} user={questions[question]!.q}>
-                  <Guide>
-                    <p>{questions[question]!.a}</p>
-                  </Guide>
-                  {question === 2 && (
-                    <div className={s.indent}>
-                      <dl className={s.summary}>
-                        <div>
-                          <dt>初期費用</dt>
-                          <dd>業務の整理・設定・動作確認</dd>
-                        </div>
-                        <div>
-                          <dt>月額費用</dt>
-                          <dd>運用サポート・所定の利用料</dd>
-                        </div>
-                        <div>
-                          <dt>利用量が増える場合</dt>
-                          <dd>人数や通知回数に応じて、事前にご相談</dd>
-                        </div>
-                      </dl>
-                    </div>
-                  )}
-                  <div className={s.indent}>
-                    <Choices
-                      label="回答のあとに"
-                      items={[
-                        {
-                          label: "ほかの質問を見る",
-                          action: () => setQuestion(null),
-                        },
-                        {
-                          label: "費用・支援内容を見る",
-                          action: () => navigate("pricing"),
-                        },
-                        {
-                          label: experience
-                            ? "体験の続きに戻る"
-                            : "仕事の体験を見る",
-                          action: () => navigate("experience"),
-                        },
-                        {
-                          label: "自分の仕事について相談する",
-                          action: contact,
-                        },
-                      ]}
-                    />
-                  </div>
-                </ChatTurn>
-              )}
-            </>
-          )}
-          {view === "pricing" && (
-            <>
-              <Guide>
-                <p>仕事に合う範囲を整理してから、費用をご案内します。</p>
-              </Guide>
-              <div className={s.indent}>
-                <div className={s.tabs}>
-                  <button onClick={() => navigate("faq")}>よくある質問</button>
-                  <button aria-pressed="true">費用・支援内容</button>
-                </div>
-                <dl className={s.summary}>
-                  <div>
-                    <dt>初期の支援</dt>
-                    <dd>業務の整理・設定・動作確認</dd>
-                  </div>
-                  <div>
-                    <dt>継続の支援</dt>
-                    <dd>運用サポート・使いながらの調整</dd>
-                  </div>
-                  <div>
-                    <dt>外部サービス</dt>
-                    <dd>LINE・AIなどの利用量を確認</dd>
-                  </div>
-                </dl>
-                <p className={s.subtext}>
-                  料金・支援範囲は現在検討中です。月額に含める利用量と、追加費用が発生する条件は、ご依頼前にご案内します。
-                </p>
-                <Choices
-                  label="費用のあとに"
-                  items={[
-                    { label: "自分の仕事について相談する", action: contact },
-                    {
-                      label: "支援の進め方を見る",
-                      action: () => navigate("process"),
-                    },
-                  ]}
-                />
-              </div>
-            </>
-          )}
-          {view === "process" && (
-            <>
-              <Guide>
-                <p>いつもの仕事を、一緒に見直すところから。</p>
-              </Guide>
-              <div className={s.indent}>
-                <ol className={s.process}>
-                  {[
-                    [
-                      "今のやり方を聞く",
-                      "使っている資料や、時間がかかるところを整理します。",
-                    ],
-                    [
-                      "小さく試して確かめる",
-                      "見本で動かし、人が判断するところも決めます。",
-                    ],
-                    [
-                      "使いながら調整する",
-                      "現場に合う手順にして、続けられる形を考えます。",
-                    ],
-                  ].map(([title, body], i) => (
-                    <li key={title}>
-                      <span>{i + 1}</span>
-                      <div>
-                        <h2>{title}</h2>
-                        <p>{body}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-                <Choices
-                  label="進め方のあとに"
-                  items={[
-                    {
-                      label: "仕事の体験を見る",
-                      action: () => navigate("experience"),
-                    },
-                    {
-                      label: "まだ整理できていないけれど相談する",
-                      action: contact,
-                    },
-                  ]}
-                />
-              </div>
-            </>
-          )}
-          {contactStarted && (
-            <div hidden={view !== "contact"}>
-              <Guide>
-                <p>今の仕事について、少し教えてください。</p>
-              </Guide>
-              <div className={s.indent}>
-                <Consultation
-                  topic={contactContext.topic}
-                  concern={contactContext.concern}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </main>
       <footer className={s.dock}>
         <div ref={setChoiceTarget} className={s.choiceSlot} />
         {!choicesVisible && activeChoice && <button className={s.resumeChoices} onClick={() => setDismissedChoice("")}>選択肢を表示</button>}
-        {!choicesVisible && menu && (
+        {menu && (
           <div
             className={s.menu}
             ref={menuBox}
@@ -586,7 +381,7 @@ export default function BusinessChat() {
             </button>
           </div>
         )}
-        {!choicesVisible && <button
+        <button
           ref={launcher}
           className={s.launcher}
           aria-expanded={menu}
@@ -599,21 +394,22 @@ export default function BusinessChat() {
           <Plus size={25} />
           <span>メニューから、できることを選ぶ</span>
           <CaretDown size={20} />
-        </button>}
+        </button>
         <div className={s.dockMeta}>
           <span>
             <Check size={12} />
             選択式のサンプル体験
           </span>
-          <Link href="/business/privacy">プライバシー</Link>
-          <Link href="/business/legal">特定商取引法に基づく表記</Link>
+          <Link href="/business/privacy" target="_blank" rel="noopener noreferrer">プライバシー</Link>
+          <Link href="/business/legal" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</Link>
         </div>
       </footer>
+      <SupportPanel panel={panel} reference={experience ? experienceNames[experience] : ""} onOpen={navigate} onClose={closePanel} />
       <noscript>
         <p className={s.noScript}>
           この体験にはJavaScriptが必要です。
-          <Link href="/business/profile">支援者のプロフィールはこちら</Link>
-          。問い合わせ窓口は準備中です。
+          <Link href="/business/profile">自己紹介はこちら</Link>
+          。<a href={`mailto:${owner.email}`}>無料相談はメールでも受け付けています</a>。
         </p>
       </noscript>
     </div>

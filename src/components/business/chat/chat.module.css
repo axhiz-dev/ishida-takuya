@@ -1254,3 +1254,21 @@
   .introChoices { margin-top: 12px; }
   .introChoices .choices > button { min-height: 74px; }
 }
+
+/* The navigation remains available beside the conversation's choices. */
+.header { background: #fff; color: #263a32; font-family: "Noto Sans JP", sans-serif; }
+.header nav a { white-space: nowrap; display: inline-flex; align-items: center; min-height: 44px; }
+.header nav button { min-height: 44px; }
+.dock { position: relative; }
+.menu { z-index: 5; bottom: 96px; }
+@media (max-width: 680px) {
+  .header { flex-wrap: wrap; gap: 8px; padding: 12px 18px; min-height: auto; }
+  .header .brand { font-size: 17px; }
+  .header .service { display: none; }
+  .header nav { gap: 12px; font-size: 11px; }
+  .header nav button { gap: 4px; }
+  .header nav button svg { display: none; }
+  .launcher { min-height: 44px; }
+}
+
+.header nav button { white-space: nowrap; }
