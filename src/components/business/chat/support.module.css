@@ -34,7 +34,7 @@
 .textLink { display: inline-flex; align-items: center; gap: 8px; color: #315f47; text-decoration: underline; text-underline-offset: 4px; font-size: 13px; min-height: 44px; }
 .process { list-style: none; padding: 0; margin: 30px 0 0; }
 .process li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 20px; padding: 26px 0; border-top: 1px solid #e1e8e3; }
-.stepNumber { color: #698172; font-size: 13px; padding-top: 3px; }
+.stepNumber { color: #526b5c; font-size: 13px; padding-top: 3px; }
 .process h3 { margin: 0 0 10px; font-size: 18px; }
 .process p { margin: 0; font-size: 14px; }
 .process .result { margin-top: 16px; background: #f4f7f4; padding: 12px 16px; border-radius: 7px; font-size: 12px; }

@@ -273,7 +273,7 @@ test("下層ページから、法定の表記に行き来できる", async ({ pa
   await page.getByRole("link", { name: "プライバシーポリシー" }).click();
   await expect(page).toHaveURL(/\/business\/privacy/);
 
-  await page.getByRole("link", { name: "自己紹介" }).click();
+  await page.getByRole("navigation", { name: "このサイトについて" }).getByRole("link", { name: "自己紹介", exact: true }).click();
   await expect(page).toHaveURL(/\/business\/profile/);
 
   await page.getByRole("link", { name: /トップへ/ }).click();
