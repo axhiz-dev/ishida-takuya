@@ -404,10 +404,58 @@
 }
 .lineMessage,
 .lineOwn {
+  width: fit-content;
   max-width: 85%;
   margin-bottom: 18px;
   font-size: 14px;
   line-height: 1.8;
+}
+.lineTimeline {
+  height: clamp(240px, 38dvh, 460px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+.lineTimeline:focus-visible {
+  outline: 2px solid #228555;
+  outline-offset: -3px;
+}
+@media (max-width: 680px) {
+  .lineTimeline {
+    height: clamp(220px, 32dvh, 320px);
+  }
+}
+.lineScrollHint {
+  padding: 10px 20px;
+  margin: 0;
+  font-size: 12px;
+  background: #f6fafc;
+  color: #516575;
+}
+.lineDay {
+  margin: 8px 0 20px;
+  padding: 8px 0;
+  border-bottom: 1px solid #cbdce5;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #516575;
+}
+.lineChannel {
+  margin: 20px 0 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #516575;
+}
+.shiftInstructions {
+  margin: 0 0 20px;
+}
+.shiftInstructions > summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-size: 13px;
+  color: #516575;
 }
 .lineMessage small,
 .lineOwn small {

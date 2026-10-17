@@ -1,4 +1,66 @@
-# Business chat design QA — 2026-10-10
+# Business chat design QA
+
+## 2026-10-17 — LINE shift consultation
+
+### Follow-up: one full week and message wording
+
+- Removed the requested extra recruitment sentence. Both short reply preview and full timeline now say `山田さん、火曜日17時からLASTで登録しました！`, with matching speaker names.
+- Replaced the weekend-only schedule with Monday–Sunday evening shifts. Sample rules are weekdays 17–22:00 with two people, weekends 18–22:00 with three, and one responsible person every day. LAST is explicitly 22:00 for this fictional shop.
+- Updated all five staff replies to match their weekly assignments. Saturday's extra assignment still follows manager approval and Suzuki's acceptance. Both manager's draft and the final table shared to the staff group use the same seven-row data.
+- Static export, lint/types and in-app browser passed: seven rows in both draft and confirmed tables, correct weekday/weekend counts, requested sentence absent, named reply present, inner scrolling retained, no horizontal page overflow at 390px. No browser errors observed.
+- Screenshots: `docs/business-qa/shift-week.png` (1440×1024) and `docs/business-qa/shift-week-mobile.png` (390×844). Tables are read inside the existing scrolling LINE viewport; seven rows need not fit simultaneously on a phone. Existing Noto Sans JP, palette, mascot, choice dock and layout remain.
+- Regression expectations updated for the exact named reply, removed sentence, Monday–Sunday rows and counts, and final staff-group table. The preceding commit's CI passed; this update's CI is separate.
+
+final result: passed
+
+### Follow-up: scrollable full LINE journey
+
+- User requested the final sample show the complete exchange beginning with automatic recruitment on the 20th, with scrolling inside LINE. This is an authorized extension of the selected flow; example 1's choice UI stays unchanged.
+- Added five staff members, 20th/21st replies, 24th private reminder, 25th shortage report, manager approval before outreach, additional staff reply, final manager approval and group confirmation. Private chats and group messages are labeled separately.
+- Instruction summary is now collapsed by default. LINE header, scroll hint and sample disclaimer remain outside the scrolling message body. Keyboard focus is visible; wheel overscroll is contained. Long static preview text is excluded from AI streaming.
+- Initial 55dvh timeline clipped its header when the outer pane was at the bottom on a 671×884 window. Reduced to `clamp(240px, 38dvh, 460px)` with `clamp(220px, 32dvh, 320px)` below 680px so the complete LINE frame fits more comfortably above the existing choice dock.
+- Browser check: wheel changed LINE scrollTop 0→1768 while main remained 3712. Focusing the region and pressing End changed inner scrollTop to 2688 with the same main scrollTop. Full transcript is reachable without lengthening the page by the entire conversation.
+- Static build, lint and types passed. Regression test now verifies the complete journey exists and the inner region scrolls independently using the keyboard. Earlier commit's GitHub CI passed; updated commit CI is separate.
+- Follow-up evidence: `docs/business-qa/shift-timeline.png` and `docs/business-qa/shift-timeline-mobile.png`. Existing font, palette, mascot and choice styles reused. No new raster imagery or visual-system change.
+
+final result: passed
+
+**Scope and visual truth**
+- Selected first displayed ImageGen concept: `exec-ae697be3-7322-4176-89aa-11c8eac34998.png`, captured locally as `screenshots/shift/reference.png` (1487×1058).
+- User override: keep example 1's choice design and behavior exactly; adapt the selected concept's conversational flow to the existing chat, rather than copying its green CTA and back button. Reuse the existing mascot, icons, fonts, header, scrolling pane and Choices component.
+- Implementation: static export served at `http://127.0.0.1:4175/business/`; captured at 1487×1058 CSS/pixels, density 1. `docs/business-qa/shift-conversation.png` and `docs/business-qa/shift-mobile.png`.
+- State: third consultation turn, free-format staff reply and default LAST. Both references show the same four-message LINE example. The implementation retains earlier turns in a scrollable pane, so the preceding manager bubble is above the captured reading position; the mock is a standalone composition. This is intentional to match example 1.
+
+**Comparison evidence**
+- Source and implementation opened in one composite input: `screenshots/shift/comparison.jpg` (2974×1058). No density scaling used.
+- Focused readable LINE-region comparison opened: `screenshots/shift/detail-comparison.jpg`. Verified all four messages, order, alignment and labels; no extra confirmation after 17時.
+- Fonts/typography: existing Zen Kaku Gothic New and existing chat scale retained to match example 1. Mock display headline and enlarged text deliberately not introduced into the scrolling chat.
+- Spacing/layout: single-column consultation with embedded LINE artifact preserved. Existing floating Choices dock reused without markup/CSS changes. All content remains reachable by scrolling; dock does not overlay the main pane.
+- Colors/tokens: existing white surface, pale-blue user/LINE backgrounds, green staff bubbles and dark-green mascot retained. No new palette or gradients.
+- Images/assets: original `chat-guide.png` and Phosphor icons reused; no generated-image text rasterized into the UI, no replacement drawings.
+- Copy/content: seven complete manager/AI exchanges define recruitment, free replies, LAST, one reminder, staffing and approvals. Fixed samples are labeled, and actual integration is described as a subsequent step. Final draft has 3 people including one responsible person on each weekend night.
+
+**Findings and history**
+- [P2, resolved] Initial LINE bubbles filled 85% of the panel even for short replies (`screenshots/shift/desktop-before.png`). Added `width: fit-content` to existing message styles. Recaptured static build (`desktop-final.png`) and compared full and focused images again; bubbles now follow message length while preserving max-width and mobile wrapping.
+- No remaining actionable P0/P1/P2 findings. Responsive screenshots checked at 390×844 (reply sample) and 320×844 (final draft); horizontal document overflow 0, choices remain in viewport.
+
+**Validation**
+- TypeScript, scoped ESLint and complete static export (including lint/types) passed.
+- In-app browser: seven turns to final draft, conversation history, FAQ round trip, consultation-topic handoff, close/reopen choices and focus restoration, desktop and mobile scrolling. Static export reply flow also checked.
+- Browser logs inspected: no errors; development LCP hint for the unchanged welcome illustration only.
+- Existing Playwright regression updated for initial consultation, exact LAST reply order, persistent history, final approval and topic handoff. Automated browser suite not run locally; CI is the remaining automated check. Real-device Safari/Android not covered.
+
+**Implementation checklist**
+- [x] Reuse example 1 Choices and ChatTurn.
+- [x] Keep requested four-message LINE exchange exactly.
+- [x] Show rule-setting before bot behavior and preserve conversation history.
+- [x] Verify static export and browser interactions; inspect full and focused visual comparisons.
+
+final result: passed
+
+---
+
+## Historical QA — 2026-10-10
 
 ## 2026-10-12 monthly report
 
