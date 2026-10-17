@@ -9,7 +9,7 @@ const ROUTES = [
   { path: "/", name: "ゲート" },
   { path: "/engineer/", name: "職務経歴" },
   { path: "/business/", name: "ご相談" },
-  { path: "/business/profile/", name: "プロフィール" },
+  { path: "/business/profile/", name: "自己紹介" },
   { path: "/business/legal/", name: "特商法の表記" },
   { path: "/business/privacy/", name: "プライバシーポリシー" },
 ] as const;
@@ -264,7 +264,7 @@ test("中身を入れたと宣言したら、未入力が残っていない", as
 });
 
 test("下層ページから、法定の表記に行き来できる", async ({ page }) => {
-  await page.goto("/business/");
+  await page.goto("/business/profile/");
 
   await page.getByRole("link", { name: "特定商取引法に基づく表記" }).click();
   await expect(page).toHaveURL(/\/business\/legal/);
@@ -273,7 +273,7 @@ test("下層ページから、法定の表記に行き来できる", async ({ pa
   await page.getByRole("link", { name: "プライバシーポリシー" }).click();
   await expect(page).toHaveURL(/\/business\/privacy/);
 
-  await page.getByRole("link", { name: "プロフィール" }).click();
+  await page.getByRole("navigation", { name: "このサイトについて" }).getByRole("link", { name: "自己紹介", exact: true }).click();
   await expect(page).toHaveURL(/\/business\/profile/);
 
   await page.getByRole("link", { name: /トップへ/ }).click();
@@ -281,10 +281,12 @@ test("下層ページから、法定の表記に行き来できる", async ({ pa
 });
 
 
-test('business: 未確定料金を断定せず、費用へ直接進める', async ({ page }) => {
+test('business: 支援内容・費用に直接進み、合意した料金を確認できる', async ({ page }) => {
   await page.goto('/business/');
-  await page.getByRole('button', { name: '費用・FAQ', exact: true }).click();
-  await page.getByRole('button', { name: '費用・支援内容', exact: true }).click();
-  await expect(page.getByText(/料金・支援範囲は現在検討中/)).toBeVisible();
-  await expect(page.locator('body')).not.toContainText('月3万円');
+  await page.getByRole('banner').getByRole('button', { name: '支援内容・費用', exact: true }).click();
+  const panel = page.getByRole('dialog');
+  await expect(panel).toContainText('5万円〜');
+  await expect(panel).toContainText('10万円〜');
+  await expect(panel).toContainText('利用料は別途必要です');
+  await expect(panel).not.toContainText('現在検討中');
 });

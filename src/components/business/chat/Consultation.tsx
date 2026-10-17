@@ -4,13 +4,12 @@ import Link from "next/link";
 import { contactConfig } from "../tour/config";
 import s from "./chat.module.css";
 
-export default function Consultation({
-  topic,
-  concern,
-}: {
-  topic: string;
-  concern: string;
-}) {
+import { owner } from "@/config/owner";
+import support from "./support.module.css";
+
+export default function Consultation({ reference }: { reference: string }) {
+  const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -47,8 +46,7 @@ export default function Consultation({
             email: values.email,
             message: values.message,
             _gotcha: values.honeypot,
-            業務: topic,
-            困っていること: concern,
+            参考に見た事例: reference || "なし",
           }),
           signal: controller.signal,
         },
@@ -63,32 +61,23 @@ export default function Consultation({
       locked.current = false;
     }
   }
-  if (status === "success")
-    return (
-      <div className={s.notice} role="status">
-        <h2>お問い合わせを受け付けました</h2>
-        <p>内容を確認のうえ、ご入力のメールアドレスへご連絡します。</p>
-      </div>
-    );
+  const emailBody = `石田様\n無料相談を希望します。\n\nお名前：${values.name}\nメール：${values.email}\n相談したいこと：${values.message || "普段の仕事について、相談しながら整理したい"}\n${reference ? `参考に見た事例：${reference}\n` : ""}`;
+  const emailHref = `mailto:${owner.email}?subject=${encodeURIComponent("AI活用の無料相談")}&body=${encodeURIComponent(emailBody)}`;
+  async function copyMessage() {
+    try { await navigator.clipboard.writeText(emailBody); setCopied(true); setCopyError(false); }
+    catch { setCopyError(true); }
+  }
+  if (status === "success") return <div className={s.notice} role="status"><h2>無料相談のお申し込みを受け付けました</h2><p>内容を確認し、{owner.responseTime}を目安にメールでご連絡します。日程を調整して、初回30分の相談を行います。</p><p>この時点で有料の支援が始まることはありません。</p></div>;
   return (
     <section className={s.contact} aria-label="相談フォーム">
-      {!ready && (
-        <p className={s.notice}>
-          現在、問い合わせ窓口を準備しています。内容の入力・確認はできますが、まだ送信されません。
-        </p>
-      )}
-      <dl className={s.summary}>
-        <div>
-          <dt>相談したい仕事</dt>
-          <dd>{topic}</dd>
-        </div>
-        {concern && (
-          <div>
-            <dt>困っていること</dt>
-            <dd>{concern}</dd>
-          </div>
-        )}
-      </dl>
+      <div className={support.contactIntro}>
+        <h2>いつもの仕事について、<br />聞かせてください。</h2>
+        <p>初回30分の無料相談です。何をAIに任せるか、まだ整理できていなくても大丈夫です。</p>
+        <ol className={support.contactSteps}><li>1 メールで日程調整</li><li>2 無料相談・30分</li><li>3 支援内容・期間・費用をご提案</li></ol>
+        <p className={s.subtext}>有料の支援は、ご提案に合意いただいてから始めます。{owner.responseTime}を目安にメールでご連絡します。</p>
+        {!ready && <p className={s.notice}>現在はメールでお申し込みを受け付けています。下の入力内容からメールを作成できます。<br /><a className={support.textLink} href={`mailto:${owner.email}?subject=${encodeURIComponent("AI活用の無料相談")}`}>直接メールする：{owner.email}</a></p>}
+      </div>
+      {reference && <p className={s.subtext}>参考に見た事例：{reference}<br />事例と違う仕事でもご相談いただけます。</p>}
       {!review ? (
         <form
           onSubmit={(e) => {
@@ -125,7 +114,7 @@ export default function Consultation({
               name="message"
               rows={3}
               maxLength={5000}
-              placeholder="今の作業や、こうなったら嬉しいことなど。"
+              placeholder="普段の仕事や、時間がかかっていることなど。まだまとまっていなくても大丈夫です。"
               value={values.message}
               onChange={(e) =>
                 setValues({ ...values, message: e.target.value })
@@ -153,14 +142,14 @@ export default function Consultation({
               }
             />
             <span>
-              <Link href="/business/privacy" target="_blank">
+              <Link href="/business/privacy" target="_blank" rel="noopener noreferrer">
                 個人情報の取り扱い
               </Link>
               を確認しました
             </span>
           </label>
           <button type="submit" className={s.neutralButton}>
-            相談内容を確認する
+            {ready ? "相談内容を確認する" : "メールに載せる内容を確認する"}
           </button>
         </form>
       ) : (
@@ -179,29 +168,23 @@ export default function Consultation({
             </div>
             <div>
               <dt>相談内容</dt>
-              <dd>{values.message || "体験で選んだ内容について相談したい"}</dd>
+              <dd>{values.message || "普段の仕事について、相談しながら整理したい"}</dd>
             </div>
           </dl>
           <p className={s.subtext}>
-            受付開始後はFormspreeを通じて送信します。内容を確認し、支援の進め方と費用をご案内します。
+            {ready ? "この内容で無料相談を申し込みます。送信後、メールで日程を調整します。" : "メールアプリを開いたあと、内容を確認して送信してください。この画面からは送信されません。"}
           </p>
           {status === "error" && (
             <p role="alert" className={s.notice}>
               送信を確認できませんでした。入力内容は残っています。受付済みの可能性もあります。時間をおいて再度お試しください。
             </p>
           )}
+          {copied && <p role="status">相談内容をコピーしました。{owner.email} 宛てのメールに貼り付けて送信してください。</p>}
+          {copyError && <p role="alert">コピーできませんでした。下の文章を選択してコピーし、{owner.email} へお送りください。</p>}
+          {!ready && <details><summary>メールアプリが開かない場合</summary><p>宛先：{owner.email}</p><textarea aria-label="メールで送る相談内容" readOnly value={emailBody} rows={8} /></details>}
           <div className={s.formActions}>
-            <button
-              className={s.neutralButton}
-              disabled={!ready || status === "sending"}
-              onClick={send}
-            >
-              {status === "sending"
-                ? "送信中…"
-                : ready
-                  ? "この内容で相談を送信"
-                  : "送信受付は準備中"}
-            </button>
+            {ready ? <button className={s.neutralButton} disabled={status === "sending"} onClick={send}>{status === "sending" ? "送信中…" : "この内容で無料相談を申し込む"}</button> : <a className={support.primary} href={emailHref}>メールアプリで開く</a>}
+            {!ready && <button onClick={copyMessage}>{copied ? "相談内容をコピーしました" : "相談内容をコピー"}</button>}
             <button
               disabled={status === "sending"}
               onClick={() => setReview(false)}

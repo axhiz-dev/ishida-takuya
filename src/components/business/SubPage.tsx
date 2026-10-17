@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { profile } from "@/content";
 import { ROUTES } from "@/config/site";
 import { EdgeNav } from "./EdgeNav";
 import { BusinessFooter } from "./BusinessFooter";
@@ -17,7 +16,7 @@ export function SubPage({ title, lede, children }: { title: string; lede?: strin
         本文へ移動
       </a>
       <div id="nav-sentinel" aria-hidden="true" />
-      <EdgeNav name={profile.name} />
+      <EdgeNav />
 
       <main id="main" className={styles.page}>
         <header className={styles.subHead}>

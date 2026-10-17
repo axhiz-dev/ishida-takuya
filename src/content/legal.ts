@@ -1,11 +1,11 @@
-import { pricing } from "@/components/business/tour/skillScenarios";
+import { supportPricing as pricing } from "@/components/business/chat/supportContent";
 import { owner } from "@/config/owner";
 
 /**
  * 法定の表記。文言はここで完結させる。
  *
  * 値が PLACEHOLDER のものは画面に「未入力」と出る（Fillable）。
- * 中身の数字や条件は src/components/business/tour/skillScenarios.ts の料金と揃えること。
+ * 中身の数字や条件は src/components/business/chat/supportContent.ts の料金と揃えること。
  * 片方だけ直すと、書いてある条件と実際の条件が食い違う。
  */
 
@@ -30,7 +30,7 @@ export const tradeLawRows: LegalRow[] = [
   { label: "営業時間", value: owner.businessHours, note: "時間外はメールでお受けします。" },
   {
     label: "役務の対価",
-    value: `AI活用・自動化の伴走支援は月${pricing.accompaniment}万円から（税別・3か月から）。自動化ツールの実装は${pricing.implementation}万円から（税別・要お見積もり）。90分の業務診断は料金お問い合わせ。`,
+    value: `AI活用・自動化の伴走支援は月${pricing.accompaniment}万円から（税別）。仕組みづくり・受託開発は${pricing.implementation}万円から（税別・要お見積もり）。初回30分の相談は無料です。`,
     note: "作業の範囲によって変わります。金額はお見積もりでご提示し、合意のうえで着手します。",
   },
   {
@@ -42,7 +42,7 @@ export const tradeLawRows: LegalRow[] = [
   {
     label: "支払時期",
     value: "ご契約前に、お見積もり・契約書で支払時期をご案内します",
-    note: "伴走支援・業務診断・実装それぞれの支払条件を確認し、合意のうえで開始します。",
+    note: "伴走支援・受託開発それぞれの支払条件を確認し、合意のうえで開始します。",
   },
   {
     label: "役務の提供時期",
@@ -52,7 +52,7 @@ export const tradeLawRows: LegalRow[] = [
   {
     label: "契約の解除",
     value: "解約・キャンセルの条件は、ご契約前にご案内します",
-    note: "伴走支援は3か月から。実装の納品後の修正・保守は別途ご相談ください。契約期間、解約時の精算、修正・保守の範囲を確認してから始めます。",
+    note: "受託開発の納品後の修正・保守は別途ご相談ください。契約期間、解約時の精算、修正・保守の範囲を確認してから始めます。",
   },
 ];
 
@@ -66,7 +66,7 @@ export const privacySections: PolicySection[] = [
   {
     heading: "取得する情報",
     body: [
-      "お問い合わせのときにご記入いただく、会社名（任意）・お名前・メールアドレス・ご相談の内容・選択した業務とお問い合わせの種別。",
+      "お問い合わせのときにご記入いただく、お名前・メールアドレス・ご相談の内容・参考に見た事例。",
       "お仕事をお受けするときにお預かりする、業務に必要な範囲のデータ（表計算ファイル、システムの設定情報など）。",
     ],
   },
@@ -97,7 +97,7 @@ export const privacySections: PolicySection[] = [
     body: [
       "アクセス解析は使っていません。Cookie による追跡もしていません。",
       "このページのデモは架空の資料と会話による見本です。ファイルのアップロードや実際のAIへの送信、手順の永続保存、定期実行は行いません。",
-      "お問い合わせフォームはFormspreeを利用します。送信した情報は同サービスを経由して当方に届き、お問い合わせへの対応のために使用します。",
+      "メールでのお申し込みは、お使いのメールサービスを経由して当方に届きます。サイト内送信を利用する場合はFormspreeを経由します。いずれも、お問い合わせへの対応のために使用します。",
     ],
   },
   {
@@ -113,4 +113,4 @@ export const privacySections: PolicySection[] = [
 ];
 
 /** 最終改定日。内容を変えたらここも直す。 */
-export const policyUpdatedAt = "2026-10-01";
+export const policyUpdatedAt = "2026-10-17";

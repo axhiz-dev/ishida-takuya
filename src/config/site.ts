@@ -2,9 +2,10 @@
  * サイト全体の定数。
  *
  * 方針：設定は環境変数ではなく **このファイル** に置く。
- * 例外は NEXT_OUTPUT / NEXT_BASE_PATH の 2 つだけで、これは
+ * 例外は NEXT_OUTPUT / NEXT_BASE_PATH と公開フォームID。前者は
  * GitHub Pages のデプロイ経路が要求するインフラ変数のため
- * next.config.ts とこのファイルの中でしか読まない。
+ * next.config.ts とこのファイルで読む。NEXT_PUBLIC_FORMSPREE_FORM_ID は
+ * components/business/tour/config.ts で読む公開設定（秘密鍵ではない）。
  *
  * next/link は内部リンクに basePath を付ける。
  * next/image の src と通常の a の静的ファイルには BASE_PATH を明示する。
@@ -46,15 +47,13 @@ export const ROUTES = {
      * デモを最初に置いているのは、実績がない段階で唯一機能する証拠だから。
      */
     sections: [
-      { id: "demo", label: "デモ" },
-      { id: "capabilities", label: "できること" },
-      { id: "process", label: "進め方" },
-      { id: "pricing", label: "料金" },
-      { id: "about", label: "私について" },
-      { id: "contact", label: "お問い合わせ" },
+      { id: "pricing", label: "支援内容・費用" },
+      { id: "process", label: "相談から利用開始まで" },
+      { id: "faq", label: "よくある質問" },
+      { id: "about", label: "自己紹介" },
+      { id: "contact", label: "無料相談" },
     ],
-    /** ナビと締めに置く行き先。事業側の相手に迷う余地を作らない。 */
-    cta: { label: "無料で相談する", href: "#contact" },
+    cta: { label: "無料で相談する", href: "/business#contact" },
   },
 } as const;
 

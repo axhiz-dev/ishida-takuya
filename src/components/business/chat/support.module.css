@@ -1,0 +1,102 @@
+.panel { color: #263a32; background: #fff; width: min(880px, calc(100vw - 64px)); height: min(860px, calc(100dvh - 64px)); max-height: calc(100dvh - 64px); max-width: none; padding: 0; margin: auto; border: 1px solid #dce5df; border-radius: 20px; box-shadow: 0 24px 100px #172b2333; overflow: hidden; font-family: "Noto Sans JP", sans-serif; font-size: 15px; line-height: 1.9; }
+.panel[open] { display: flex; flex-direction: column; }
+.panel::backdrop { background: #17282073; backdrop-filter: blur(3px); }
+.panel [hidden] { display: none !important; }
+.panel button, .panel input, .panel textarea { font: inherit; }
+.panel button, .panel a, .panel summary { cursor: pointer; }
+.panel :focus-visible, .personLink:focus-visible { outline: 2px solid #376956; outline-offset: 4px; }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; padding: 18px 28px; border-bottom: 1px solid #e4eae6; }
+.panelHeader h1 { font: inherit; font-weight: 600; margin: 0; outline: none; }
+.close { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; }
+.close:hover { background: #edf3ef; }
+.sectionNav { display: flex; padding: 12px 24px; gap: 6px; flex-shrink: 0; flex-wrap: wrap; border-bottom: 1px solid #e4eae6; }
+.sectionNav button { padding: 8px 12px; border-radius: 8px; font-size: 13px; min-height: 44px; }
+.sectionNav button[aria-current] { background: #edf3ef; color: #244e3b; font-weight: 600; }
+.panelBody { overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; min-height: 0; padding: 36px 40px 48px; }
+.eyebrow { font-size: 12px; color: #526b5c; margin: 0 0 12px; }
+.sectionTitle { font-size: clamp(23px, 3vw, 30px); line-height: 1.6; letter-spacing: .025em; margin: 0 0 18px; }
+.lead { color: #52615a; margin: 0 0 30px; }
+.priceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 28px; }
+.priceCard { border: 1px solid #dce5df; padding: 24px; border-radius: 12px; }
+.priceCard:first-child { background: #f4f8f5; }
+.priceCard h2 { font-size: 18px; margin: 15px 0; }
+.priceCard > p { font-size: 13px; }
+.priceCard ul, .letter ul { list-style: disc; padding-left: 1.4em; }
+.priceCard li { font-size: 13px; margin: 8px 0; }
+.tag { font-size: 11px; color: #486552; }
+.price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
+.price span { font-size: 32px; font-weight: 600; color: #244e3b; }
+.price small { font-size: 11px; }
+.note { color: #53635a; margin-top: 20px; font-size: 12px !important; }
+.costNote { padding: 20px 0; margin-bottom: 16px; border-bottom: 1px solid #e1e8e3; }
+.costNote h2 { font-size: 15px; margin: 0 0 8px; }
+.costNote p { font-size: 13px; margin: 0; }
+.textLink { display: inline-flex; align-items: center; gap: 8px; color: #315f47; text-decoration: underline; text-underline-offset: 4px; font-size: 13px; min-height: 44px; }
+.process { list-style: none; padding: 0; margin: 0; }
+.process > li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 230px; align-items: center; gap: 30px; padding: 0 0 58px; margin-bottom: 24px; }
+.process > li:last-child { padding-bottom: 0; margin-bottom: 0; }
+.stepNumber { display: block; color: #526b5c; font-size: 13px; letter-spacing: .1em; margin-bottom: 8px; }
+.process h2 { margin: 0 0 12px; font-size: 18px; }
+.process p { margin: 0; font-size: 14px; line-height: 1.85; }
+.process .result { margin-top: 14px; padding-top: 12px; border-top: 1px solid #dce5df; font-size: 12px; color: #526b5c; }
+.result strong { font-size: 12px; font-weight: 500; }
+.processComic { width: 100%; aspect-ratio: 1; overflow: hidden; position: relative; border-radius: 12px; }
+.processComic img { position: absolute; width: 200%; max-width: none; height: 200%; }
+.processArrow { position: absolute; left: calc(50% - 15px); bottom: 0; color: #526b5c; }
+.faqGroup { margin: 30px 0; }
+.faqGroup h3 { font-size: 13px; color: #526b5c; margin: 0 0 10px; }
+.faqGroup details { border-bottom: 1px solid #e1e8e3; }
+.faqGroup summary { padding: 18px 8px; font-size: 14px; font-weight: 500; }
+.faqGroup details[open] { background: #f6f9f6; }
+.faqGroup details p { margin: 0; padding: 0 20px 22px; font-size: 14px; }
+.person { display: flex; align-items: center; gap: 20px; margin: 0 0 32px; }
+.avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eaf1ec; display: grid; place-items: center; color: #476650; font-size: 22px; }
+.avatarCompact { width: 44px; height: 44px; font-size: 13px; }
+.personName { margin: 0; font-size: 21px; font-weight: 500; letter-spacing: .1em; }
+.letter { max-width: 680px; margin: auto; color: #29392f; font-family: "Noto Sans JP", sans-serif; font-size: 15px; line-height: 1.85; }
+.letterCover { padding: 16px; background: #eef5e9; margin: 0 0 28px; }
+.letterTitle { margin: 0; padding: 30px 22px; border: 2px solid #71915b; font-size: clamp(22px, 3vw, 28px); line-height: 1.65; color: #244e3b; letter-spacing: .025em; }
+.letterTitle span { display: block; }
+.letterGroup { margin: 0 0 28px; }
+.letterGroup p { margin: 0; }
+.letterGroup ul { margin: 10px 0; }
+.letterGroup li { padding-left: 3px; margin: 0; }
+.signature { text-align: right; margin: 24px 0; }
+.panelCta { border-top: 1px solid #dce5df; padding-top: 28px; margin-top: 36px; text-align: center; }
+.panelCta p { font-size: 14px; }
+.panelCta small { display: block; margin-top: 10px; font-size: 12px; color: #53635a; }
+.primary { background: #2c503d; color: white; border-radius: 8px; padding: 14px 20px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; text-decoration: none; font-size: 14px; }
+.primary:hover { background: #203f2e; }
+.personLink { display: flex; align-items: center; gap: 12px; margin-top: 28px; padding: 10px 0; min-height: 64px; width: fit-content; color: #315f47; cursor: pointer; font-size: 14px; text-align: left; }
+.personLink:hover > span:nth-child(2) { text-decoration: underline; text-underline-offset: 4px; }
+.contactIntro h2 { font-size: 25px; margin: 0 0 16px; line-height: 1.6; }
+.contactIntro p { margin: 0 0 15px; }
+.contactSteps { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 24px 0; font-size: 12px; }
+.contactSteps li { background: #edf3ef; border-radius: 6px; padding: 8px 12px; }
+@media (max-width: 680px) {
+  .panel { width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .panelHeader { padding: 10px 16px; }
+  .sectionNav { display: grid; grid-template-columns: 1fr 1fr; padding: 8px 12px; gap: 4px; }
+  .sectionNav button { padding: 8px; font-size: 12px; }
+  .panelBody { padding: 26px 22px calc(32px + env(safe-area-inset-bottom)); }
+  .priceGrid { grid-template-columns: 1fr; }
+  .priceCard { padding: 22px; }
+  .person { gap: 16px; }
+  .avatar:not(.avatarCompact) { width: 64px; height: 64px; font-size: 18px; }
+  .personName { font-size: 19px; }
+  .letter { font-size: 14px; }
+  .letterGroup { margin-bottom: 24px; }
+  .letterCover { padding: 10px; }
+  .letterTitle { padding: 24px 16px; font-size: 21px; }
+  .process > li { grid-template-columns: minmax(0, 1fr) clamp(96px, 28vw, 160px); gap: 14px; align-items: start; padding-bottom: 44px; }
+  .processComic { margin-top: 30px; }
+  .process h2 { font-size: 16px; }
+  .process p { font-size: 13px; }
+  .processArrow { bottom: 0; }
+  .primary { width: 100%; }
+
+}
+
+@media (min-width: 420px) and (max-width: 680px) {
+  .process > li { grid-template-columns: minmax(0, 1fr) 120px; }
+}

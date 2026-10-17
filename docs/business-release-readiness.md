@@ -1,5 +1,8 @@
 # /business 公開前確認（2026-10-01）
 
+> 2026-10-17更新：案内・自己紹介・料金・相談の現行仕様は [business-consultation-guide.md](business-consultation-guide.md) を参照。以下には以前の実装時点の記録も含みます。
+
+
 PR #8をマージしたmain `1b00e2474542e7b375562945146f5e98e9798398` を起点とした追加修正。
 
 ## この変更で解消する項目

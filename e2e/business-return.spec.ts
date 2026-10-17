@@ -21,8 +21,8 @@ for (const width of [390, 1440]) {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.getByRole("button", { name: "相談する", exact: true }).click();
     await expect(page.getByRole("region", { name: "相談フォーム" })).toBeVisible();
-    await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
-    await page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ }).click();
+    await expect(page.getByRole("dialog", { name: "無料相談" })).toBeVisible();
+    await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
     await expect(page.getByLabel("レポートの対象月")).toHaveValue("2026-04");
     await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "回答をすべて表示" })).toHaveCount(0);
@@ -30,8 +30,8 @@ for (const width of [390, 1440]) {
     expect(await page.locator("[data-chat-turn]").allTextContents()).toEqual(before);
     await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(scroll);
     await expect(page.getByRole("button", { name: "月次レポートまで毎月使えるスキルにして" })).toBeVisible();
-    await page.getByRole("button", { name: "費用・FAQ" }).click();
-    await page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ }).click();
+    await page.getByRole("button", { name: "支援内容・費用", exact: true }).click();
+    await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
     await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(scroll);
     await expect(page.getByRole("button", { name: "入力を完了して送信" })).toHaveCount(0);
     await page.screenshot({ path: testInfo.outputPath(`return-${width}.png`), animations: "disabled" });
@@ -58,7 +58,7 @@ test("入力中・考え中・回答中は画面を離れると止まり、戻�
   await page.clock.runFor(10000);
   expect(await user.textContent()).toBe(text);
   await expect(turn).toHaveAttribute("data-phase", "user");
-  const back = page.getByRole("button", { name: /毎月のExcel集計の体験を途中まで見ています/ });
+  const back = page.getByRole("button", { name: "案内を閉じて元の画面に戻る" });
   await back.click();
   expect(await user.textContent()).toBe(text);
   await page.clock.runFor(90);
