@@ -7,9 +7,7 @@ import s from "./support.module.css";
 /** Reuse the owner's photo; never substitute a reference person's portrait. */
 export function PersonAvatar({ compact = false }: { compact?: boolean }) {
   const className = compact ? `${s.avatar} ${s.avatarCompact}` : s.avatar;
-  return profile.photo
-    ? <Image className={className} src={`${BASE_PATH}${profile.photo}`} alt="石田卓也の顔写真" width={96} height={96} />
-    : <span className={className} aria-label="顔写真は準備中です"><span aria-hidden="true">石田</span></span>;
+  return <Image className={className} src={`${BASE_PATH}${profile.photo ?? "/images/business/ishida-avatar.webp"}`} alt="石田卓也の顔写真" width={96} height={96} />;
 }
 export function PersonIdentity() {
   return <div className={s.person}><PersonAvatar /><p className={s.personName}>石田 卓也</p></div>;
@@ -17,9 +15,13 @@ export function PersonIdentity() {
 export default function SelfIntroduction() {
   return <article className={s.letter}>
     <header className={s.letterCover}>
-      <h2 className={s.letterTitle}><span>大切にしたいことに、</span><span>もっと時間を使ってほしい。</span></h2>
+      <h2 className={s.letterTitle}>大切にしたいことに、もっと時間を使ってほしい。</h2>
+      <picture>
+        <source media="(max-width: 480px)" srcSet={`${BASE_PATH}/images/business/ishida-profile-banner-mobile.webp`} width={1024} height={1024} />
+        {/* The lettering belongs to the selected banner artwork. */}
+        <img className={s.letterBanner} src={`${BASE_PATH}/images/business/ishida-profile-banner.webp`} width={1774} height={887} alt="石田 卓也 — エンジニア / AI導入の伴走支援" />
+      </picture>
     </header>
-    <PersonIdentity />
     <div className={s.letterGroup}><p>みなさま、こんにちは。</p><p>石田と申します。<br />普段はエンジニアとして、人事向けのWebサービスを開発しています。</p></div>
     <div className={s.letterGroup}><p>ここではなぜこの支援を始めたのかを少しお話しさせてください。</p><p>私が何を大切にしているかを知ってもらうほうがお互いにとってよい仕事ができると思うからです。</p></div>
     <div className={s.letterGroup}><p>これまで、ピアニストや美容師、飲食店やライブハウスを営む方など、自分の好きなこと・強みを仕事にしている方々に出会ってきました。</p></div>
