@@ -26,7 +26,7 @@ test("集計：判断、結果、相談への引き継ぎとメール受付", as
   await form.getByRole("checkbox").check();
   await form.getByRole("button", { name: "メールに載せる内容を確認する" }).click();
   const emailLink = form.getByRole("link", { name: "メールアプリで開く" });
-  await expect(emailLink).toHaveAttribute("href", /^mailto:axhiz.ozi@gmail.com\?/);
+  await expect(emailLink).toHaveAttribute("href", /^mailto:axhiz\.dev@gmail\.com\?/);
   expect(decodeURIComponent((await emailLink.getAttribute("href"))!)).toContain("確認 太郎");
   await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
   await page.getByRole("banner").getByRole("button", { name: "支援内容・費用", exact: true }).click();
