@@ -73,6 +73,8 @@ jobs:
         if: steps.app.outputs.exists == 'true'
         run: npm run build
         env:
+          # Public form ID; not a secret. Keep local/CI builds in email fallback mode.
+          NEXT_PUBLIC_FORMSPREE_FORM_ID: xnpjyvwo
           NEXT_OUTPUT: export
           NEXT_BASE_PATH: /${{ github.event.repository.name }}
 
