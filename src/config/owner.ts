@@ -22,7 +22,7 @@ export const owner = {
   /** 番地まで。特商法の表記に出る。 */
   address: PLACEHOLDER,
   phone: PLACEHOLDER,
-  email: "axhiz.ozi@gmail.com",
+  email: "axhiz.dev@gmail.com",
 
   /** 適格請求書発行事業者の登録番号（T + 13 桁）。請求書 PDF に出る。 */
   invoiceRegistration: PLACEHOLDER,
