@@ -1272,3 +1272,8 @@
 }
 
 .header nav button { white-space: nowrap; }
+
+.submitButton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.submitSpinner { width: 1em; height: 1em; flex-shrink: 0; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: submitSpin 800ms linear infinite; }
+@keyframes submitSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .submitSpinner { animation: none; } }
