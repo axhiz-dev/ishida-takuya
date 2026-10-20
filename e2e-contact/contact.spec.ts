@@ -145,7 +145,7 @@ test("changeイベントを発火しないブラウザー自動入力も確認�
   expect(data.email).toBe("autofill@example.com");
 });
 
-test("第1〜第3希望を確認・修正・エラー後も保持し、送信する", async ({ page }) => {
+test("第1〜第3希望を選択し、確認・修正・エラー後も保持して送信する", async ({ page }) => {
   let count = 0;
   let data: Record<string, string> = {};
   await page.route(endpoint, (route) => {
@@ -154,21 +154,66 @@ test("第1〜第3希望を確認・修正・エラー後も保持し、送信す
     return route.fulfill({ status: count === 1 ? 503 : 200, body: count === 1 ? "{}" : '{"ok":true}' });
   });
   const form = await openForm(page);
-  const dates = ["10月25日 14時〜16時", "10月26日 10時30分〜12時", "11月2日 18時〜19時"];
-  for (let i = 0; i < dates.length; i++) await form.getByLabel(`第${i + 1}希望`, { exact: true }).fill(dates[i]!);
+  const dates = [
+    { date: "2099-10-25", start: "18:00", end: "20:00", label: "2099年10月25日 18:00〜20:00" },
+    { date: "2099-10-26", start: "10:30", end: "12:00", label: "2099年10月26日 10:30〜12:00" },
+    { date: "2099-11-02", start: "18:00", end: "19:00", label: "2099年11月2日 18:00〜19:00" },
+  ];
+  for (const [index, slot] of dates.entries()) {
+    await form.getByLabel(`第${index + 1}希望の日付`, { exact: true }).fill(slot.date);
+    await form.getByLabel(`第${index + 1}希望の開始時間`, { exact: true }).selectOption(slot.start);
+    await form.getByLabel(`第${index + 1}希望の終了時間`, { exact: true }).selectOption(slot.end);
+  }
+  await expect(form).toContainText("平日は18時以降");
+  await expect(form).toContainText("土日は、早めにご相談いただければ調整可能");
+  await expect(form).toContainText("平日日中を強くご希望の場合も調整");
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
-  for (const date of dates) await expect(form).toContainText(date);
+  for (const slot of dates) await expect(form).toContainText(slot.label);
   await form.getByRole("button", { name: "戻って修正" }).click();
-  for (let i = 0; i < dates.length; i++) await expect(form.getByLabel(`第${i + 1}希望`, { exact: true })).toHaveValue(dates[i]!);
+  for (const [index, slot] of dates.entries()) {
+    await expect(form.getByLabel(`第${index + 1}希望の日付`, { exact: true })).toHaveValue(slot.date);
+    await expect(form.getByLabel(`第${index + 1}希望の開始時間`, { exact: true })).toHaveValue(slot.start);
+    await expect(form.getByLabel(`第${index + 1}希望の終了時間`, { exact: true })).toHaveValue(slot.end);
+  }
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
   await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
   await expect(form.getByRole("alert")).toContainText("入力内容は残っています");
   const email = new URL((await form.getByRole("link", { name: "メールでご連絡ください" }).getAttribute("href"))!);
-  for (const date of dates) expect(email.searchParams.get("body")).toContain(date);
+  for (const slot of dates) expect(email.searchParams.get("body")).toContain(slot.label);
   await form.getByRole("button", { name: "戻って修正" }).click();
-  for (let i = 0; i < dates.length; i++) await expect(form.getByLabel(`第${i + 1}希望`, { exact: true })).toHaveValue(dates[i]!);
+  for (const [index, slot] of dates.entries()) await expect(form.getByLabel(`第${index + 1}希望の日付`, { exact: true })).toHaveValue(slot.date);
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
   await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
   await expect(page.getByRole("status")).toContainText("無料相談のお申し込みを受け付けました");
-  expect(data).toMatchObject({ 希望日時_第1希望: dates[0], 希望日時_第2希望: dates[1], 希望日時_第3希望: dates[2] });
+  expect(data).toMatchObject({ 希望日時_第1希望: dates[0]!.label, 希望日時_第2希望: dates[1]!.label, 希望日時_第3希望: dates[2]!.label });
+});
+
+test("希望日時の途中入力・時間の逆転・過去日を防ぎ、スマホでも選べる", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const form = await openForm(page);
+  const date = form.getByLabel("第1希望の日付", { exact: true });
+  const start = form.getByLabel("第1希望の開始時間", { exact: true });
+  const end = form.getByLabel("第1希望の終了時間", { exact: true });
+  await expect(date).toHaveAttribute("type", "date");
+  await date.fill("2099-10-25");
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await expect(form.getByRole("alert")).toContainText("開始時間を選択");
+  await start.selectOption("18:00");
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await expect(form.getByRole("alert")).toContainText("終了時間を選択");
+  for (const value of ["17:30", "18:00"]) {
+    await end.selectOption(value);
+    await form.getByRole("button", { name: "相談内容を確認する" }).click();
+    await expect(form.getByRole("alert")).toContainText("終了時間は開始時間より後");
+  }
+  await date.fill("2000-01-01");
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await expect(date).toBeFocused();
+  await expect(form.getByRole("button", { name: "この内容で無料相談を申し込む" })).toHaveCount(0);
+  await date.fill("2099-10-25");
+  await end.selectOption("19:00");
+  const panel = page.getByRole("dialog");
+  expect(await panel.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await expect(form).toContainText("2099年10月25日 18:00〜19:00");
 });

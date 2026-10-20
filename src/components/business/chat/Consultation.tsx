@@ -6,6 +6,7 @@ import s from "./chat.module.css";
 
 import { owner } from "@/config/owner";
 import support from "./support.module.css";
+import { formatPreferredSlot, japanToday, timeOptions, validatePreferredSlots, type PreferredSlot } from "./preferredDates";
 
 export default function Consultation({ reference }: { reference: string }) {
   const [copied, setCopied] = useState(false);
@@ -20,6 +21,14 @@ export default function Consultation({ reference }: { reference: string }) {
     consent: false,
     honeypot: "",
   });
+  const [preferredSlots, setPreferredSlots] = useState<PreferredSlot[]>([
+    { date: "", start: "", end: "" }, { date: "", start: "", end: "" }, { date: "", start: "", end: "" },
+  ]);
+  const [today, setToday] = useState("");
+  useEffect(() => { setToday(japanToday()); }, []);
+  function updateSlot(index: number, field: keyof PreferredSlot, value: string) {
+    setPreferredSlots((current) => current.map((slot, i) => i === index ? { ...slot, [field]: value } : slot));
+  }
   const [review, setReview] = useState(false);
   const [validationError, setValidationError] = useState("");
   const [status, setStatus] = useState<
@@ -102,19 +111,32 @@ export default function Consultation({ reference }: { reference: string }) {
             const data = new FormData(e.currentTarget);
             // Read the submitted controls as well as React state: browser autofill
             // can update inputs without dispatching React's change event.
+            const slots = [1, 2, 3].map((index) => ({
+              date: String(data.get(`preferredDate${index}Date`) ?? ""),
+              start: String(data.get(`preferredDate${index}Start`) ?? ""),
+              end: String(data.get(`preferredDate${index}End`) ?? ""),
+            }));
+            setPreferredSlots(slots);
             const confirmed = {
               name: String(data.get("name") ?? "").trim(),
               email: String(data.get("email") ?? "").trim(),
               message: String(data.get("message") ?? ""),
-              preferredDate1: String(data.get("preferredDate1") ?? "").trim(),
-              preferredDate2: String(data.get("preferredDate2") ?? "").trim(),
-              preferredDate3: String(data.get("preferredDate3") ?? "").trim(),
+              preferredDate1: formatPreferredSlot(slots[0]!),
+              preferredDate2: formatPreferredSlot(slots[1]!),
+              preferredDate3: formatPreferredSlot(slots[2]!),
               consent: data.get("consent") === "on",
               honeypot: String(data.get("_gotcha") ?? ""),
             };
             setValues({ ...confirmed, honeypot: "" });
             if (confirmed.honeypot || !confirmed.consent) {
               setValidationError("入力内容を確認できませんでした。お名前・メールアドレスと同意を確認して、もう一度お試しください。");
+              return;
+            }
+            const dateError = validatePreferredSlots(slots);
+            if (dateError) {
+              setValidationError(dateError.message);
+              const field = e.currentTarget.elements.namedItem(dateError.field);
+              if (field instanceof HTMLElement) field.focus();
               return;
             }
             setValidationError("");
@@ -160,21 +182,35 @@ export default function Consultation({ reference }: { reference: string }) {
           </label>
           <fieldset className={s.preferredDates}>
             <legend>無料相談の希望日時</legend>
-            <p id="preferred-dates-help" className={s.subtext}>候補があれば、第3希望までご記入ください（任意・日本時間）。日時はメールで調整して確定します。</p>
-            {(["preferredDate1", "preferredDate2", "preferredDate3"] as const).map((field, index) => (
-              <label key={field}>
-                第{index + 1}希望
-                <input
-                  name={field}
-                  type="text"
-                  maxLength={100}
-                  autoComplete="off"
-                  placeholder="例：10月25日 14時〜16時"
-                  aria-describedby="preferred-dates-help"
-                  value={values[field]}
-                  onChange={(e) => setValues((current) => ({ ...current, [field]: e.target.value }))}
-                />
-              </label>
+            <p id="preferred-dates-help" className={s.subtext}>第3希望まで、日付と時間帯を選べます（任意・日本時間）。日時はメールで調整して確定します。</p>
+            <div id="consultation-availability" className={s.availabilityNote}>
+              <p>平日は18時以降に対応しています。土日は、早めにご相談いただければ調整可能です。</p>
+              <p>平日日中を強くご希望の場合も調整しますので、「相談したいこと」にその旨をご記入ください。</p>
+            </div>
+            {preferredSlots.map((slot, index) => (
+              <fieldset className={s.preferredSlot} key={index} aria-describedby="preferred-dates-help consultation-availability">
+                <legend>第{index + 1}希望</legend>
+                <div className={s.preferredSlotFields}>
+                  <label className={s.preferredSlotDate}>
+                    日付
+                    <input name={`preferredDate${index + 1}Date`} aria-label={`第${index + 1}希望の日付`} type="date" min={today || undefined} value={slot.date} onChange={(e) => updateSlot(index, "date", e.target.value)} />
+                  </label>
+                  <label>
+                    開始時間
+                    <select name={`preferredDate${index + 1}Start`} aria-label={`第${index + 1}希望の開始時間`} value={slot.start} onChange={(e) => updateSlot(index, "start", e.target.value)}>
+                      <option value="">選択してください</option>
+                      {timeOptions.map((time) => <option key={time} value={time}>{time}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    終了時間
+                    <select name={`preferredDate${index + 1}End`} aria-label={`第${index + 1}希望の終了時間`} value={slot.end} onChange={(e) => updateSlot(index, "end", e.target.value)}>
+                      <option value="">選択してください</option>
+                      {[...timeOptions, "24:00"].map((time) => <option key={time} value={time}>{time}</option>)}
+                    </select>
+                  </label>
+                </div>
+              </fieldset>
             ))}
           </fieldset>
           <div className={s.honeypot} aria-hidden="true">
