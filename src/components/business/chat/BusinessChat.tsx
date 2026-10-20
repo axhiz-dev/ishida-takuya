@@ -18,8 +18,11 @@ import {
 } from "@phosphor-icons/react";
 import { AggregateArtifact, MailDraftArtifact, FinanceSkillArtifact, ShiftArtifact } from "./Artifacts";
 import MonthlyReportArtifact from "./MonthlyReportArtifact";
+import GrowthArtifact from "./GrowthArtifacts";
+import { growthScenarios } from "./growthScenarios";
 import {
   experienceNames,
+  experienceOptions,
   shiftSteps,
   type Experience,
 } from "./content";
@@ -104,6 +107,7 @@ export default function BusinessChat() {
   const [panel, setPanel] = useState<BusinessPanel | null>(null);
   const [experience, setExperience] = useState<Experience | null>(null);
   const [step, setStep] = useState(0);
+  const [selectingExperience, setSelectingExperience] = useState(false);
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState("");
   const main = useRef<HTMLElement>(null);
@@ -176,6 +180,7 @@ export default function BusinessChat() {
   }
   function start(kind: Experience) {
     setExperience(kind);
+    setSelectingExperience(false);
     setStep(0);
     setMenu(false);
     setDismissedChoice("");
@@ -184,6 +189,7 @@ export default function BusinessChat() {
   }
   function home() {
     setExperience(null);
+    setSelectingExperience(false);
     setStep(0);
     setMenu(false);
     backgroundScroll.current = 0;
@@ -193,8 +199,17 @@ export default function BusinessChat() {
   const completionChoices: Choice[] = [
     { label: "自分の仕事について相談する", description: "初回30分・無料。メールで日程を調整します。", action: contact },
     { label: "費用や支援の進め方を確認する", action: () => navigate("pricing") },
-    { label: "もうひとつの事例を見る", action: () => start(experience === "aggregate" ? "shift" : "aggregate") },
+    { label: "もうひとつの事例を見る", action: () => { setSelectingExperience(true); setDismissedChoice(""); } },
   ];
+  const finalChoices: Choice[] = selectingExperience ? [
+    ...experienceOptions.filter((option) => option.kind !== experience).map((option) => ({
+      label: option.label,
+      description: option.description,
+      action: () => start(option.kind),
+    })),
+    { label: "元の選択肢に戻る", action: () => { setSelectingExperience(false); setDismissedChoice(""); } },
+  ] : completionChoices;
+  const growthSteps = experience === "prospecting" || experience === "proposal" ? growthScenarios[experience] : null;
   const menuItems = [
     {
       label: "仕事の体験",
@@ -238,20 +253,12 @@ export default function BusinessChat() {
                   inline
                   label="あなたの仕事に似ている場面を選んでみてください"
                   items={[
-                    {
-                      label: "毎月、数字の照合と確認に時間がかかる",
-                      badge: "例1",
-                      description:
-                        "Excelの集計・照合の例を見る",
-                      action: () => start("aggregate"),
-                    },
-                    {
-                      label: "返信の確認や催促、シフト調整に追われる",
-                      badge: "例2",
-                      description:
-                        "LINEのシフト調整を、AIと相談して仕組みにする",
-                      action: () => start("shift"),
-                    },
+                    ...experienceOptions.map((option, index) => ({
+                      label: option.label,
+                      badge: `例${index + 1}`,
+                      description: option.description,
+                      action: () => start(option.kind),
+                    })),
                     {
                       label: "支援の進め方を見る",
                       description: "無料相談から利用開始までをご案内",
@@ -265,7 +272,7 @@ export default function BusinessChat() {
           </div>
           {experience && (
             <ConversationActiveContext.Provider value={!panel}>
-            <div>
+            <div key={experience}>
               {experience === "aggregate" && (
                 <>
                   <ChatTurn user={aggregateRequest} attachments>
@@ -319,11 +326,27 @@ export default function BusinessChat() {
                       <p>次の月末は「finance-checkerで今月分を確認して」と、売上・入金のExcelを添えるだけ。取引先の表記ルールや社内担当者の情報は、毎回渡す必要がありません。</p>
                       <p>担当者や照合ルールが変わったときは、スキルを更新できます。</p>
                       <CompletionBridge onAbout={() => navigate("about")} />
-                      {step === 4 && <Choices label="あなたの仕事でも" items={completionChoices} />}
+                      {step === 4 && <Choices label="あなたの仕事でも" items={finalChoices} />}
                     </Guide>
                   </ChatTurn>}
                 </>
               )}
+              {growthSteps && growthSteps.slice(0, step + 1).map((scene, index) => (
+                <ChatTurn key={`${experience}-${index}`} user={scene.user}>
+                  <Guide>
+                    {scene.replies.map((reply) => <p key={reply}>{reply}</p>)}
+                    {scene.sample && <GrowthArtifact sample={scene.sample} />}
+                    {index === growthSteps.length - 1 && <CompletionBridge onAbout={() => navigate("about")} />}
+                    {step === index && <Choices
+                      label={selectingExperience ? "ほかの事例を選ぶ" : scene.choiceLabel}
+                      items={index === growthSteps.length - 1 ? finalChoices : [{
+                        label: scene.next,
+                        action: () => setStep(index + 1),
+                      }]}
+                    />}
+                  </Guide>
+                </ChatTurn>
+              ))}
               {experience === "shift" && (
                 <>
                   {shiftSteps.slice(0, step + 1).map((scene, index) => (
@@ -334,7 +357,7 @@ export default function BusinessChat() {
                         {index === shiftSteps.length - 1 && <CompletionBridge onAbout={() => navigate("about")} />}
                         {step === index && <Choices
                           label={scene.choiceLabel}
-                          items={index === shiftSteps.length - 1 ? completionChoices : [{
+                          items={index === shiftSteps.length - 1 ? finalChoices : [{
                             label: scene.next,
                             action: () => setStep(index + 1),
                           }]}

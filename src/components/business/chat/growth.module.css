@@ -1,0 +1,16 @@
+.preview { min-width: 0; overflow-wrap: anywhere; background: #fff; }
+.preview h4 { font-size: 13px; line-height: 1.7; }
+.title { margin: 20px 0 10px; font-weight: 600; }
+.facts { margin: 14px 0; font-size: 13px; }
+.facts > div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; padding: 13px 0; border-bottom: 1px solid #e3e7e9; }
+.facts dt { color: #53606b; font-weight: 500; }
+.facts dd { margin: 0; min-width: 0; }
+.candidates { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.candidates button { border: 1px solid #dce2e6; border-radius: 8px; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+.candidates button[aria-pressed="true"] { border-color: #376451; background: #edf3ef; color: #28513e; }
+.candidates button:hover { background: #edf3ef; }
+.change { border-left: 3px solid #759580; background: #f3f6f3; padding: 12px 14px; margin: 16px 0; font-size: 12px; line-height: 1.8; }
+@media (max-width: 680px) {
+  .facts > div { grid-template-columns: 1fr; gap: 5px; padding: 11px 0; }
+  .candidates button { padding: 8px 10px; }
+}
