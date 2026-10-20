@@ -49,6 +49,9 @@ test("確認後に送信：内容が揃い、連打でも1件だけ送信する"
     email: "test@example.com",
     message: "日本語の送信・再送を確認します。",
     参考に見た事例: "なし",
+    希望日時_第1希望: "未指定",
+    希望日時_第2希望: "未指定",
+    希望日時_第3希望: "未指定",
   });
   release();
   await expect(page.getByRole("status")).toContainText(
@@ -140,4 +143,32 @@ test("changeイベントを発火しないブラウザー自動入力も確認�
   await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
   await expect(page.getByRole("status")).toContainText("無料相談のお申し込みを受け付けました");
   expect(data.email).toBe("autofill@example.com");
+});
+
+test("第1〜第3希望を確認・修正・エラー後も保持し、送信する", async ({ page }) => {
+  let count = 0;
+  let data: Record<string, string> = {};
+  await page.route(endpoint, (route) => {
+    count++;
+    data = route.request().postDataJSON();
+    return route.fulfill({ status: count === 1 ? 503 : 200, body: count === 1 ? "{}" : '{"ok":true}' });
+  });
+  const form = await openForm(page);
+  const dates = ["10月25日 14時〜16時", "10月26日 10時30分〜12時", "11月2日 18時〜19時"];
+  for (let i = 0; i < dates.length; i++) await form.getByLabel(`第${i + 1}希望`, { exact: true }).fill(dates[i]!);
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  for (const date of dates) await expect(form).toContainText(date);
+  await form.getByRole("button", { name: "戻って修正" }).click();
+  for (let i = 0; i < dates.length; i++) await expect(form.getByLabel(`第${i + 1}希望`, { exact: true })).toHaveValue(dates[i]!);
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
+  await expect(form.getByRole("alert")).toContainText("入力内容は残っています");
+  const email = new URL((await form.getByRole("link", { name: "メールでご連絡ください" }).getAttribute("href"))!);
+  for (const date of dates) expect(email.searchParams.get("body")).toContain(date);
+  await form.getByRole("button", { name: "戻って修正" }).click();
+  for (let i = 0; i < dates.length; i++) await expect(form.getByLabel(`第${i + 1}希望`, { exact: true })).toHaveValue(dates[i]!);
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
+  await expect(page.getByRole("status")).toContainText("無料相談のお申し込みを受け付けました");
+  expect(data).toMatchObject({ 希望日時_第1希望: dates[0], 希望日時_第2希望: dates[1], 希望日時_第3希望: dates[2] });
 });
