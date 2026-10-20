@@ -36,6 +36,7 @@ function CandidatePreview({ qualified }: { qualified: boolean }) {
   const [selected, setSelected] = useState(0);
   const visible = qualified ? candidates.slice(0, 2) : candidates;
   const candidate = visible[selected];
+  if (!candidate) return null;
   return <>
     <h3 className={s.artifactLead}>{qualified ? "受注条件に合わせて絞った営業先" : "営業先と提案の切り口"}</h3>
     <div className={g.candidates} role="group" aria-label="営業先の見本を選ぶ">
