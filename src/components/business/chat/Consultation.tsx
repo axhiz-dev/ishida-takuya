@@ -14,6 +14,9 @@ export default function Consultation({ reference }: { reference: string }) {
     name: "",
     email: "",
     message: "",
+    preferredDate1: "",
+    preferredDate2: "",
+    preferredDate3: "",
     consent: false,
     honeypot: "",
   });
@@ -56,6 +59,9 @@ export default function Consultation({ reference }: { reference: string }) {
             name: values.name,
             email: values.email,
             message: values.message,
+            希望日時_第1希望: values.preferredDate1 || "未指定",
+            希望日時_第2希望: values.preferredDate2 || "未指定",
+            希望日時_第3希望: values.preferredDate3 || "未指定",
             _gotcha: values.honeypot,
             参考に見た事例: reference || "なし",
           }),
@@ -72,7 +78,7 @@ export default function Consultation({ reference }: { reference: string }) {
       locked.current = false;
     }
   }
-  const emailBody = `石田様\n無料相談を希望します。\n\nお名前：${values.name}\nメール：${values.email}\n相談したいこと：${values.message || "普段の仕事について、相談しながら整理したい"}\n${reference ? `参考に見た事例：${reference}\n` : ""}`;
+  const emailBody = `石田様\n無料相談を希望します。\n\nお名前：${values.name}\nメール：${values.email}\n相談したいこと：${values.message || "普段の仕事について、相談しながら整理したい"}\n第1希望：${values.preferredDate1 || "未指定"}\n第2希望：${values.preferredDate2 || "未指定"}\n第3希望：${values.preferredDate3 || "未指定"}\n${reference ? `参考に見た事例：${reference}\n` : ""}`;
   const emailHref = `mailto:${owner.email}?subject=${encodeURIComponent("AI活用の無料相談")}&body=${encodeURIComponent(emailBody)}`;
   async function copyMessage() {
     try { await navigator.clipboard.writeText(emailBody); setCopied(true); setCopyError(false); }
@@ -100,6 +106,9 @@ export default function Consultation({ reference }: { reference: string }) {
               name: String(data.get("name") ?? "").trim(),
               email: String(data.get("email") ?? "").trim(),
               message: String(data.get("message") ?? ""),
+              preferredDate1: String(data.get("preferredDate1") ?? "").trim(),
+              preferredDate2: String(data.get("preferredDate2") ?? "").trim(),
+              preferredDate3: String(data.get("preferredDate3") ?? "").trim(),
               consent: data.get("consent") === "on",
               honeypot: String(data.get("_gotcha") ?? ""),
             };
@@ -149,6 +158,25 @@ export default function Consultation({ reference }: { reference: string }) {
               }
             />
           </label>
+          <fieldset className={s.preferredDates}>
+            <legend>無料相談の希望日時</legend>
+            <p id="preferred-dates-help" className={s.subtext}>候補があれば、第3希望までご記入ください（任意・日本時間）。日時はメールで調整して確定します。</p>
+            {(["preferredDate1", "preferredDate2", "preferredDate3"] as const).map((field, index) => (
+              <label key={field}>
+                第{index + 1}希望
+                <input
+                  name={field}
+                  type="text"
+                  maxLength={100}
+                  autoComplete="off"
+                  placeholder="例：10月25日 14時〜16時"
+                  aria-describedby="preferred-dates-help"
+                  value={values[field]}
+                  onChange={(e) => setValues((current) => ({ ...current, [field]: e.target.value }))}
+                />
+              </label>
+            ))}
+          </fieldset>
           <div className={s.honeypot} aria-hidden="true">
             <input
               name="_gotcha"
@@ -203,6 +231,9 @@ export default function Consultation({ reference }: { reference: string }) {
               <dt>相談内容</dt>
               <dd>{values.message || "普段の仕事について、相談しながら整理したい"}</dd>
             </div>
+            {(["preferredDate1", "preferredDate2", "preferredDate3"] as const).map((field, index) => (
+              <div key={field}><dt>第{index + 1}希望</dt><dd>{values[field] || "未指定"}</dd></div>
+            ))}
           </dl>
           <p className={s.subtext}>
             {ready ? "この内容で無料相談を申し込みます。送信後、メールで日程を調整します。" : "メールアプリを開いたあと、内容を確認して送信してください。この画面からは送信されません。"}
