@@ -18,6 +18,7 @@ export default function Consultation({ reference }: { reference: string }) {
     honeypot: "",
   });
   const [review, setReview] = useState(false);
+  const [validationError, setValidationError] = useState("");
   const [status, setStatus] = useState<
     "idle" | "sending" | "success" | "error"
   >("idle");
@@ -26,7 +27,17 @@ export default function Consultation({ reference }: { reference: string }) {
   useEffect(() => () => pending.current?.abort(), []);
   const ready = /^[a-zA-Z0-9]+$/.test(contactConfig.formId);
   async function send() {
-    if (!ready || locked.current || !values.consent || values.honeypot) return;
+    if (locked.current) return;
+    if (!values.consent || values.honeypot) {
+      setValidationError("入力内容を確認できませんでした。お名前・メールアドレスと同意を確認して、もう一度お試しください。");
+      setValues((current) => ({ ...current, honeypot: "" }));
+      setReview(false);
+      return;
+    }
+    if (!ready) {
+      setStatus("error");
+      return;
+    }
     locked.current = true;
     setStatus("sending");
     const controller = new AbortController();
@@ -82,6 +93,23 @@ export default function Consultation({ reference }: { reference: string }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            const data = new FormData(e.currentTarget);
+            // Read the submitted controls as well as React state: browser autofill
+            // can update inputs without dispatching React's change event.
+            const confirmed = {
+              name: String(data.get("name") ?? "").trim(),
+              email: String(data.get("email") ?? "").trim(),
+              message: String(data.get("message") ?? ""),
+              consent: data.get("consent") === "on",
+              honeypot: String(data.get("_gotcha") ?? ""),
+            };
+            setValues({ ...confirmed, honeypot: "" });
+            if (confirmed.honeypot || !confirmed.consent) {
+              setValidationError("入力内容を確認できませんでした。お名前・メールアドレスと同意を確認して、もう一度お試しください。");
+              return;
+            }
+            setValidationError("");
+            setStatus("idle");
             setReview(true);
           }}
         >
@@ -126,6 +154,9 @@ export default function Consultation({ reference }: { reference: string }) {
               name="_gotcha"
               tabIndex={-1}
               autoComplete="off"
+              aria-label="この項目は空欄のままにしてください"
+              data-lpignore="true"
+              data-1p-ignore
               value={values.honeypot}
               onChange={(e) =>
                 setValues({ ...values, honeypot: e.target.value })
@@ -135,6 +166,7 @@ export default function Consultation({ reference }: { reference: string }) {
           <label className={s.consent}>
             <input
               type="checkbox"
+              name="consent"
               required
               checked={values.consent}
               onChange={(e) =>
@@ -148,6 +180,7 @@ export default function Consultation({ reference }: { reference: string }) {
               を確認しました
             </span>
           </label>
+          {validationError && <p role="alert" className={s.notice}>{validationError}</p>}
           <button type="submit" className={s.neutralButton}>
             {ready ? "相談内容を確認する" : "メールに載せる内容を確認する"}
           </button>
@@ -155,7 +188,7 @@ export default function Consultation({ reference }: { reference: string }) {
       ) : (
         <div>
           <p className={s.reviewHeading} role="status">
-            相談内容をまとめました。まだ送信されていません。
+            {status === "sending" ? "送信しています。このままお待ちください。" : "相談内容をまとめました。まだ送信されていません。"}
           </p>
           <dl className={s.summary}>
             <div>
@@ -176,14 +209,14 @@ export default function Consultation({ reference }: { reference: string }) {
           </p>
           {status === "error" && (
             <p role="alert" className={s.notice}>
-              送信を確認できませんでした。入力内容は残っています。受付済みの可能性もあります。時間をおいて再度お試しください。
+              送信を確認できませんでした。入力内容は残っています。受付済みの可能性もあります。時間をおいて再度お試しいただくか、<a href={emailHref}>メールでご連絡ください</a>。
             </p>
           )}
           {copied && <p role="status">相談内容をコピーしました。{owner.email} 宛てのメールに貼り付けて送信してください。</p>}
           {copyError && <p role="alert">コピーできませんでした。下の文章を選択してコピーし、{owner.email} へお送りください。</p>}
           {!ready && <details><summary>メールアプリが開かない場合</summary><p>宛先：{owner.email}</p><textarea aria-label="メールで送る相談内容" readOnly value={emailBody} rows={8} /></details>}
           <div className={s.formActions}>
-            {ready ? <button className={s.neutralButton} disabled={status === "sending"} onClick={send}>{status === "sending" ? "送信中…" : "この内容で無料相談を申し込む"}</button> : <a className={support.primary} href={emailHref}>メールアプリで開く</a>}
+            {ready ? <button type="button" className={`${s.neutralButton} ${s.submitButton}`} disabled={status === "sending"} aria-busy={status === "sending"} onClick={send}>{status === "sending" && <span className={s.submitSpinner} aria-hidden="true" />}{status === "sending" ? "送信中…" : "この内容で無料相談を申し込む"}</button> : <a className={support.primary} href={emailHref}>メールアプリで開く</a>}
             {!ready && <button onClick={copyMessage}>{copied ? "相談内容をコピーしました" : "相談内容をコピー"}</button>}
             <button
               disabled={status === "sending"}

@@ -42,6 +42,8 @@ test("確認後に送信：内容が揃い、連打でも1件だけ送信する"
   });
   await expect.poll(() => count).toBe(1);
   await expect(form.getByRole("button", { name: "送信中…" })).toBeDisabled();
+  await expect(form.getByRole("button", { name: "送信中…" })).toHaveAttribute("aria-busy", "true");
+  await expect(form.getByText("送信しています。このままお待ちください。")).toBeVisible();
   expect(data).toMatchObject({
     name: "確認 太郎",
     email: "test@example.com",
@@ -100,18 +102,42 @@ test("必須入力・不正メール・同意なしは確認へ進めない", as
     form.getByRole("button", { name: "この内容で無料相談を申し込む" }),
   ).toHaveCount(0);
 });
-test("honeypotが埋まっていたら送信しない", async ({ page }) => {
+test("自動入力でチェック項目が埋まっても無反応にならず、確認して再送できる", async ({ page }) => {
   let count = 0;
   await page.route(endpoint, (route) => {
     count++;
-    return route.abort();
+    return route.fulfill({ status: 200, body: '{"ok":true}' });
   });
   const form = await openForm(page);
   await form.locator('input[name="_gotcha"]').fill("bot", { force: true });
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
-  await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
-  await expect(
-    form.getByRole("button", { name: "この内容で無料相談を申し込む" }),
-  ).toBeEnabled();
+  await expect(form.getByRole("alert")).toContainText("入力内容を確認できませんでした");
+  await expect(form.getByLabel("お名前", { exact: true })).toHaveValue("確認 太郎");
+  await expect(form.locator('input[name="_gotcha"]')).toHaveValue("");
   expect(count).toBe(0);
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
+  await expect(page.getByRole("status")).toContainText("無料相談のお申し込みを受け付けました");
+  expect(count).toBe(1);
+});
+
+test("changeイベントを発火しないブラウザー自動入力も確認画面と送信に反映する", async ({ page }) => {
+  let data: Record<string, string> = {};
+  await page.route(endpoint, (route) => {
+    data = route.request().postDataJSON();
+    return route.fulfill({ status: 200, body: '{"ok":true}' });
+  });
+  const form = await openForm(page);
+  await form.getByRole("checkbox").uncheck();
+  await form.getByRole("checkbox").evaluate((input) => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "checked")!.set!.call(input, true);
+  });
+  await form.locator('input[name="email"]').evaluate((input) => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "autofill@example.com");
+  });
+  await form.getByRole("button", { name: "相談内容を確認する" }).click();
+  await expect(form).toContainText("autofill@example.com");
+  await form.getByRole("button", { name: "この内容で無料相談を申し込む" }).click();
+  await expect(page.getByRole("status")).toContainText("無料相談のお申し込みを受け付けました");
+  expect(data.email).toBe("autofill@example.com");
 });
