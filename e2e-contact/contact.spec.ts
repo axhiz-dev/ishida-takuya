@@ -128,6 +128,10 @@ test("changeイベントを発火しないブラウザー自動入力も確認�
     return route.fulfill({ status: 200, body: '{"ok":true}' });
   });
   const form = await openForm(page);
+  await form.getByRole("checkbox").uncheck();
+  await form.getByRole("checkbox").evaluate((input) => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "checked")!.set!.call(input, true);
+  });
   await form.locator('input[name="email"]').evaluate((input) => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "autofill@example.com");
   });
