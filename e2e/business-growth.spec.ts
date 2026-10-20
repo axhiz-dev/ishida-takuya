@@ -44,6 +44,7 @@ for (const width of [390, 1440]) {
       const buttons = entry.getByRole("button");
       await expect(buttons.nth(0)).toHaveAccessibleName(cases[0].entry);
       await expect(buttons.nth(1)).toHaveAccessibleName(cases[1].entry);
+      if (width === 1440) expect(await page.locator("main").evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: example.entry, exact: true }).click();
       for (let index = 0; index < example.samples.length; index++) {
         const turn = page.locator("[data-chat-turn]").last();
