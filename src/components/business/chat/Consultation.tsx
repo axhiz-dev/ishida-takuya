@@ -188,7 +188,7 @@ export default function Consultation({ reference }: { reference: string }) {
       ) : (
         <div>
           <p className={s.reviewHeading} role="status">
-            相談内容をまとめました。まだ送信されていません。
+            {status === "sending" ? "送信しています。このままお待ちください。" : "相談内容をまとめました。まだ送信されていません。"}
           </p>
           <dl className={s.summary}>
             <div>
@@ -207,7 +207,6 @@ export default function Consultation({ reference }: { reference: string }) {
           <p className={s.subtext}>
             {ready ? "この内容で無料相談を申し込みます。送信後、メールで日程を調整します。" : "メールアプリを開いたあと、内容を確認して送信してください。この画面からは送信されません。"}
           </p>
-          {status === "sending" && <p role="status" className={s.subtext}>送信しています。このままお待ちください。</p>}
           {status === "error" && (
             <p role="alert" className={s.notice}>
               送信を確認できませんでした。入力内容は残っています。受付済みの可能性もあります。時間をおいて再度お試しいただくか、<a href={emailHref}>メールでご連絡ください</a>。
