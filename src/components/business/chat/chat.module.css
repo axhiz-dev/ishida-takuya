@@ -1281,3 +1281,14 @@
 .preferredDates { min-width: 0; border: 0; padding: 0; margin: 0 0 24px; }
 .preferredDates legend { padding: 0; font-weight: 500; }
 .preferredDates > p { margin: 8px 0 16px; }
+
+.availabilityNote { background: #f3f6f3; border-left: 3px solid #759580; padding: 12px 14px; margin-bottom: 20px; font-size: 12px; line-height: 1.8; }
+.availabilityNote p { margin: 0; }
+.availabilityNote p + p { margin-top: 8px; }
+.preferredSlot { min-width: 0; margin: 0 0 16px; padding: 14px; border: 1px solid #dce2e6; border-radius: 8px; }
+.preferredSlot legend { padding: 0 6px; font-size: 13px; }
+.preferredSlotFields { display: grid; grid-template-columns: minmax(160px, 1.3fr) repeat(2, minmax(0, 1fr)); gap: 12px; }
+.contact .preferredSlotFields label { min-width: 0; margin-bottom: 0; }
+.preferredSlot select { display: block; width: 100%; min-width: 0; padding: 12px 8px; margin-top: 8px; border: 1px solid #cfd8dc; border-radius: 8px; background: #fff; color: #202b36; font: inherit; font-size: 16px; min-height: 48px; }
+.contact .preferredSlotFields input { min-width: 0; min-height: 48px; }
+@media (max-width: 680px) { .preferredSlotFields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .preferredSlotDate { grid-column: 1 / -1; } }
