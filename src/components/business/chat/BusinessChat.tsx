@@ -19,6 +19,8 @@ import {
 import { AggregateArtifact, MailDraftArtifact, FinanceSkillArtifact, ShiftArtifact } from "./Artifacts";
 import MonthlyReportArtifact from "./MonthlyReportArtifact";
 import GrowthArtifact from "./GrowthArtifacts";
+import GrowthDocumentPreview, { GrowthDocuments } from "./GrowthDocumentPreview";
+import type { GrowthDocumentId } from "./growthDocuments";
 import { growthScenarios } from "./growthScenarios";
 import {
   experienceNames,
@@ -105,6 +107,7 @@ export default function BusinessChat() {
   const [dismissedChoice, setDismissedChoice] = useState("");
   const choicesVisible = !!activeChoice && dismissedChoice !== activeChoice;
   const [panel, setPanel] = useState<BusinessPanel | null>(null);
+  const [sourceDocument, setSourceDocument] = useState<GrowthDocumentId | null>(null);
   const [experience, setExperience] = useState<Experience | null>(null);
   const [step, setStep] = useState(0);
   const [selectingExperience, setSelectingExperience] = useState(false);
@@ -115,14 +118,14 @@ export default function BusinessChat() {
   const panelRef = useRef<BusinessPanel | null>(null);
   useLayoutEffect(() => {
     panelRef.current = panel;
-    if (panel) return;
+    if (panel || sourceDocument) return;
     // Pausing removes the choice dock temporarily. Restore after its portal returns,
     // including when the growing viewport clamped a scroll position near the end.
     const restore = () => main.current?.scrollTo({ top: backgroundScroll.current });
     restore();
     const frame = requestAnimationFrame(restore);
     return () => cancelAnimationFrame(frame);
-  }, [panel]);
+  }, [panel, sourceDocument]);
   const launcher = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -196,6 +199,10 @@ export default function BusinessChat() {
     main.current?.scrollTo({ top: 0 });
   }
   function contact() { navigate("contact"); }
+  function openDocument(id: GrowthDocumentId) {
+    if (main.current) backgroundScroll.current = main.current.scrollTop;
+    setSourceDocument(id);
+  }
   const completionChoices: Choice[] = [
     { label: "自分の仕事について相談する", description: "初回30分・無料。メールで日程を調整します。", action: contact },
     { label: "費用や支援の進め方を確認する", action: () => navigate("pricing") },
@@ -271,7 +278,7 @@ export default function BusinessChat() {
             </div>
           </div>
           {experience && (
-            <ConversationActiveContext.Provider value={!panel}>
+            <ConversationActiveContext.Provider value={!panel && !sourceDocument}>
             <div key={experience}>
               {experience === "aggregate" && (
                 <>
@@ -332,10 +339,11 @@ export default function BusinessChat() {
                 </>
               )}
               {growthSteps && growthSteps.slice(0, step + 1).map((scene, index) => (
-                <ChatTurn key={`${experience}-${index}`} user={scene.user}>
+                <ChatTurn key={`${experience}-${index}`} user={scene.user}
+                  sourceAttachments={scene.documents && <GrowthDocuments ids={scene.documents} onOpen={openDocument} />}>
                   <Guide>
                     {scene.replies.map((reply) => <p key={reply}>{reply}</p>)}
-                    {scene.sample && <GrowthArtifact sample={scene.sample} />}
+                    {scene.sample && <GrowthArtifact sample={scene.sample} onOpenDocument={openDocument} />}
                     {index === growthSteps.length - 1 && <CompletionBridge onAbout={() => navigate("about")} />}
                     {step === index && <Choices
                       label={selectingExperience ? "ほかの事例を選ぶ" : scene.choiceLabel}
@@ -440,6 +448,7 @@ export default function BusinessChat() {
           <Link href="/business/legal" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</Link>
         </div>
       </footer>
+      {sourceDocument && <GrowthDocumentPreview documentId={sourceDocument} onClose={() => setSourceDocument(null)} />}
       <SupportPanel panel={panel} reference={experience ? experienceNames[experience] : ""} onOpen={navigate} onClose={closePanel} />
       <noscript>
         <p className={s.noScript}>

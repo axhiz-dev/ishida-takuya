@@ -2,65 +2,78 @@ import { test, expect } from "@playwright/test";
 
 const cases = [
   {
-    kind: "prospecting",
-    entry: "自社に合う営業先を見つけ、提案したい",
-    reference: "営業先を見つけ、相手に合う提案を考える",
-    samples: ["materials", "candidates", "qualified", "outreach", "revised-outreach", "sales-skill"],
-    next: [
-      "小ロットの造作家具が得意。首都圏で20〜100万円の案件を増やしたい",
-      "全国チェーンは外して。1〜3店舗くらいで、部分的な改装を相談できる相手がいい",
-      "ホテルKOTO向けに、施工事例を添えた初回メールを作って",
-      "無料の現地調査は約束せず、まず写真と寸法で相談する形にして",
-      "候補の選び方と、提案するときのルールをスキルにして",
-    ],
+    kind: "prospecting", entry: "自社に合う営業先を見つけ、提案したい", reference: "営業先を見つけ、相手に合う提案を考える",
+    samples: ["sales-draft", "sales-revised", "sales-reuse"],
+    next: ["全国チェーンは外して。写真と寸法から相談する形にして", "この選び方をスキルにして、次は美容室で探して"],
+    documents: [["会社案内", "こもれび家具製作所"], ["施工事例集", "幅1,800mm・奥行き350mm"]],
   },
   {
-    kind: "proposal",
-    entry: "社長の提案力を、社員も使えるようにしたい",
-    reference: "社長の提案力を社員も使えるようにする",
-    samples: ["meeting", "first-proposal", "judgment", "revised-proposal", "revised-proposal", "proposal-skill"],
-    next: [
-      "店舗からの買い替え相談です。過去の提案書と商品資料も使って",
-      "すぐ機種を選ばず、冷えない時間帯と席、使い方から確認して",
-      "西日の当たる窓側だけ冷えにくい。清掃は未確認。提案を直して",
-      "この提案書に、次に聞くことと、私の確認が必要なところも残して",
-      "商談メモから同じ観点で提案を考えられるスキルにして",
-    ],
+    kind: "proposal", entry: "社長の提案力を、社員も使えるようにしたい", reference: "社長の提案力を社員も使えるようにする",
+    samples: ["proposal-draft", "proposal-revised", "proposal-reuse"],
+    next: ["冷えない席と時間を先に確認。追加で聞いた内容も反映して", "この観点をスキルにして、次から社員も使えるようにして"],
+    documents: [["今回の商談メモ", "まだ聞けていないこと"], ["過去の提案書", "事例02｜カフェの客席"], ["商品・見積もりの確認資料", "機種選定前"]],
   },
 ];
 
 for (const width of [390, 1440]) {
   for (const example of cases) {
-    test(`${width}px：${example.kind}の相談・修正・スキルと復帰`, async ({ page }, testInfo) => {
+    test(`${width}px：${example.kind}を3段階で体験し、資料の中身と復帰を確認`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ reducedMotion: "reduce" });
       const outbound: string[] = [];
-      await page.route(/formspree\.io|gmail\.googleapis\.com|api\.openai\.com/, async route => {
-        outbound.push(route.request().url());
-        await route.abort();
-      });
+      await page.route(/formspree\.io|gmail\.googleapis\.com|api\.openai\.com/, async route => { outbound.push(route.request().url()); await route.abort(); });
       await page.goto("/business/");
-      const entry = page.getByRole("region", { name: "選択肢パネル" });
-      const buttons = entry.getByRole("button");
+      const buttons = page.getByRole("region", { name: "選択肢パネル" }).getByRole("button");
       await expect(buttons.nth(0)).toHaveAccessibleName(cases[0].entry);
       await expect(buttons.nth(1)).toHaveAccessibleName(cases[1].entry);
       if (width === 1440) expect(await page.locator("main").evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: example.entry, exact: true }).click();
+      for (const [title, evidence] of example.documents) {
+        const trigger = page.locator('[aria-label="ユーザーの発言"]').getByRole("button", { name: `${title}を見る`, exact: true });
+        await trigger.click();
+        const dialog = page.getByRole("dialog", { name: title, exact: true });
+        await expect(dialog).toBeVisible();
+        await expect(dialog).toContainText(evidence);
+        await expect(dialog).toContainText("架空のサンプルデータ");
+        expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+        await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
+        if (title === "過去の提案書") {
+          await page.screenshot({ path: testInfo.outputPath(`source-${width}.png`) });
+          await page.keyboard.press("Escape");
+        } else await dialog.getByRole("button", { name: "資料を閉じる" }).click();
+        await expect(dialog).toHaveCount(0);
+        await expect(trigger).toBeFocused();
+      }
       for (let index = 0; index < example.samples.length; index++) {
         const turn = page.locator("[data-chat-turn]").last();
         await expect(turn).toHaveAttribute("data-phase", "ready");
         await expect(turn.locator("[data-growth-sample]")).toHaveAttribute("data-growth-sample", example.samples[index]);
-        if (example.kind === "prospecting" && index === 1) {
-          await turn.getByRole("button", { name: "美容室nagi", exact: true }).click();
-          await expect(turn.getByRole("heading", { name: "美容室nagi", exact: true })).toBeVisible();
+        if (example.kind === "prospecting" && index === 0) {
+          await turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true }).click();
+          await expect(turn).toContainText("全国で50施設");
           await page.getByRole("banner").getByRole("button", { name: "支援内容・費用", exact: true }).click();
           await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
-          await expect(turn.getByRole("button", { name: "美容室nagi", exact: true })).toHaveAttribute("aria-pressed", "true");
+          await expect(turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true })).toHaveAttribute("aria-pressed", "true");
+        }
+        if (index === 1 && example.kind === "proposal") {
+          await turn.getByRole("button", { name: "今回の提案書を見る", exact: true }).click();
+          const dialog = page.getByRole("dialog", { name: "今回の提案書", exact: true });
+          await expect(dialog).toContainText("15〜17時に窓側だけ冷えにくい");
+          await expect(dialog).toContainText("社員が聞くこと");
+          await page.keyboard.press("Escape");
+          const trigger = turn.locator('[aria-label="ユーザーの発言"]').getByRole("button", { name: "追加ヒアリングメモを見る", exact: true });
+          await trigger.click();
+          await expect(page.getByRole("dialog", { name: "追加ヒアリングメモ" })).toContainText("9月25日");
+          await page.keyboard.press("Escape");
         }
         if (index < example.next.length) await page.getByRole("button", { name: example.next[index], exact: true }).click();
       }
-      await expect(page.locator("[data-chat-turn]")).toHaveCount(6);
-      await expect(page.locator("main")).toContainText(example.kind === "prospecting" ? "写真と寸法から相談" : "日差しの影響は仮説");
+      await expect(page.locator("[data-chat-turn]")).toHaveCount(3);
+      const rules = page.locator("details").filter({ has: page.getByText("スキルに残すルールを見る", { exact: true }) });
+      await expect(rules).not.toHaveAttribute("open", "");
+      await rules.locator("summary").click();
+      await expect(rules).toHaveAttribute("open", "");
+      await expect(rules).toContainText(example.kind === "prospecting" ? "全国チェーンは対象外" : "足りない情報は社員に聞き返す");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
       expect(await page.locator("main").evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).waitFor();
@@ -72,11 +85,10 @@ for (const width of [390, 1440]) {
       await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).click();
       await expect(page.getByRole("region", { name: "相談フォーム" })).toContainText(example.reference);
       await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
-      await expect(page.locator("[data-chat-turn]")).toHaveCount(6);
-      await expect(page.locator('[data-chat-turn][data-phase="ready"]')).toHaveCount(6);
+      await expect(page.locator('[data-chat-turn][data-phase="ready"]')).toHaveCount(3);
+      await expect(rules).toHaveAttribute("open", "");
       await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(position);
       await page.getByRole("button", { name: "もうひとつの事例を見る", exact: true }).click();
-      await expect(page.getByRole("button", { name: example.entry, exact: true })).toHaveCount(0);
       await page.getByRole("button", { name: "元の選択肢に戻る", exact: true }).click();
       await expect(page.getByRole("button", { name: "自分の仕事について相談する", exact: true })).toBeVisible();
       await page.getByRole("button", { name: "もうひとつの事例を見る", exact: true }).click();
@@ -89,20 +101,28 @@ for (const width of [390, 1440]) {
   }
 }
 
-test("新しい事例も、回答完了から1秒待って選択肢を表示する", async ({ page }) => {
+test("資料を読んでいる間は回答を止め、閉じると続きから再開する", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/business/");
-  await page.getByRole("button", { name: cases[0].entry, exact: true }).click();
-  await page.getByRole("button", { name: cases[0].next[0], exact: true }).waitFor();
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  const now = new Date("2026-10-20T16:00:00Z");
+  await page.getByRole("button", { name: cases[1].entry, exact: true }).click();
+  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  const now = new Date("2026-10-21T01:00:00Z");
   await page.clock.install({ time: now });
   await page.clock.pauseAt(now);
-  await page.getByRole("button", { name: cases[0].next[0], exact: true }).click();
-  await page.getByRole("button", { name: "入力を完了して送信" }).click();
+  await page.clock.runFor(2500);
+  const turn = page.locator("[data-chat-turn]").last();
+  await expect(turn).toHaveAttribute("data-phase", "streaming");
+  await page.getByRole("button", { name: "今回の商談メモを見る", exact: true }).click();
+  const before = await turn.locator('[class*="botResponse"]').textContent();
+  await page.clock.runFor(30000);
+  expect(await turn.locator('[class*="botResponse"]').textContent()).toBe(before);
+  await page.keyboard.press("Escape");
+  await page.clock.runFor(450);
+  expect(await turn.locator('[class*="botResponse"]').textContent()).not.toBe(before);
   await page.getByRole("button", { name: "回答をすべて表示" }).click();
   await page.clock.runFor(999);
   await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
   await page.clock.runFor(1);
-  await expect(page.getByRole("button", { name: cases[0].next[1], exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: cases[1].next[0], exact: true })).toBeVisible();
 });
