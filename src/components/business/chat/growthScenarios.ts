@@ -2,7 +2,7 @@ import type { Experience } from "./content";
 import type { GrowthDocumentId } from "./growthDocuments";
 
 export type GrowthExperience = Extract<Experience, "prospecting" | "proposal">;
-export type GrowthSample = "sales-draft" | "sales-revised" | "sales-reuse" | "proposal-draft" | "proposal-revised" | "proposal-reuse";
+export type GrowthSample = "sales-draft" | "sales-revised" | "sales-reuse" | "proposal-notes" | "proposal-draft" | "proposal-revised" | "proposal-reuse";
 type GrowthStep = {
   user: string;
   documents?: GrowthDocumentId[];
@@ -39,24 +39,31 @@ export const growthScenarios: Record<GrowthExperience, GrowthStep[]> = {
   ],
   proposal: [
     {
-      user: "業務用エアコンを販売しています。社員は頼まれた機種の見積もりで終わりがちです。商談メモと過去の提案書から、お客さんに合う提案を一緒に考えてもらえますか？",
-      documents: ["meeting", "past-proposals", "product-guide"],
-      replies: ["買い替え相談のたたき台を作りました。過去の事例には、使い方を聞いて提案を変えた例もあります。社長なら、今回どこから確認しますか？"],
+      user: "Web会議が終わりました。この議事録から、お客さんへの提案資料まで作れますか？ 相談内容はホームページのリニューアルです。",
+      documents: ["meeting"],
+      replies: ["まず、お客さんが困っていることと、今回提案することを整理しました。会議で決まっていない金額や公開日は、確認事項として残しています。"],
+      sample: "proposal-notes",
+      choiceLabel: "提案資料にする",
+      next: "過去の提案書を参考に、うちのデザインで作って",
+    },
+    {
+      user: "この過去の提案書とサービス案内を使って、うちのデザインで4ページにまとめてください。",
+      documents: ["past-proposals", "product-guide"],
+      replies: ["紺色の見出し、緑のアクセント、短い文章を引き継いで作りました。議事録の『どこから問い合わせればいいか分からない』という声を、問い合わせボタンの改善につなげています。"],
       sample: "proposal-draft",
-      choiceLabel: "社長の判断を加える",
-      next: "冷えない席と時間を先に確認。追加で聞いた内容も反映して",
+      choiceLabel: "自社らしい書き方に整える",
+      next: "会社紹介より、お客さんの課題と提案を先にして",
     },
     {
-      user: "すぐ2台の買い替えを勧めず、冷えない席と時間から確認してください。追加で聞くと、15〜17時の窓側だけで、ほかの席は問題なし。清掃状況は未確認です。次に聞くことも残してください。",
-      documents: ["followup"],
-      replies: ["2台の買い替えを前提にせず、窓側の環境と設備の状態を確認する提案に直しました。社員が次に聞くことと、社長の判断が必要な点も分けています。"],
+      user: "うちは会社紹介より、お客さんの課題と提案を先に伝えたいです。『導線を最適化』も『問い合わせボタンを見つけやすく』にしてください。",
+      replies: ["課題 → 改善案 → 進め方 → 会社紹介の順に直しました。専門用語を減らし、お客さんが『何が変わるか』を想像できる資料にしています。下の見本で4ページとも確認できます。"],
       sample: "proposal-revised",
-      choiceLabel: "社員が次の商談でも使えるようにする",
-      next: "この観点をスキルにして、次から社員も使えるようにして",
+      choiceLabel: "次の商談につなげる",
+      next: "次からは、会議の議事録を渡すだけでここまで作りたい",
     },
     {
-      user: "この観点をスキルにして、次から社員も使えるようにしてください。新しい商談メモを渡したら、足りない情報を聞き返し、提案と次の質問を考える形がいいです。",
-      replies: ["proposal-partnerとして残す見本です。次の商談でも、社長が確認している観点から提案を考えます。前の結論を当てはめず、情報が足りなければ社員に聞き返します。"],
+      user: "このデザインと書き方を覚えて、次からはWeb会議の議事録を渡すだけで、提案資料まで作ってほしいです。",
+      replies: ["今回の型を、次も使えるスキルにまとめる見本です。目指すのは、Web会議の議事録から自社らしい提案資料まで下書きがそろい、営業は内容を確認して、お客さんへの提案に進める流れです。"],
       sample: "proposal-reuse",
       choiceLabel: "あなたの仕事でも",
       next: "自分の仕事について相談する",

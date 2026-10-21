@@ -8,24 +8,24 @@ const cases = [
     documents: [["会社案内", "こもれび家具製作所"], ["施工事例集", "幅1,800mm・奥行き350mm"]],
   },
   {
-    kind: "proposal", entry: "社長の提案力を、社員も使えるようにしたい", reference: "社長の提案力を社員も使えるようにする",
-    samples: ["proposal-draft", "proposal-revised", "proposal-reuse"],
-    next: ["冷えない席と時間を先に確認。追加で聞いた内容も反映して", "この観点をスキルにして、次から社員も使えるようにして"],
-    documents: [["今回の商談メモ", "まだ聞けていないこと"], ["過去の提案書", "事例02｜カフェの客席"], ["商品・見積もりの確認資料", "機種選定前"]],
+    kind: "proposal", entry: "会議の議事録から、提案資料を作りたい", reference: "Web会議の議事録から提案資料を作る",
+    samples: ["proposal-notes", "proposal-draft", "proposal-revised", "proposal-reuse"],
+    next: ["過去の提案書を参考に、うちのデザインで作って", "会社紹介より、お客さんの課題と提案を先にして", "次からは、会議の議事録を渡すだけでここまで作りたい"],
+    documents: [["Web会議の議事録", "まず何を変えるとよいか"]],
   },
 ];
 
 for (const width of [390, 1440]) {
   for (const example of cases) {
-    test(`${width}px：${example.kind}を3段階で体験し、資料の中身と復帰を確認`, async ({ page }, testInfo) => {
+    test(`${width}px：${example.kind}を最後まで体験し、資料の中身と復帰を確認`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ reducedMotion: "reduce" });
       const outbound: string[] = [];
       await page.route(/formspree\.io|gmail\.googleapis\.com|api\.openai\.com/, async route => { outbound.push(route.request().url()); await route.abort(); });
       await page.goto("/business/");
       const buttons = page.getByRole("region", { name: "選択肢パネル" }).getByRole("button");
-      await expect(buttons.nth(0)).toHaveAccessibleName(cases[0].entry);
-      await expect(buttons.nth(1)).toHaveAccessibleName(cases[1].entry);
+      await expect(buttons.nth(0)).toHaveAccessibleName(cases[1].entry);
+      await expect(buttons.nth(1)).toHaveAccessibleName(cases[0].entry);
       if (width === 1440) expect(await page.locator("main").evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: example.entry, exact: true }).click();
       for (const [title, evidence] of example.documents) {
@@ -55,25 +55,32 @@ for (const width of [390, 1440]) {
           await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
           await expect(turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true })).toHaveAttribute("aria-pressed", "true");
         }
-        if (index === 1 && example.kind === "proposal") {
-          await turn.getByRole("button", { name: "今回の提案書を見る", exact: true }).click();
-          const dialog = page.getByRole("dialog", { name: "今回の提案書", exact: true });
-          await expect(dialog).toContainText("15〜17時に窓側だけ冷えにくい");
-          await expect(dialog).toContainText("社員が聞くこと");
+        if ((index === 1 || index === 2) && example.kind === "proposal") {
+          const deck = turn.getByRole("group", { name: "提案資料 1ページ目", exact: true });
+          await expect(deck).toContainText(index === 1 ? "私たちについて" : "問い合わせしやすいホームページへ");
+          const navigation = turn.getByRole("group", { name: "提案資料のページ切り替え" });
+          await expect(navigation.getByRole("button", { name: "前へ", exact: true })).toBeDisabled();
+          for (let slide = 2; slide <= 4; slide++) {
+            await navigation.getByRole("button", { name: "次へ", exact: true }).click();
+            await expect(turn.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true })).toBeVisible();
+          }
+          await expect(navigation.getByRole("button", { name: "次へ", exact: true })).toBeDisabled();
+          const title = index === 1 ? "過去の提案書" : "提案前の確認事項";
+          await turn.getByRole("button", { name: `${title}を見る`, exact: true }).click();
+          await expect(page.getByRole("dialog", { name: title, exact: true })).toContainText(index === 1 ? "紺色の見出し" : "社内で相談中");
           await page.keyboard.press("Escape");
-          const trigger = turn.locator('[aria-label="ユーザーの発言"]').getByRole("button", { name: "追加ヒアリングメモを見る", exact: true });
-          await trigger.click();
-          await expect(page.getByRole("dialog", { name: "追加ヒアリングメモ" })).toContainText("9月25日");
-          await page.keyboard.press("Escape");
+          await expect(turn.getByRole("group", { name: "提案資料 4ページ目", exact: true })).toBeVisible();
+          await navigation.getByRole("button", { name: "前へ", exact: true }).click();
+          await page.screenshot({ path: testInfo.outputPath(`deck-${index}-${width}.png`) });
         }
         if (index < example.next.length) await page.getByRole("button", { name: example.next[index], exact: true }).click();
       }
-      await expect(page.locator("[data-chat-turn]")).toHaveCount(3);
+      await expect(page.locator("[data-chat-turn]")).toHaveCount(example.samples.length);
       const rules = page.locator("details").filter({ has: page.getByText("スキルに残すルールを見る", { exact: true }) });
       await expect(rules).not.toHaveAttribute("open", "");
       await rules.locator("summary").click();
       await expect(rules).toHaveAttribute("open", "");
-      await expect(rules).toContainText(example.kind === "prospecting" ? "全国チェーンは対象外" : "足りない情報は社員に聞き返す");
+      await expect(rules).toContainText(example.kind === "prospecting" ? "全国チェーンは対象外" : "足りない情報は確認事項に残す");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
       expect(await page.locator("main").evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).waitFor();
@@ -85,7 +92,7 @@ for (const width of [390, 1440]) {
       await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).click();
       await expect(page.getByRole("region", { name: "相談フォーム" })).toContainText(example.reference);
       await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
-      await expect(page.locator('[data-chat-turn][data-phase="ready"]')).toHaveCount(3);
+      await expect(page.locator('[data-chat-turn][data-phase="ready"]')).toHaveCount(example.samples.length);
       await expect(rules).toHaveAttribute("open", "");
       await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(position);
       await page.getByRole("button", { name: "もうひとつの事例を見る", exact: true }).click();
@@ -113,7 +120,7 @@ test("資料を読んでいる間は回答を止め、閉じると続きから�
   await page.clock.runFor(2500);
   const turn = page.locator("[data-chat-turn]").last();
   await expect(turn).toHaveAttribute("data-phase", "streaming");
-  await page.getByRole("button", { name: "今回の商談メモを見る", exact: true }).click();
+  await page.getByRole("button", { name: "Web会議の議事録を見る", exact: true }).click();
   const before = await turn.locator('[class*="botResponse"]').textContent();
   await page.clock.runFor(30000);
   expect(await turn.locator('[class*="botResponse"]').textContent()).toBe(before);
