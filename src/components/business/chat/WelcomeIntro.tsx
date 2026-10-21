@@ -95,7 +95,7 @@ export default function WelcomeIntro({ children }: { children: ReactNode }) {
       <nav className={s.comicPages} aria-label="漫画のコマ">
         {panels.map((_, i) => <button key={i} onClick={() => showPanel(i)} aria-label={`${i + 1}コマ目を見る`} aria-current={current === i ? "step" : undefined}><span /></button>)}
       </nav>
-      <p className={s.comicInvitation} data-comic-visible={complete} aria-hidden={!complete}>いつもの仕事がどう変わるか、サンプルで体験してみてください。</p>
+      <p className={s.comicInvitation} data-comic-visible={complete} aria-hidden={!complete}>次の営業につながる準備も、毎月の仕事も。AIとの進め方をサンプルで体験してみてください。</p>
     </div>
     {children}
   </ResponseReadyContext.Provider>;

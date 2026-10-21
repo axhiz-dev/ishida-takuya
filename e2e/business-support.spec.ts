@@ -83,6 +83,7 @@ test("事例の最後から支援内容を確認し、続きと別の事例に�
   await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
   await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(readingPosition);
   await page.getByRole("button", { name: "もうひとつの事例を見る" }).click();
+  await page.getByRole("button", { name: "返信の確認や催促、シフト調整に追われる", exact: true }).click();
   await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
   await expect(page.locator("[data-chat-turn]")).toContainText("毎月LINEでシフト希望を集めています");
 });

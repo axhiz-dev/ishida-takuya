@@ -14,7 +14,7 @@ export function Guide({ children, title = false }: { children: ReactNode; title?
   </div>;
 }
 
-export function UserMessage({ children, attachments = false }: { children: ReactNode; attachments?: boolean }) {
+export function UserMessage({ children, attachments = false, sourceAttachments }: { children: ReactNode; attachments?: boolean; sourceAttachments?: ReactNode }) {
   const [preview, setPreview] = useState(false);
   return <div className={s.userMessage} aria-label="ユーザーの発言">
     <div className={s.userBubble}>
@@ -26,6 +26,7 @@ export function UserMessage({ children, attachments = false }: { children: React
           <span><strong>月末集計サンプル.xlsx</strong><small>売上データ・入金明細 · クリックしてプレビュー</small></span>
         </button>
       </div>}
+      {sourceAttachments}
     </div>
     <User size={23} weight="fill" aria-hidden="true" />
     {preview && <WorkbookPreview onClose={() => setPreview(false)} />}
@@ -96,7 +97,7 @@ function StreamResponse({ children, immediate, onComplete }: { children: ReactNo
 }
 
 // Experience turns stay mounted across navigation; hidden turns pause in place.
-export default function ChatTurn({ user, attachments = false, children, emphasize }: { user: string; attachments?: boolean; children: ReactNode; emphasize?: string }) {
+export default function ChatTurn({ user, attachments = false, sourceAttachments, children, emphasize }: { user: string; attachments?: boolean; sourceAttachments?: ReactNode; children: ReactNode; emphasize?: string }) {
   const [length, setLength] = useState(0);
   const [phase, setPhase] = useState<"user" | "thinking" | "streaming" | "ready">("user");
   const [immediate, setImmediate] = useState(false);
@@ -143,7 +144,7 @@ export default function ChatTurn({ user, attachments = false, children, emphasiz
   const visibleUser = user.slice(0, length);
   const emphasisAt = emphasize ? visibleUser.indexOf(emphasize) : -1;
   return <div ref={root} className={s.turn} data-chat-turn data-phase={phase}>
-    <UserMessage attachments={attachments && phase !== "user"}>
+    <UserMessage attachments={attachments && phase !== "user"} sourceAttachments={phase !== "user" ? sourceAttachments : undefined}>
       <span aria-hidden="true">{emphasisAt < 0 ? visibleUser : <>{visibleUser.slice(0, emphasisAt)}<strong>{emphasize}</strong>{visibleUser.slice(emphasisAt + emphasize!.length)}</>}{phase === "user" && <span className={s.cursor}>▍</span>}</span>
       <span className={s.srOnly}>{user}</span>
     </UserMessage>

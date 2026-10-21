@@ -1,8 +1,16 @@
-export type Experience = "aggregate" | "shift";
+export type Experience = "aggregate" | "shift" | "prospecting" | "proposal";
 export const experienceNames: Record<Experience, string> = {
+  prospecting: "営業先を見つけ、相手に合う提案を考える",
+  proposal: "社長の提案力を社員も使えるようにする",
   aggregate: "毎月のExcel集計",
   shift: "LINEのシフト調整をAIと仕組みにする",
 };
+export const experienceOptions: { kind: Experience; label: string; description: string }[] = [
+  { kind: "prospecting", label: "自社に合う営業先を見つけ、提案したい", description: "施工事例から候補を絞り、相手に合う提案を考える" },
+  { kind: "proposal", label: "社長の提案力を、社員も使えるようにしたい", description: "商談メモと社長の判断から、提案を一緒に組み立てる" },
+  { kind: "aggregate", label: "毎月、数字の照合と確認に時間がかかる", description: "Excelの集計・照合の例を見る" },
+  { kind: "shift", label: "返信の確認や催促、シフト調整に追われる", description: "LINEのシフト調整を、AIと相談して仕組みにする" },
+];
 export type ShiftSample = "recruit" | "reply" | "reminder" | "shortage" | "trial";
 
 // Fictional evening shifts for one week. LAST is 22:00 in this sample shop.
