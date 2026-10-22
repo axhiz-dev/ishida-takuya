@@ -9,8 +9,8 @@ const cases = [
   },
   {
     kind: "proposal", entry: "会議の議事録から、提案資料を作りたい", reference: "Web会議の議事録から提案資料を作る",
-    samples: ["proposal-notes", "proposal-draft", "proposal-revised", "proposal-reuse"],
-    next: ["過去の提案書を参考に、うちのデザインで作って", "会社紹介より、お客さんの課題と提案を先にして", "次からは、会議の議事録を渡すだけでここまで作りたい"],
+    samples: ["proposal-notes", "proposal-draft", "proposal-reuse"],
+    next: ["この過去の提案書とサービス案内を使って作って", "次からは、会議の議事録を渡すだけでここまで作りたい"],
     documents: [["Web会議の議事録", "まず何を変えるとよいか"]],
   },
 ];
@@ -55,23 +55,46 @@ for (const width of [390, 1440]) {
           await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
           await expect(turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true })).toHaveAttribute("aria-pressed", "true");
         }
-        if ((index === 1 || index === 2) && example.kind === "proposal") {
-          const deck = turn.getByRole("group", { name: "提案資料 1ページ目", exact: true });
-          await expect(deck).toContainText(index === 1 ? "私たちについて" : "問い合わせしやすいホームページへ");
+        if (index === 0 && example.kind === "proposal") {
+          const notes = turn.locator('[data-growth-sample="proposal-notes"]');
+          await expect(notes.getByRole("list")).toHaveCount(3);
+          await expect(notes.getByRole("listitem")).toHaveCount(9);
+          await expect(notes.getByRole("button")).toHaveCount(0);
+          await expect(notes).not.toContainText("架空の");
+          await expect(turn).toContainText("過去の提案書はありますか？");
+        }
+        if (index === 1 && example.kind === "proposal") {
           const navigation = turn.getByRole("group", { name: "提案資料のページ切り替え" });
           await expect(navigation.getByRole("button", { name: "前へ", exact: true })).toBeDisabled();
-          for (let slide = 2; slide <= 4; slide++) {
-            await navigation.getByRole("button", { name: "次へ", exact: true }).click();
-            await expect(turn.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true })).toBeVisible();
+          for (let slide = 1; slide <= 3; slide++) {
+            const current = turn.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true });
+            await expect(current).toContainText("現状の課題");
+            await expect(current).toContainText("改善のご提案");
+            await expect(current.getByRole("img")).toHaveCount(2);
+            await expect.poll(() => current.getByRole("img").evaluateAll(images => images.every(image => (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
+            await current.scrollIntoViewIfNeeded();
+            await current.screenshot({ path: testInfo.outputPath(`deck-${slide}-${width}.png`) });
+            if (slide < 3) await navigation.getByRole("button", { name: "次へ", exact: true }).click();
           }
           await expect(navigation.getByRole("button", { name: "次へ", exact: true })).toBeDisabled();
-          const title = index === 1 ? "過去の提案書" : "提案前の確認事項";
-          await turn.getByRole("button", { name: `${title}を見る`, exact: true }).click();
-          await expect(page.getByRole("dialog", { name: title, exact: true })).toContainText(index === 1 ? "紺色の見出し" : "社内で相談中");
+          await turn.getByRole("button", { name: "過去の提案書を見る", exact: true }).click();
+          const dialog = page.getByRole("dialog", { name: "過去の提案書", exact: true });
+          await expect(dialog).toContainText("こはるオフィス様");
+          for (let slide = 1; slide <= 3; slide++) {
+            const previous = dialog.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true });
+            await expect.poll(() => previous.getByRole("img").evaluateAll(images => images.length === 2 && images.every(image => (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
+            expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+            if (slide < 3) await dialog.getByRole("button", { name: "次へ", exact: true }).click();
+          }
           await page.keyboard.press("Escape");
-          await expect(turn.getByRole("group", { name: "提案資料 4ページ目", exact: true })).toBeVisible();
-          await navigation.getByRole("button", { name: "前へ", exact: true }).click();
-          await page.screenshot({ path: testInfo.outputPath(`deck-${index}-${width}.png`) });
+          await expect(turn.getByRole("group", { name: "提案資料 3ページ目", exact: true })).toBeVisible();
+          await expect(turn.getByRole("button", { name: "過去の提案書を見る", exact: true })).toBeFocused();
+        }
+        if (index === 2 && example.kind === "proposal") {
+          const reuse = turn.locator('[data-growth-sample="proposal-reuse"]');
+          await expect(reuse).toContainText("この議事録から、いつもの型で提案資料を作って");
+          await expect(reuse).not.toContainText("会議のあと、そのまま提案へ");
+          await expect(reuse).not.toContainText("架空の");
         }
         if (index < example.next.length) await page.getByRole("button", { name: example.next[index], exact: true }).click();
       }
