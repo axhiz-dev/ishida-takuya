@@ -344,6 +344,7 @@ export default function BusinessChat() {
                   <Guide>
                     {scene.replies.map((reply) => <p key={reply}>{reply}</p>)}
                     {scene.sample && <GrowthArtifact sample={scene.sample} onOpenDocument={openDocument} />}
+                    {scene.followup && <p>{scene.followup}</p>}
                     {index === growthSteps.length - 1 && <CompletionBridge onAbout={() => navigate("about")} />}
                     {step === index && <Choices
                       label={selectingExperience ? "ほかの事例を選ぶ" : scene.choiceLabel}

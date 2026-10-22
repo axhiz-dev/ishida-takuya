@@ -4,6 +4,7 @@ import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { FileText, CaretRight, X } from "@phosphor-icons/react";
 import { growthDocuments, type GrowthDocumentId } from "./growthDocuments";
+import ProposalDeck from "./ProposalDeck";
 import s from "./chat.module.css";
 import g from "./growth.module.css";
 
@@ -39,7 +40,7 @@ export default function GrowthDocumentPreview({ documentId, onClose }: { documen
         <button type="button" autoFocus aria-label="資料を閉じる" onClick={() => dialog.current?.close()}><X size={22} /></button>
       </header>
       <article className={g.documentBody}>
-        {doc.sections.map((section) => <section key={section.heading}>
+        {documentId === "past-proposals" ? <ProposalDeck variant="past" /> : documentId === "proposal" ? <ProposalDeck /> : doc.sections.map((section) => <section key={section.heading}>
           <h3>{section.heading}</h3>
           {section.paragraphs?.map((text) => <p key={text}>{text}</p>)}
           {section.rows && <dl className={g.facts}>{section.rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}

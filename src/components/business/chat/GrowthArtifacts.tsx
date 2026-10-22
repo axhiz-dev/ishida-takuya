@@ -15,7 +15,7 @@ const candidates = [
 ];
 const sampleLabels: Record<GrowthSample, string> = {
   "sales-draft": "営業先と提案のたたき台", "sales-revised": "修正した営業先と提案", "sales-reuse": "次の営業での使い方",
-  "proposal-notes": "議事録から整理した提案の材料", "proposal-draft": "自社のデザインで作った提案資料", "proposal-revised": "書き方を整えた提案資料", "proposal-reuse": "会議から提案までの流れ",
+  "proposal-notes": "議事録から整理した提案の材料", "proposal-draft": "自社のデザインで作った提案資料", "proposal-reuse": "会議から提案までの流れ",
 };
 
 function SalesDraft({ onOpen }: { onOpen: OpenDocument }) {
@@ -54,51 +54,26 @@ function SalesRevised({ onOpen }: { onOpen: OpenDocument }) {
   </>;
 }
 
-function ProposalNotes({ onOpen }: { onOpen: OpenDocument }) {
-  return <>
-    <h3 className={s.artifactLead}>会議の内容が、提案の材料に</h3>
-    <dl className={g.facts}>
-      <div><dt>お客さんの課題</dt><dd>スマホで読みにくい。問い合わせ先が分からない。事例が古い。</dd></div>
-      <div><dt>提案すること</dt><dd>文字と配置を見直す。問い合わせボタンを見つけやすく。最近の事例を3件掲載。</dd></div>
-      <div><dt>まだ決まっていないこと</dt><dd>予算・公開時期・掲載する文章と写真。</dd></div>
-    </dl>
-    <GrowthDocuments ids={["meeting"]} onOpen={onOpen} />
-  </>;
-}
-
-function ProposalDraft() {
-  return <>
-    <h3 className={s.artifactLead}>いつものデザインで、4ページの提案資料に</h3>
-    <ProposalDeck />
-  </>;
-}
-
-function ProposalRevised({ onOpen }: { onOpen: OpenDocument }) {
-  return <>
-    <h3 className={s.artifactLead}>見た目だけでなく、伝え方もうちらしく</h3>
-    <p className={g.change}>お客さんの課題と改善案を先に。会社紹介は最後に移しました。</p>
-    <ProposalDeck revised />
-    <GrowthDocuments ids={["followup"]} onOpen={onOpen} />
-  </>;
+function ProposalNotes() {
+  const groups = [
+    { title: "お客さんの課題", items: ["スマホで読みにくい", "問い合わせ先が分からない", "事例が古い"] },
+    { title: "提案すること", items: ["スマホに合わせて文字と配置を見直す", "問い合わせボタンを見つけやすくする", "最近の事例を3件掲載する"] },
+    { title: "まだ決まっていないこと", items: ["予算", "公開時期", "掲載する文章と写真"] },
+  ];
+  return <div className={g.noteGroups}>{groups.map(group => <section key={group.title}>
+    <h3>{group.title}</h3><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul>
+  </section>)}</div>;
 }
 
 function ProposalReuse() {
   return <>
-    <h3 className={s.artifactLead}>会議のあと、そのまま提案へ</h3>
-    <ol className={g.workflow}>
-      <li><strong>Web会議の議事録</strong><span>会議ツールの文字起こし・議事録を渡す</span></li>
-      <li><strong>課題と提案を整理</strong><span>お客さんの発言から、提案と確認事項をまとめる</span></li>
-      <li><strong>自社の型で資料を作成</strong><span>デザインと書き方を引き継いで下書きにする</span></li>
-      <li><strong>営業が確認して提案</strong><span>金額・納期・内容を確かめて、お客さんへ</span></li>
-    </ol>
-    <code className={s.skillPrompt}>この会議の議事録から、うちの型で提案資料を作って</code>
+    <p className={s.skillPrompt}>この議事録から、いつもの型で提案資料を作って</p>
     <details className={g.rules}><summary>スキルに残すルールを見る</summary><ul className={s.skillDetails}>
-      <li>自社の提案書の色・レイアウトを使い、1ページ1テーマ、短い文章でまとめる。</li>
-      <li>お客さんの課題 → 改善案 → 進め方 → 会社紹介の順。専門用語を身近な言葉にする。</li>
-      <li>新しい議事録と自社のサービス案内を参照。過去の案件の内容は流用しない。</li>
+      <li>今回の提案書と同じデザインで、1ページに1つの課題と改善案をまとめる。</li>
+      <li>現状と改善案の画面を並べ、変える場所と内容を具体的に書く。</li>
+      <li>新しい議事録と自社のサービス案内を使う。過去のお客さんの情報は引き継がない。</li>
       <li>足りない情報は確認事項に残す。金額・納期・効果を勝手に決めない。</li>
     </ul></details>
-    <p className={s.sampleNote}>この画面は架空のデータによる体験です。会議ツールとの連携・資料の自動生成・スキル保存は行いません。実際の導入では、お使いの会議ツールや資料形式に合わせて仕組みを作ります。</p>
   </>;
 }
 
@@ -122,13 +97,12 @@ function ReusePreview({ onOpen }: { onOpen: OpenDocument }) {
 }
 
 export default function GrowthArtifact({ sample, onOpenDocument }: { sample: GrowthSample; onOpenDocument: OpenDocument }) {
-  return <section className={`${s.artifact} ${g.preview}`} aria-label={sampleLabels[sample]} data-growth-sample={sample} data-static-preview>
-    <span className={s.badge}>架空のデータによるサンプル体験</span>
+  return <section className={`${s.artifact} ${g.preview} ${sample.startsWith("proposal-") ? g.proposalArtifact : ""}`} aria-label={sampleLabels[sample]} data-growth-sample={sample} data-static-preview>
+    {sample.startsWith("sales-") && <span className={s.badge}>架空のデータによるサンプル体験</span>}
     {sample === "sales-draft" && <SalesDraft onOpen={onOpenDocument} />}
     {sample === "sales-revised" && <SalesRevised onOpen={onOpenDocument} />}
-    {sample === "proposal-notes" && <ProposalNotes onOpen={onOpenDocument} />}
-    {sample === "proposal-draft" && <ProposalDraft />}
-    {sample === "proposal-revised" && <ProposalRevised onOpen={onOpenDocument} />}
+    {sample === "proposal-notes" && <ProposalNotes />}
+    {sample === "proposal-draft" && <ProposalDeck />}
     {sample === "sales-reuse" && <ReusePreview onOpen={onOpenDocument} />}
     {sample === "proposal-reuse" && <ProposalReuse />}
   </section>;
