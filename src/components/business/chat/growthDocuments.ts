@@ -35,7 +35,7 @@ export const growthDocuments: Record<GrowthDocumentId, GrowthDocument> = {
     ],
   },
   "past-proposals": {
-    title: "過去の提案書", description: "こはるオフィス様・画面で説明する3ページ",
+    title: "過去の提案書", description: "こはるオフィス様・採用ページ改善の提案（3ページ）",
     sections: [],
   },
   "estimate-history": {

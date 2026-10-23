@@ -82,6 +82,7 @@ for (const width of [390, 1440]) {
           await turn.getByRole("button", { name: "過去の提案書を見る", exact: true }).click();
           const dialog = page.getByRole("dialog", { name: "過去の提案書", exact: true });
           await expect(dialog).toContainText("こはるオフィス様");
+          await expect(dialog).toContainText("募集条件を、職種ごとに比べやすく");
           for (let slide = 1; slide <= 3; slide++) {
             const previous = dialog.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true });
             await expect.poll(() => previous.getByRole("img").evaluateAll(images => images.length === 1 && images.every(image => (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
@@ -94,6 +95,9 @@ for (const width of [390, 1440]) {
           await turn.getByRole("button", { name: "過去の対応・見積一覧を見る", exact: true }).click();
           const history = page.getByRole("dialog", { name: "過去の対応・見積一覧", exact: true });
           await expect(history.getByRole("row")).toHaveCount(7);
+          await expect(history.getByRole("columnheader").first()).toHaveText("対応内容");
+          await expect(history.getByRole("columnheader").last()).toHaveText("管理番号・年月");
+          await page.screenshot({ path: testInfo.outputPath(`estimate-${width}.png`) });
           await expect(history.getByRole("row").filter({ hasText: "E-01" })).toContainText("90,000円");
           await expect(history.getByRole("row").filter({ hasText: "E-03" })).toContainText("40,000円");
           await expect(history.getByRole("row").filter({ hasText: "E-06" })).toContainText("45,000円");
@@ -106,7 +110,9 @@ for (const width of [390, 1440]) {
         }
         if (index === 2 && example.kind === "proposal") {
           const reuse = turn.locator('[data-growth-sample="proposal-reuse"]');
-          await expect(reuse).toContainText("この議事録から、いつもの型で提案資料と概算見積を作って");
+          await expect(reuse).toContainText("/proposal-maker この議事録から提案資料と概算見積を作って");
+          await expect(turn).toContainText("/proposal-maker というスキルにまとめました");
+          await expect(reuse).toContainText("毎回デザインや見積の出し方を説明する必要はありません");
           await expect(reuse).not.toContainText("会議のあと、そのまま提案へ");
           await expect(reuse).not.toContainText("架空の");
         }
