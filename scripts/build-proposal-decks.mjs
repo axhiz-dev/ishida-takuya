@@ -30,13 +30,15 @@ function text(slide,value,left,top,width,height,size=24,bold=false,color=ink) {
 function base(p,customer,n,title,count) {
  const s=p.slides.add();s.background.fill='#FFFFFF';
  text(s,'MIDORI DESIGN',56,28,240,26,18,true,green);
- text(s,customer+'様　Webサイト改修のご提案',600,28,624,26,18,false);
+ text(s,customer+'様　'+(customer==='こはるオフィス'?'採用ページ改善':'Webサイト改修')+'のご提案',600,28,624,26,18,false);
  text(s,title,56,81,1168,65,38,true);
  text(s,customer+'様',56,675,560,22,16,false,'#68777D');
  text(s,`${n} / ${count}`,1155,675,70,22,16,false,'#68777D');
  return s;
 }
-for (const variant of ['current','past']) {
+const variants = process.env.PROPOSAL_VARIANT ? [process.env.PROPOSAL_VARIANT] : ['current','past'];
+if (variants.some(v => !['current','past'].includes(v))) throw new Error('Invalid PROPOSAL_VARIANT');
+for (const variant of variants) {
  const p=Presentation.create({slideSize:{width:1280,height:720}});
  const customer=variant==='current'?'あおば商事':'こはるオフィス';const count=variant==='current'?4:3;
  for(const [i,item] of data[variant].entries()){
@@ -47,7 +49,7 @@ for (const variant of ['current','past']) {
    text(s,state==='before'?item.problem:item.proposal,x,492,540,110,24,false);
   }
   text(s,item.scope,56,615,1168,48,20,false,green);
-  s.speakerNotes.text='サンプル企業の提案資料。サイト画面はscripts/proposal-samples/site.htmlを撮影した現状・改善案。写真出典: Craig Lovelidge https://unsplash.com/photos/bV5dFLEYecM / Slidebean https://unsplash.com/photos/6MtJ-y1hzTs。実在の受注実績ではない。';
+  s.speakerNotes.text='サンプル企業の提案資料。サイト画面はscripts/proposal-samples/'+(variant==='past'?'recruitment':'site')+'.htmlを撮影した現状・改善案。写真出典: Craig Lovelidge https://unsplash.com/photos/bV5dFLEYecM / Slidebean https://unsplash.com/photos/6MtJ-y1hzTs。実在の受注実績ではない。';
  }
  if(variant==='current'){
   const s=base(p,customer,4,'概算お見積もり',4);

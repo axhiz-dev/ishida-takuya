@@ -58,8 +58,8 @@ export const growthScenarios: Record<GrowthExperience, GrowthStep[]> = {
       next: "次からは、会議の議事録を渡すだけでここまで作りたい",
     },
     {
-      user: "このデザインと書き方をスキルにして、次からはWeb会議の議事録を渡すだけで、提案資料まで作ってほしいです。",
-      replies: ["はい。この型をスキルにまとめます。次回は議事録を添えて、こう頼めば大丈夫です。"],
+      user: "このデザインと書き方をスキルにして、次からはWeb会議の議事録を渡すだけで、提案資料と概算見積まで作ってほしいです。",
+      replies: ["/proposal-maker というスキルにまとめました。提案書のデザインと書き方、過去の対応から見積もるルールを引き継ぎます。"],
       sample: "proposal-reuse",
       choiceLabel: "あなたの仕事でも",
       next: "自分の仕事について相談する",

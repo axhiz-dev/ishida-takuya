@@ -67,7 +67,9 @@ function ProposalNotes() {
 
 function ProposalReuse() {
   return <>
-    <p className={s.skillPrompt}>この議事録から、いつもの型で提案資料と概算見積を作って</p>
+    <p className={g.reuseExplanation}>次回は新しい議事録を添えるだけで、課題の整理から、お客さん向けのPowerPointと概算見積まで作れます。毎回デザインや見積の出し方を説明する必要はありません。</p>
+    <h3 className={s.artifactLead}>次回の頼み方</h3>
+    <p className={s.skillPrompt}>/proposal-maker この議事録から提案資料と概算見積を作って</p>
     <details className={g.rules}><summary>スキルに残すルールを見る</summary><ul className={s.skillDetails}>
       <li>今回の提案書と同じデザインで、1ページに1つの課題と改善案をまとめる。</li>
       <li>現状と改善案の画面を並べ、変える場所と内容を具体的に書く。</li>
