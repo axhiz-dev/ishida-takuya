@@ -1,4 +1,4 @@
-export type GrowthDocumentId = "company" | "work" | "research" | "meeting" | "past-proposals" | "product-guide" | "followup" | "proposal";
+export type GrowthDocumentId = "company" | "work" | "research" | "meeting" | "past-proposals" | "estimate-history" | "followup" | "proposal";
 type DocumentSection = { heading: string; paragraphs?: string[]; rows?: [string, string][] };
 type GrowthDocument = { title: string; description: string; sections: DocumentSection[] };
 
@@ -38,18 +38,16 @@ export const growthDocuments: Record<GrowthDocumentId, GrowthDocument> = {
     title: "過去の提案書", description: "こはるオフィス様・画面で説明する3ページ",
     sections: [],
   },
-  "product-guide": {
-    title: "自社のサービス案内", description: "提案できることと、見積もり前の確認事項",
-    sections: [
-      { heading: "ミドリデザインのホームページ制作", rows: [["対応内容", "構成の整理、スマホ対応のデザイン、問い合わせページ、事例紹介ページの制作。"], ["進め方", "内容整理 → デザイン → 制作・確認 → 公開。"], ["見積もりに必要なこと", "ページ数、掲載する文章・写真の準備状況、必要な機能、公開希望日。"], ["価格・納期", "要件を確認して個別に見積もり。固定価格・標準納期の設定はない。"]] },
-    ],
+  "estimate-history": {
+    title: "過去の対応・見積一覧", description: "対応内容・数量・税別金額・条件の6件",
+    sections: [],
   },
   followup: {
     title: "提案前の確認事項", description: "次の打ち合わせで確認する3点",
     sections: [{ heading: "あおば商事様へ確認", rows: [["予算と公開時期", "社内で相談中。希望を確認して見積もりを作る。"], ["掲載する事例", "3件分の文章・写真を用意できるか。"], ["問い合わせ対応", "問い合わせの通知先と、必要な入力項目。"]] }],
   },
   proposal: {
-    title: "今回の提案書", description: "あおば商事様・3つの課題と改善案",
+    title: "今回の提案書", description: "あおば商事様・改善案と概算見積の4ページ",
     sections: [],
   },
 };
