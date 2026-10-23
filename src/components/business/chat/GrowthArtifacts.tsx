@@ -67,12 +67,12 @@ function ProposalNotes() {
 
 function ProposalReuse() {
   return <>
-    <p className={s.skillPrompt}>この議事録から、いつもの型で提案資料を作って</p>
+    <p className={s.skillPrompt}>この議事録から、いつもの型で提案資料と概算見積を作って</p>
     <details className={g.rules}><summary>スキルに残すルールを見る</summary><ul className={s.skillDetails}>
       <li>今回の提案書と同じデザインで、1ページに1つの課題と改善案をまとめる。</li>
       <li>現状と改善案の画面を並べ、変える場所と内容を具体的に書く。</li>
-      <li>新しい議事録と自社のサービス案内を使う。過去のお客さんの情報は引き継がない。</li>
-      <li>足りない情報は確認事項に残す。金額・納期・効果を勝手に決めない。</li>
+      <li>新しい議事録と過去の見積一覧を使う。過去のお客さんの情報は引き継がない。</li>
+      <li>足りない情報は確認事項に残す。見積もりは過去の対応範囲と条件を確認して算出し、前提を明記する。納期・効果を勝手に決めない。</li>
     </ul></details>
   </>;
 }

@@ -10,7 +10,7 @@ const cases = [
   {
     kind: "proposal", entry: "会議の議事録から、提案資料を作りたい", reference: "Web会議の議事録から提案資料を作る",
     samples: ["proposal-notes", "proposal-draft", "proposal-reuse"],
-    next: ["この過去の提案書とサービス案内を使って作って", "次からは、会議の議事録を渡すだけでここまで作りたい"],
+    next: ["この過去の提案書と見積一覧で、見積も一緒に作って", "次からは、会議の議事録を渡すだけでここまで作りたい"],
     documents: [["Web会議の議事録", "まず何を変えるとよいか"]],
   },
 ];
@@ -66,15 +66,17 @@ for (const width of [390, 1440]) {
         if (index === 1 && example.kind === "proposal") {
           const navigation = turn.getByRole("group", { name: "提案資料のページ切り替え" });
           await expect(navigation.getByRole("button", { name: "前へ", exact: true })).toBeDisabled();
-          for (let slide = 1; slide <= 3; slide++) {
+          for (let slide = 1; slide <= 4; slide++) {
             const current = turn.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true });
-            await expect(current).toContainText("現状の課題");
-            await expect(current).toContainText("改善のご提案");
-            await expect(current.getByRole("img")).toHaveCount(2);
+            if (slide < 4) await expect(current).toContainText("現状の課題");
+            else await expect(current).toContainText("合計 175,000円（税別）");
+            await expect(current.getByRole("img")).toHaveCount(1);
+            const rect = await current.boundingBox();
+            expect(rect!.width / rect!.height).toBeCloseTo(16 / 9, 1);
             await expect.poll(() => current.getByRole("img").evaluateAll(images => images.every(image => (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
             await current.scrollIntoViewIfNeeded();
             await current.screenshot({ path: testInfo.outputPath(`deck-${slide}-${width}.png`) });
-            if (slide < 3) await navigation.getByRole("button", { name: "次へ", exact: true }).click();
+            if (slide < 4) await navigation.getByRole("button", { name: "次へ", exact: true }).click();
           }
           await expect(navigation.getByRole("button", { name: "次へ", exact: true })).toBeDisabled();
           await turn.getByRole("button", { name: "過去の提案書を見る", exact: true }).click();
@@ -82,17 +84,29 @@ for (const width of [390, 1440]) {
           await expect(dialog).toContainText("こはるオフィス様");
           for (let slide = 1; slide <= 3; slide++) {
             const previous = dialog.getByRole("group", { name: `提案資料 ${slide}ページ目`, exact: true });
-            await expect.poll(() => previous.getByRole("img").evaluateAll(images => images.length === 2 && images.every(image => (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
+            await expect.poll(() => previous.getByRole("img").evaluateAll(images => images.length === 1 && images.every(image => (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
             expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
             if (slide < 3) await dialog.getByRole("button", { name: "次へ", exact: true }).click();
           }
           await page.keyboard.press("Escape");
-          await expect(turn.getByRole("group", { name: "提案資料 3ページ目", exact: true })).toBeVisible();
+          await expect(turn.getByRole("group", { name: "提案資料 4ページ目", exact: true })).toBeVisible();
           await expect(turn.getByRole("button", { name: "過去の提案書を見る", exact: true })).toBeFocused();
+          await turn.getByRole("button", { name: "過去の対応・見積一覧を見る", exact: true }).click();
+          const history = page.getByRole("dialog", { name: "過去の対応・見積一覧", exact: true });
+          await expect(history.getByRole("row")).toHaveCount(7);
+          await expect(history.getByRole("row").filter({ hasText: "E-01" })).toContainText("90,000円");
+          await expect(history.getByRole("row").filter({ hasText: "E-03" })).toContainText("40,000円");
+          await expect(history.getByRole("row").filter({ hasText: "E-06" })).toContainText("45,000円");
+          expect(await history.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+          await page.keyboard.press("Escape");
+          const download = turn.getByRole("link", { name: "PowerPointをダウンロード", exact: true });
+          const response = await page.request.get((await download.getAttribute("href"))!);
+          expect(response.ok()).toBe(true);
+          expect((await response.body()).subarray(0, 2).toString()).toBe("PK");
         }
         if (index === 2 && example.kind === "proposal") {
           const reuse = turn.locator('[data-growth-sample="proposal-reuse"]');
-          await expect(reuse).toContainText("この議事録から、いつもの型で提案資料を作って");
+          await expect(reuse).toContainText("この議事録から、いつもの型で提案資料と概算見積を作って");
           await expect(reuse).not.toContainText("会議のあと、そのまま提案へ");
           await expect(reuse).not.toContainText("架空の");
         }
