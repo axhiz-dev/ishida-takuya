@@ -44,13 +44,6 @@ for (const width of [390, 1440]) {
         const turn = page.locator("[data-chat-turn]").last();
         await expect(turn).toHaveAttribute("data-phase", "ready");
         await expect(turn.locator("[data-growth-sample]")).toHaveAttribute("data-growth-sample", example.samples[index]);
-        if (example.kind === "prospecting" && index === 0) {
-          await turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true }).click();
-          await expect(turn).toContainText("全国で50施設");
-          await page.getByRole("banner").getByRole("button", { name: "支援内容・費用", exact: true }).click();
-          await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
-          await expect(turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true })).toHaveAttribute("aria-pressed", "true");
-        }
         if (index === 0 && example.kind === "proposal") {
           const notes = turn.locator('[data-growth-sample="proposal-notes"]');
           await expect(notes.getByRole("list")).toHaveCount(3);
@@ -119,7 +112,7 @@ for (const width of [390, 1440]) {
       await expect(rules).not.toHaveAttribute("open", "");
       await rules.locator("summary").click();
       await expect(rules).toHaveAttribute("open", "");
-      await expect(rules).toContainText(example.kind === "prospecting" ? "全国チェーンは対象外" : "足りない情報は確認事項に残す");
+      await expect(rules).toContainText("足りない情報は確認事項に残す");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
       expect(await page.locator("main").evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).waitFor();
@@ -138,10 +131,10 @@ for (const width of [390, 1440]) {
       await page.getByRole("button", { name: "元の選択肢に戻る", exact: true }).click();
       await expect(page.getByRole("button", { name: "自分の仕事について相談する", exact: true })).toBeVisible();
       await page.getByRole("button", { name: "もうひとつの事例を見る", exact: true }).click();
-      const other = cases.find(item => item.kind !== example.kind)!;
-      await page.getByRole("button", { name: other.entry, exact: true }).click();
+      await expect(page.getByRole("button", { name: "自社に合う営業先を見つけ、提案したい", exact: true })).toHaveCount(0);
+      await page.getByRole("button", { name: "毎月、数字の照合と確認に時間がかかる", exact: true }).click();
       await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
-      await expect(page.locator("[data-growth-sample]")).toHaveAttribute("data-growth-sample", other.samples[0]);
+      await expect(page.getByRole("button", { name: "同じ会社です。このルールで照合して", exact: true })).toBeVisible();
       expect(outbound).toEqual([]);
     });
   }
@@ -170,5 +163,5 @@ test("資料を読んでいる間は回答を止め、閉じると続きから�
   await page.clock.runFor(999);
   await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
   await page.clock.runFor(1);
-  await expect(page.getByRole("button", { name: cases[1].next[0], exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: cases[0].next[0], exact: true })).toBeVisible();
 });
