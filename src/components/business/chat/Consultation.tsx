@@ -99,7 +99,6 @@ export default function Consultation({ reference }: { reference: string }) {
       <div className={support.contactIntro}>
         <h2>いつもの仕事について、<br />聞かせてください。</h2>
         <p>初回30分の無料相談です。何をAIに任せるか、まだ整理できていなくても大丈夫です。</p>
-        <ol className={support.contactSteps}><li>1 メールで日程調整</li><li>2 無料相談・30分</li><li>3 支援内容・期間・費用をご提案</li></ol>
         <p className={s.subtext}>有料の支援は、ご提案に合意いただいてから始めます。{owner.responseTime}を目安にメールでご連絡します。</p>
         {!ready && <p className={s.notice}>現在はメールでお申し込みを受け付けています。下の入力内容からメールを作成できます。<br /><a className={support.textLink} href={`mailto:${owner.email}?subject=${encodeURIComponent("AI活用の無料相談")}`}>直接メールする：{owner.email}</a></p>}
       </div>
