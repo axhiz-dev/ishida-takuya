@@ -73,8 +73,6 @@
 .personLink:hover > span:nth-child(2) { text-decoration: underline; text-underline-offset: 4px; }
 .contactIntro h2 { font-size: 25px; margin: 0 0 16px; line-height: 1.6; }
 .contactIntro p { margin: 0 0 15px; }
-.contactSteps { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 24px 0; font-size: 12px; }
-.contactSteps li { background: #edf3ef; border-radius: 6px; padding: 8px 12px; }
 @media (max-width: 680px) {
   .panel { width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
   .panelHeader { padding: 10px 16px; }
