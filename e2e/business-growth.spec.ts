@@ -2,12 +2,6 @@ import { test, expect } from "@playwright/test";
 
 const cases = [
   {
-    kind: "prospecting", entry: "自社に合う営業先を見つけ、提案したい", reference: "営業先を見つけ、相手に合う提案を考える",
-    samples: ["sales-draft", "sales-revised", "sales-reuse"],
-    next: ["全国チェーンは外して。写真と寸法から相談する形にして", "この選び方をスキルにして、次は美容室で探して"],
-    documents: [["会社案内", "こもれび家具製作所"], ["施工事例集", "幅1,800mm・奥行き350mm"]],
-  },
-  {
     kind: "proposal", entry: "会議の議事録から、提案資料を作りたい", reference: "Web会議の議事録から提案資料を作る",
     samples: ["proposal-notes", "proposal-draft", "proposal-reuse"],
     next: ["この過去の提案書と見積一覧で、見積も一緒に作って", "次からは、会議の議事録を渡すだけでここまで作りたい"],
@@ -24,8 +18,10 @@ for (const width of [390, 1440]) {
       await page.route(/formspree\.io|gmail\.googleapis\.com|api\.openai\.com/, async route => { outbound.push(route.request().url()); await route.abort(); });
       await page.goto("/business/");
       const buttons = page.getByRole("region", { name: "選択肢パネル" }).getByRole("button");
-      await expect(buttons.nth(0)).toHaveAccessibleName(cases[1].entry);
-      await expect(buttons.nth(1)).toHaveAccessibleName(cases[0].entry);
+      await expect(buttons.nth(0)).toHaveAccessibleName(cases[0].entry);
+      await expect(buttons.nth(1)).toHaveAccessibleName("毎月、数字の照合と確認に時間がかかる");
+      await expect(buttons.nth(2)).toHaveAccessibleName("返信の確認や催促、シフト調整に追われる");
+      await expect(page.getByRole("button", { name: "自社に合う営業先を見つけ、提案したい", exact: true })).toHaveCount(0);
       if (width === 1440) expect(await page.locator("main").evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: example.entry, exact: true }).click();
       for (const [title, evidence] of example.documents) {
@@ -48,13 +44,6 @@ for (const width of [390, 1440]) {
         const turn = page.locator("[data-chat-turn]").last();
         await expect(turn).toHaveAttribute("data-phase", "ready");
         await expect(turn.locator("[data-growth-sample]")).toHaveAttribute("data-growth-sample", example.samples[index]);
-        if (example.kind === "prospecting" && index === 0) {
-          await turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true }).click();
-          await expect(turn).toContainText("全国で50施設");
-          await page.getByRole("banner").getByRole("button", { name: "支援内容・費用", exact: true }).click();
-          await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
-          await expect(turn.getByRole("button", { name: "全国ホテルチェーンA", exact: true })).toHaveAttribute("aria-pressed", "true");
-        }
         if (index === 0 && example.kind === "proposal") {
           const notes = turn.locator('[data-growth-sample="proposal-notes"]');
           await expect(notes.getByRole("list")).toHaveCount(3);
@@ -123,7 +112,7 @@ for (const width of [390, 1440]) {
       await expect(rules).not.toHaveAttribute("open", "");
       await rules.locator("summary").click();
       await expect(rules).toHaveAttribute("open", "");
-      await expect(rules).toContainText(example.kind === "prospecting" ? "全国チェーンは対象外" : "足りない情報は確認事項に残す");
+      await expect(rules).toContainText("足りない情報は確認事項に残す");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
       expect(await page.locator("main").evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
       await page.getByRole("button", { name: "自分の仕事について相談する", exact: true }).waitFor();
@@ -142,10 +131,10 @@ for (const width of [390, 1440]) {
       await page.getByRole("button", { name: "元の選択肢に戻る", exact: true }).click();
       await expect(page.getByRole("button", { name: "自分の仕事について相談する", exact: true })).toBeVisible();
       await page.getByRole("button", { name: "もうひとつの事例を見る", exact: true }).click();
-      const other = cases.find(item => item.kind !== example.kind)!;
-      await page.getByRole("button", { name: other.entry, exact: true }).click();
+      await expect(page.getByRole("button", { name: "自社に合う営業先を見つけ、提案したい", exact: true })).toHaveCount(0);
+      await page.getByRole("button", { name: "毎月、数字の照合と確認に時間がかかる", exact: true }).click();
       await expect(page.locator("[data-chat-turn]")).toHaveCount(1);
-      await expect(page.locator("[data-growth-sample]")).toHaveAttribute("data-growth-sample", other.samples[0]);
+      await expect(page.getByRole("button", { name: "同じ会社です。このルールで照合して", exact: true })).toBeVisible();
       expect(outbound).toEqual([]);
     });
   }
@@ -155,7 +144,7 @@ test("資料を読んでいる間は回答を止め、閉じると続きから�
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/business/");
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.getByRole("button", { name: cases[1].entry, exact: true }).click();
+  await page.getByRole("button", { name: cases[0].entry, exact: true }).click();
   await page.getByRole("button", { name: "入力を完了して送信" }).click();
   const now = new Date("2026-10-21T01:00:00Z");
   await page.clock.install({ time: now });
@@ -174,5 +163,5 @@ test("資料を読んでいる間は回答を止め、閉じると続きから�
   await page.clock.runFor(999);
   await expect(page.getByRole("region", { name: "選択肢パネル" })).toHaveCount(0);
   await page.clock.runFor(1);
-  await expect(page.getByRole("button", { name: cases[1].next[0], exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: cases[0].next[0], exact: true })).toBeVisible();
 });

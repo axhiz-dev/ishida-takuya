@@ -7,7 +7,6 @@ export const experienceNames: Record<Experience, string> = {
 };
 export const experienceOptions: { kind: Experience; label: string; description: string }[] = [
   { kind: "proposal", label: "会議の議事録から、提案資料を作りたい", description: "自社のデザイン・書き方に合わせた資料ができるまで" },
-  { kind: "prospecting", label: "自社に合う営業先を見つけ、提案したい", description: "施工事例から候補を絞り、相手に合う提案を考える" },
   { kind: "aggregate", label: "毎月、数字の照合と確認に時間がかかる", description: "Excelの集計・照合の例を見る" },
   { kind: "shift", label: "返信の確認や催促、シフト調整に追われる", description: "LINEのシフト調整を、AIと相談して仕組みにする" },
 ];
