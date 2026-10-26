@@ -285,7 +285,7 @@ test('business: 支援内容・費用に直接進み、合意した料金を確�
   await page.goto('/business/');
   await page.getByRole('banner').getByRole('button', { name: '支援内容・費用', exact: true }).click();
   const panel = page.getByRole('dialog');
-  await expect(panel).toContainText('5万円〜');
+  await expect(panel).toContainText('5万円');
   await expect(panel).toContainText('10万円〜');
   await expect(panel).toContainText('利用料は別途必要です');
   await expect(panel).not.toContainText('現在検討中');

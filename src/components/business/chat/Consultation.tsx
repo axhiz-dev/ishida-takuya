@@ -184,7 +184,7 @@ export default function Consultation({ reference }: { reference: string }) {
             <p id="preferred-dates-help" className={s.subtext}>第3希望まで、日付と時間帯を選べます（任意・日本時間）。日時はメールで調整して確定します。</p>
             <div id="consultation-availability" className={s.availabilityNote}>
               <p>平日は18時以降に対応しています。土日は、早めにご相談いただければ調整可能です。</p>
-              <p>平日日中を強くご希望の場合も調整しますので、「相談したいこと」にその旨をご記入ください。</p>
+              <p>平日日中をご希望の場合も、まずはご相談ください。</p>
             </div>
             {preferredSlots.map((slot, index) => (
               <fieldset className={s.preferredSlot} key={index} aria-describedby="preferred-dates-help consultation-availability">
