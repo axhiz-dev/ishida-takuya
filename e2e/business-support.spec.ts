@@ -10,8 +10,8 @@ for (const width of [320, 390, 1440]) {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
     await expect(page).toHaveURL(/#about$/);
-    await expect(dialog).toContainText("というか、してほしいのです。");
-    await expect(dialog).toContainText("大切な時間が増えることには変わりありません。");
+    await expect(dialog).toContainText("私はそれがすごくもどかしく感じました。");
+    await expect(dialog).toContainText("大切な時間を増やしてより良い人生にしていくためのお手伝いができたら嬉しく思います。");
     await expect(dialog.getByRole("heading", { name: "自己紹介", exact: true })).toBeFocused();
     expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
     const shot = testInfo.outputPath(`self-introduction-${width}.png`);
