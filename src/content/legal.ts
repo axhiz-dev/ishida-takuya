@@ -30,8 +30,8 @@ export const tradeLawRows: LegalRow[] = [
   { label: "営業時間", value: owner.businessHours, note: "時間外はメールでお受けします。" },
   {
     label: "役務の対価",
-    value: `AI活用・自動化の伴走支援は月${pricing.accompaniment}万円から（税別）。仕組みづくり・受託開発は${pricing.implementation}万円から（税別・要お見積もり）。初回30分の相談は無料です。`,
-    note: "作業の範囲によって変わります。金額はお見積もりでご提示し、合意のうえで着手します。",
+    value: `AI活用・自動化の伴走支援は1か月${pricing.accompaniment}万円（税別）。仕組みづくり・受託開発は${pricing.implementation}万円から（税別・要お見積もり）。初回30分の相談は無料です。`,
+    note: "伴走支援にはオンライン相談30分×全4回と、対象業務のチャット相談を含みます。受託開発や追加支援の金額はお見積もりでご提示し、合意のうえで着手します。",
   },
   {
     label: "対価以外に必要な費用",

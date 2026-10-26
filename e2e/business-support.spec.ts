@@ -25,6 +25,17 @@ for (const width of [320, 390, 1440]) {
       const parent = await dialog.locator('[class*="panelCta"]').boundingBox();
       expect(Math.abs((box!.x + box!.width / 2) - (parent!.x + parent!.width / 2))).toBeLessThan(2);
       expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+      if (key === "pricing") {
+        await expect(dialog).toContainText("30分×全4回");
+        await expect(dialog).toContainText("原則2営業日以内に返信");
+        await expect(dialog.getByText("5万円〜", { exact: true })).toHaveCount(0);
+        const example = dialog.locator("details").filter({ hasText: "たとえば、毎月のExcel照合" });
+        await expect(example).not.toHaveAttribute("open", "");
+        await example.locator("summary").click();
+        await expect(example.getByRole("heading", { name: "伴走支援なら" })).toBeVisible();
+        expect(await dialog.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+        await example.locator("summary").click();
+      }
       if (key === "process") {
         const process = dialog.getByRole("region", { name: "相談から利用開始まで", exact: true });
         await expect(process.getByRole("listitem")).toHaveCount(4);
@@ -59,7 +70,7 @@ test("法定ページから無料相談に直接移動でき、旧ナビが出�
   await page.goto("/business/privacy/");
   await expect(page.getByText("ダミー", { exact: true })).toHaveCount(0);
   await page.goto("/business/legal/");
-  await expect(page.locator("main")).toContainText("月5万円から");
+  await expect(page.locator("main")).toContainText("1か月5万円");
   await expect(page.locator("main")).not.toContainText("3か月から");
   await page.getByRole("banner").getByRole("link", { name: "相談する", exact: true }).click();
   await expect(page).toHaveURL(/\/business\/?#contact$/);
@@ -75,11 +86,11 @@ test("事例の最後から支援内容を確認し、続きと別の事例に�
   await page.getByRole("button", { name: /^毎月、数字の照合と確認に時間がかかる/ }).click();
   for (const name of ["同じ会社です。このルールで照合して", "担当者を伝えて、確認メールを下書きして", "件数の多いサンプルで月次レポートを見てみる", "月次レポートまで毎月使えるスキルにして"]) await page.getByRole("button", { name }).click();
   await expect(page.getByRole("button", { name: "石田ってどんな人？", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "費用や支援の進め方を確認する" }).waitFor();
+  await page.getByRole("button", { name: "2つのプランと費用を見る" }).waitFor();
   await page.locator("main").evaluate(el => { el.scrollTop = el.scrollHeight; });
   const readingPosition = await page.locator("main").evaluate(el => el.scrollTop);
-  await page.getByRole("button", { name: "費用や支援の進め方を確認する" }).click();
-  await expect(page.getByRole("dialog")).toContainText("5万円〜");
+  await page.getByRole("button", { name: "2つのプランと費用を見る" }).click();
+  await expect(page.getByRole("dialog")).toContainText("5万円");
   await page.getByRole("button", { name: "案内を閉じて元の画面に戻る" }).click();
   await expect.poll(() => page.locator("main").evaluate(el => el.scrollTop)).toBe(readingPosition);
   await page.getByRole("button", { name: "もうひとつの事例を見る" }).click();

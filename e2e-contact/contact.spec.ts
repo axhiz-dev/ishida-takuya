@@ -166,7 +166,7 @@ test("第1〜第3希望を選択し、確認・修正・エラー後も保持し
   }
   await expect(form).toContainText("平日は18時以降");
   await expect(form).toContainText("土日は、早めにご相談いただければ調整可能");
-  await expect(form).toContainText("平日日中を強くご希望の場合も調整");
+  await expect(form).toContainText("平日日中をご希望の場合も、まずはご相談ください。");
   await form.getByRole("button", { name: "相談内容を確認する" }).click();
   for (const slot of dates) await expect(form).toContainText(slot.label);
   await form.getByRole("button", { name: "戻って修正" }).click();

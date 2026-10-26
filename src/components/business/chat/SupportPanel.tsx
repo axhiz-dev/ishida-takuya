@@ -28,10 +28,32 @@ export default function SupportPanel({ panel, reference, onOpen, onClose }: Prop
     {panel !== "contact" && <nav className={s.sectionNav} aria-label="支援のご案内">{supportSections.map((section) => <button key={section.id} aria-current={panel === section.id ? "page" : undefined} onClick={() => onOpen(section.id)}>{section.label}</button>)}</nav>}
     <div ref={body} className={s.panelBody} onScroll={() => { if (panel && body.current) positions.current[panel] = body.current.scrollTop; }}>
       <section hidden={panel !== "pricing"} aria-label="支援内容・費用">
+        <p className={s.pricingIntro}>この例のように、仕事に合わせたAIの手順や仕組みを、一緒に作ることも、制作を任せることもできます。</p>
         <div className={s.priceGrid}>
-          <article className={s.priceCard}><span className={s.tag}>使い方を身につけたい方へ</span><h2>AI活用の伴走支援</h2><p className={s.price}>月<span>{supportPricing.accompaniment}万円〜</span><small>（税別）</small></p><p>普段の仕事を、繰り返し使えるAIの手順に。</p><ul><li>打ち合わせ・チャットでのご相談</li><li>業務に合う指示文・スキルづくり</li><li>見本での動作確認と、使いながらの改善</li></ul><p className={s.note}>打ち合わせの頻度・相談の範囲・支援期間は、ご提案時に決めます。</p></article>
-          <article className={s.priceCard}><span className={s.tag}>制作を任せたい方へ</span><h2>仕組みづくり・受託開発</h2><p className={s.price}><span>{supportPricing.implementation}万円〜</span><small>（税別・要見積もり）</small></p><p>対象の仕事を決めて、使える仕組みに。</p><ul><li>ファイル形式や仕事の手順に合わせた制作</li><li>動作確認と、使い方のご案内</li><li>手順書とあわせてお渡し</li></ul><p className={s.note}>納品後の修正・保守は別途ご相談となります。</p></article>
+          <article className={s.priceCard}>
+            <span className={s.tag}>自分で作れるようになりたい方へ</span>
+            <h2>AI活用の伴走支援</h2>
+            <p className={s.price}>1か月<span>{supportPricing.accompaniment}万円</span><small>（税別）</small></p>
+            <p>実際の仕事を題材に、AIへの頼み方や仕組みの考え方を学びながら、一緒に作ります。</p>
+            <ul><li>オンライン相談：30分×全4回</li><li>チャット相談：原則2営業日以内に返信</li><li>まずは1つの業務をテーマに</li></ul>
+            <p className={s.note}>週1回を目安に、ご自身で試した内容を一緒に確認します。</p>
+          </article>
+          <article className={s.priceCard}>
+            <span className={s.tag}>時間がない・制作を任せたい方へ</span>
+            <h2>仕組みづくり・受託開発</h2>
+            <p className={s.price}><span>{supportPricing.implementation}万円〜</span><small>（税別・要見積もり）</small></p>
+            <p>やりたいことや仕事のルールを伺い、こちらで制作します。作る時間が取れない方に。</p>
+            <ul><li>仕事の手順や資料に合わせた制作</li><li>動作確認と、使い方のご案内</li><li>手順書とあわせてお渡し</li></ul>
+            <p className={s.note}>納品後の修正・保守は含みません。必要に応じて別途ご相談いただけます。</p>
+          </article>
         </div>
+        <details className={s.planExample}>
+          <summary>たとえば、毎月のExcel照合を楽にしたい場合</summary>
+          <div className={s.exampleGrid}>
+            <div><h3>伴走支援なら</h3><p>照合ルールの整理やAIへの伝え方を一緒に考えます。ご自身で操作して試し、翌月の変更にも対応できることを目指します。</p></div>
+            <div><h3>制作を任せるなら</h3><p>Excelの形式や照合ルールを伺い、こちらで制作・動作確認を行います。出来上がりをご確認いただき、使い方とあわせてお渡しします。</p></div>
+          </div>
+        </details>
         <div className={s.costNote}><h2>外部サービスの利用料について</h2><p>AIの有料プランやLINEなどの利用料は別途必要です。必要な契約・費用の見込みと、追加費用が発生する条件は、ご依頼前にご案内します。</p></div>
       </section>
       <section hidden={panel !== "process"} aria-label="相談から利用開始まで">

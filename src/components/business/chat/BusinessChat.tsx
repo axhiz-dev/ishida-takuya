@@ -94,7 +94,9 @@ function Choices({ items, label, inline = false }: { items: Choice[]; label: str
 }
 
 function CompletionBridge({ onAbout }: { onAbout: () => void }) {
-  return <section data-static-preview aria-label="自己紹介へのリンク"><button className={support.personLink} onClick={onAbout} aria-label="石田ってどんな人？">
+  return <section data-static-preview aria-label="支援プランと自己紹介へのご案内">
+    <p className={support.completionIntro}>この例のような手順や仕組みを、自分で作れるようになりたい方には伴走支援を、制作を任せたい方には受託開発をご案内しています。</p>
+    <button className={support.personLink} onClick={onAbout} aria-label="石田ってどんな人？">
     <PersonAvatar compact />
     <span>石田ってどんな人？</span>
     <CaretRight size={18} aria-hidden="true" />
@@ -205,7 +207,7 @@ export default function BusinessChat() {
   }
   const completionChoices: Choice[] = [
     { label: "自分の仕事について相談する", description: "初回30分・無料。メールで日程を調整します。", action: contact },
-    { label: "費用や支援の進め方を確認する", action: () => navigate("pricing") },
+    { label: "2つのプランと費用を見る", action: () => navigate("pricing") },
     { label: "もうひとつの事例を見る", action: () => { setSelectingExperience(true); setDismissedChoice(""); } },
   ];
   const finalChoices: Choice[] = selectingExperience ? [
