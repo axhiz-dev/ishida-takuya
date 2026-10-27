@@ -35,7 +35,7 @@ export default function SelfIntroduction() {
     <div className={s.letterGroup}><p>もちろん</p><ul><li>残業を減らして家族と過ごしたい</li><li>自分の時間をもっと増やして趣味を楽しみたい</li><li>ステップアップのための勉強をしたい</li></ul><p>という方も大歓迎です。</p></div>
     <div className={s.letterGroup}><p>大きな目標を叶えるためでも、<br />毎日の仕事をもう少し楽にしたいという気持ちでも、<br />大切な時間を増やしてより良い人生にしていくためのお手伝いができたら嬉しく思います。</p></div>
     <hr className={s.letterDivider} />
-    <div className={s.letterGroup}><p>新卒ではPCメーカーで営業をしていました。専門的な話を相手の仕事や立場に置き換えて、<br />分かりやすく伝えるのは得意です。</p></div>
+    <div className={s.letterGroup}><p>新卒ではPCメーカーで営業をしていました。<br />専門的な話を相手の仕事や立場に置き換えて、<br />分かりやすく伝えるのは得意です。</p></div>
     <div className={s.letterGroup}><p>現在は数万人規模の大企業でも使われているWebサービスを開発し、<br />普段の仕事でもAIをフル活用していますので、<br />自動化の勘所もお伝えできるかと思います。</p></div>
     <div className={s.letterGroup}><p>「AIで作れたけれど、仕事で使って大丈夫か分からない」というときにも、技術面から判断をお手伝いできます。</p></div>
     <div className={s.letterGroup}><p>「AIに何を頼めるのか分からない」という段階でも大丈夫です。<br />普段どんな仕事をしていて、何に時間を取られているのか。<br />任せられることを一緒に考えましょう。</p></div>
