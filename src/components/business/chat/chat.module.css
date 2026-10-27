@@ -1215,7 +1215,7 @@
 .comicInvitation[data-comic-visible="true"] { opacity: 1; }
 .introChoices { margin-top: 18px; }
 .introChoices .choicePanelHeader { display: none; }
-.introChoices .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; border: 0; padding: 0; background: none; }
+.introChoices .choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; border: 0; padding: 0; background: none; }
 .introChoices .choices > button { position: relative; border: 1px solid #dce2e6; border-radius: 10px; min-height: 82px; padding: 13px 16px; }
 .choiceExampleBadge { position: absolute; top: -10px; left: 12px; padding: 1px 9px; border: 2px solid #fff; border-radius: 999px; background: #e8f1eb; color: #376451; font-size: 10px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
 .introChoices .choices > button strong { font-size: 14px; }
@@ -1236,7 +1236,7 @@
   .comicPages [aria-current="step"] span { background: #376451; }
   .comicInvitation { font-size: 12px; margin-top: 10px; padding: 0 8px; }
   .introChoices { margin-top: 14px; }
-  .introChoices .choices { gap: 8px; }
+  .introChoices .choices { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .introChoices .choices > button { padding: 10px; gap: 4px; min-height: 86px; }
   .introChoices .choices > button strong { font-size: 12px; }
   .introChoices .choices > button small { font-size: 10px; }
