@@ -14,6 +14,8 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Capture-only reports are available through the manual screenshots workflow.
+  testIgnore: ["**/screenshots.spec.ts"],
   outputDir: "./test-results",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -43,7 +45,9 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: `npm run build:export && npx serve out -l ${PORT} --no-clipboard`,
+        command: process.env.PLAYWRIGHT_REUSE_BUILD === "1"
+          ? `node scripts/serve-e2e-build.mjs ${PORT}`
+          : `npm run build:export && node scripts/serve-e2e-build.mjs ${PORT}`,
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 5 * 60 * 1000,

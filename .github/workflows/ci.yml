@@ -8,8 +8,7 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
+  # main pushes are checked once by deploy-pages.yml via workflow_call.
   pull_request:
   workflow_dispatch:
   workflow_call:
@@ -17,7 +16,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -50,9 +49,9 @@ jobs:
         if: steps.app.outputs.exists == 'true'
         run: npm run typecheck
 
-      - name: Build
+      - name: Build static E2E artifact
         if: steps.app.outputs.exists == 'true'
-        run: npm run build
+        run: npm run build:export
 
       - name: Install Playwright browser
         if: steps.app.outputs.exists == 'true'
@@ -61,6 +60,8 @@ jobs:
       - name: E2E smoke tests
         if: steps.app.outputs.exists == 'true'
         run: npm run test:e2e
+        env:
+          PLAYWRIGHT_REUSE_BUILD: "1"
 
       - name: Contact form E2E (mocked delivery)
         if: steps.app.outputs.exists == 'true'
@@ -69,6 +70,8 @@ jobs:
       - name: Firefox and WebKit demo E2E
         if: steps.app.outputs.exists == 'true'
         run: npm run test:e2e:compat
+        env:
+          PLAYWRIGHT_REUSE_BUILD: "1"
 
       # スクリーンショット付きレポート。Actions の Artifacts からダウンロードして目視確認できる。
       - name: Upload Playwright report
