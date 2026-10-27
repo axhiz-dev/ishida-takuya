@@ -15,6 +15,7 @@
 /playwright-report/
 /playwright-contact-report/
 /playwright-compat-report/
+/playwright-screenshots-report/
 /test-results/
 
 # next.js
