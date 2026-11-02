@@ -5,7 +5,7 @@ import { engineerNow, type NowInitiative } from "@/content/engineer";
 import { formatDotPeriod } from "@/lib/derive";
 import { Reveal } from "./Reveal";
 import { Tag } from "./Tag";
-import { ProductMigrationStory } from "./MigrationStory";
+import { InitiativeStory } from "./MigrationStory";
 
 /**
  * 現職での取り組み。主張のカードと、取り組みを 1 枚ずつ見せるカルーセル。
@@ -14,9 +14,6 @@ import { ProductMigrationStory } from "./MigrationStory";
  * 1 枚のパネルに収めてタブで件数と名前を先に見せる。
  * 紙では ResumeDocument が全件を縦に並べるので、ここは画面専用。
  */
-
-const beatLabel = (initiative: NowInitiative) =>
-  initiative.status === "ongoing" ? "現在" : "やりきった結果";
 
 function Slide({ initiative, index, active }: { initiative: NowInitiative; index: number; active: boolean }) {
   const ongoing = initiative.status === "ongoing";
@@ -38,31 +35,13 @@ function Slide({ initiative, index, active }: { initiative: NowInitiative; index
         >
           {ongoing ? "進行中" : "リリース済"}
         </span>
-        <h4 className={initiative.visual ? "text-[20px] leading-relaxed font-bold sm:text-[22px]" : "text-[17px] font-bold"}>{initiative.title}</h4>
+        <h4 className="text-[20px] leading-relaxed font-bold sm:text-[22px]">{initiative.title}</h4>
         <p className="text-[11px] text-ink-faint">
           {initiative.role} ・ {formatDotPeriod(initiative.period)}
         </p>
       </div>
 
-      {initiative.visual === "dashboard-migration" ? (
-        <ProductMigrationStory initiative={initiative} />
-      ) : (
-      <div className="mt-4 grid gap-2.5 md:grid-cols-[1fr_1.25fr_1fr] md:gap-0">
-        <p className="now-beat text-[13px] leading-[1.8]">
-          <span className="now-beat-label text-ink-faint">状況</span>
-          {initiative.situation}
-        </p>
-        <p className="now-beat now-beat-take text-[13px] leading-[1.8] font-medium">
-          <span className="now-beat-label text-accent">取りに行ったこと</span>
-          {initiative.action}
-        </p>
-        <p className="now-beat text-[13px] leading-[1.8]">
-          <span className="now-beat-label text-[#2a6f51]">{beatLabel(initiative)}</span>
-          {initiative.outcome}
-        </p>
-      </div>
-
-      )}
+      <InitiativeStory initiative={initiative} />
 
       {initiative.tech.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-1.5">

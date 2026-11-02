@@ -1,10 +1,12 @@
 import {
   ArrowDown, ArrowRight, CalendarDots, ChartBar, CheckCircle,
   Database, FileText, Gear, Headset, ListChecks, Stack, TreeStructure,
-  User, UsersThree, WarningCircle, Wrench,
+  User, UsersThree, WarningCircle, Wrench, Target, Code, TestTube,
+  ShieldCheck, DownloadSimple, Lightbulb, Checks, FlowArrow,
 } from "@phosphor-icons/react";
 import type { Icon } from "@phosphor-icons/react";
-import type { NowInitiative } from "@/content/engineer";
+import type { NowInitiative, InitiativeStoryIcon } from "@/content/engineer";
+import type { CSSProperties } from "react";
 
 function StoryIcon({ icon: IconComponent, size = 28 }: { icon: Icon; size?: number }) {
   return <IconComponent size={size} weight="regular" aria-hidden />;
@@ -18,40 +20,43 @@ function Background({ children }: { children: React.ReactNode }) {
   return <details className="migration-background"><summary>詳しい背景を見る</summary><div>{children}</div></details>;
 }
 
-export function ProductMigrationStory({ initiative }: { initiative: NowInitiative }) {
-  const viewpoints = [
-    { icon: UsersThree, title: "顧客の利用実態", note: "業務に必要な機能・使い方" },
-    { icon: Headset, title: "CS・セールスの視点", note: "顧客の要望・案内や提案のしやすさ" },
-    { icon: CalendarDots, title: "開発スケジュール", note: "目標時期・実現できる範囲" },
-  ];
-  const decisions = [
-    { icon: ListChecks, title: "必要な機能・使い方を整理", note: "利用実態・要望をもとに、必要な範囲を明確化" },
-    { icon: TreeStructure, title: "使いやすい構成を検討", note: "顧客の業務に合わせて、機能の構成を見直す" },
-    { icon: Gear, title: "期限に合わせて仕様を調整", note: "関係者と変更点をすり合わせる" },
-  ];
+const initiativeIcons: Record<InitiativeStoryIcon, Icon> = {
+  users: UsersThree, support: Headset, calendar: CalendarDots, list: ListChecks,
+  tree: TreeStructure, settings: Gear, document: FileText, target: Target,
+  code: Code, test: TestTube, shield: ShieldCheck, install: DownloadSimple,
+  lightbulb: Lightbulb, chart: ChartBar, checks: Checks, workflow: FlowArrow,
+};
+
+export function InitiativeStory({ initiative }: { initiative: NowInitiative }) {
+  const story = initiative.story;
   return (
-    <div className="migration-story migration-product" data-testid="product-migration-story">
-      <p className="migration-intro">既存機能の移行に向け、利用実態・要望・期限を整理し、関係者と仕様をすり合わせる。</p>
+    <div className="migration-story migration-product" data-testid="initiative-story" data-initiative={initiative.tab}>
+      <p className="migration-intro">{story.intro}</p>
       <div className="migration-product-map">
-        <section className="migration-inputs">
-          <h5 className="migration-column-title">判断の材料</h5>
+        <section className="migration-inputs" style={{ "--input-count": story.inputs.length } as CSSProperties}>
+          <h5 className="migration-column-title">{story.inputTitle}</h5>
           <ul className="migration-input-list">
-            {viewpoints.map(({ icon, title, note }) => <li key={title}><StoryIcon icon={icon} /><div><strong>{title}</strong><span>{note}</span></div></li>)}
+            {story.inputs.map(({ icon, title, note }) => <li key={title}><StoryIcon icon={initiativeIcons[icon]} /><div><strong>{title}</strong><span>{note}</span></div></li>)}
           </ul>
           <div className="migration-merge" aria-hidden><ArrowRight size={26} /></div>
         </section>
         <section className="migration-decisions">
-          <h5 className="migration-column-title">移行仕様をすり合わせる</h5>
+          <h5 className="migration-column-title">{story.processTitle}</h5>
           <ol className="migration-decision-list">
-            {decisions.map(({ icon, title, note }, index) => <li key={title}><span className="migration-step-number">{index + 1}</span><StoryIcon icon={icon} /><div><strong>{title}</strong><span>{note}</span></div>{index < decisions.length - 1 && <ArrowDown className="migration-step-arrow" size={18} aria-hidden />}</li>)}
+            {story.steps.map(({ icon, title, note }, index) => <li key={title}><span className="migration-step-number">{index + 1}</span><StoryIcon icon={initiativeIcons[icon]} /><div><strong>{title}</strong><span>{note}</span></div>{index < story.steps.length - 1 && <ArrowDown className="migration-step-arrow" size={18} aria-hidden />}</li>)}
           </ol>
         </section>
         <section className="migration-agreement">
-          <h5 className="migration-column-title">合意した移行方針</h5>
-          <div className="migration-agreement-body"><ArrowRight className="migration-agreement-arrow" size={30} aria-hidden /><div className="migration-document"><FileText size={52} weight="regular" aria-hidden /></div><p>提供範囲・仕様・<br className="migration-desktop-break" />進め方に合意</p></div>
+          <h5 className="migration-column-title">{story.outcomeTitle}</h5>
+          <div className="migration-agreement-body">
+            <ArrowRight className="migration-agreement-arrow" size={30} aria-hidden />
+            <div className="migration-document"><StoryIcon icon={initiativeIcons[story.outcome.icon]} size={52} /></div>
+            <p>{story.outcome.title}</p>
+            <span className="migration-outcome-note">{story.outcome.note}</span>
+          </div>
         </section>
       </div>
-      <Contribution>仕様の再整理と、関係者との合意形成。</Contribution>
+      <Contribution>{story.contribution}</Contribution>
       <Background><p>{initiative.situation}</p><p>{initiative.action}</p><p>{initiative.outcome}</p></Background>
     </div>
   );
