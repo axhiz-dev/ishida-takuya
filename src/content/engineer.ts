@@ -162,27 +162,58 @@ export type TechTopic = {
   summary: string;
   tech: string[];
   href?: string;
-  diagram?: "aggregation" | "cache";
+  caseStudy?: {
+    problem: { title: string; description: string };
+    solution: { title: string; description: string };
+    contribution: string;
+    ongoing: string;
+  };
 };
 
 export const engineerTechTopics: TechTopic[] = [
   {
     source: "HRBrain（実装中）",
     period: { from: "2026-04", to: "present" },
-    title: "事前集計から都度集計へ：時系列集計の設計と性能検証",
+    title: "共通基盤への負荷を抑える、時系列集計の設計",
     summary:
-      "BigQueryによる事前集計から、閲覧時に必要なデータを取得する都度集計へ移行する設計。Goで分割取得・集計処理を実装し、共通基盤への負荷に配慮。性能検証で待ち時間の課題を把握し、取得件数・並列度・基盤側の性能改善を関係チームと協議している。",
-    tech: ["Go", "BigQuery", "React", "Recharts"],
-    diagram: "aggregation",
+      "事前集計の運用コストを背景に、BigQueryから都度集計へ移行する設計。共有DBに負荷を集中させないようGoで分割取得・集計処理を実装。性能検証をもとに、共通基盤チームと取得件数・並列度・基盤側の性能改善を協議している。",
+    tech: ["Go", "BigQuery"],
+    caseStudy: {
+      problem: {
+        title: "大量の時系列データを、その場で集計する必要がある",
+        description:
+          "事前集計の運用コストを背景に、閲覧時に集計する方式へ移行。人事データを過去の複数時点で集計するため処理が重く、他プロダクトも使う共通基盤への負荷が課題になった。",
+      },
+      solution: {
+        title: "データを分割取得し、負荷を抑えて集計する",
+        description:
+          "共通基盤チームと取得単位を協議し、Goで分割取得・集計処理を実装。性能検証で待ち時間を把握し、取得件数や並列度の調整、基盤側の性能改善も含めて検討している。",
+      },
+      contribution: "集計処理の実装に加え、プロダクトの待ち時間と共通基盤の負荷制約を踏まえ、チーム間で性能要件を調整。",
+      ongoing: "実装・検証中。初回の集計待ち時間の改善を継続している。",
+    },
   },
   {
     source: "HRBrain（実装中）",
     period: { from: "2026-04", to: "present" },
-    title: "Valkeyで集計結果を再利用：データ鮮度と負荷のバランス設計",
+    title: "待ち時間とデータ鮮度を両立する、キャッシュの仕様設計",
     summary:
-      "Valkeyによる集計結果のキャッシュ導入を提案。DB負荷・表示待ち時間・更新反映の遅れによる問い合わせ対応を踏まえ、PdM・テックリードと保持方針を決定。管理者向けの手動更新と連続操作の抑制も設計し、共通基盤側の改善とアプリ側の追加対策を比較検討している。",
+      "都度集計の負荷・待ち時間を抑えるため、Valkeyの導入を提案。更新反映の遅れによる問い合わせ対応も踏まえ、PdM・テックリードと保持方針を決定。更新を確認したい管理者向けに手動更新と連続操作の抑制も設計している。",
     tech: ["Go", "Valkey", "React"],
-    diagram: "cache",
+    caseStudy: {
+      problem: {
+        title: "毎回の再集計は重く、長いキャッシュは更新確認を妨げる",
+        description:
+          "閲覧のたびに再集計すると、待ち時間とDB負荷が発生する。一方、キャッシュを長く保持すると人事データの変更が反映されず、問い合わせ対応が増える懸念があった。",
+      },
+      solution: {
+        title: "集計結果を再利用し、管理者には手動更新を用意する",
+        description:
+          "Valkeyで集計結果をキャッシュ。負荷と更新反映の遅れを踏まえて保持方針を決め、管理者が更新を確認できる操作も用意。連続操作を抑制する仕様を合わせて設計した。",
+      },
+      contribution: "キャッシュ導入を自ら提案。PdM・テックリードと、性能だけでなく使い勝手・問い合わせ対応コストも踏まえて仕様を決定。",
+      ongoing: "実装中。初回は集計が必要となるため、基盤側の性能改善と合わせて検証している。",
+    },
   },
   {
     source: "HRBrain",
