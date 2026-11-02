@@ -65,71 +65,63 @@ body {
   outline-offset: 2px;
 }
 
-/* ===== 技術トピック：課題と解決策 ===== */
-.topic-case-study {
-  margin-top: 1rem;
-  min-width: 0;
-}
-.topic-case-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-.topic-case-panel {
-  padding: 1.1rem;
-  border: 1px solid var(--color-line);
-  border-radius: 0.375rem;
-  background: var(--color-paper);
-}
-.topic-case-solution {
-  background: var(--color-accent-soft);
-  border-color: #bac8d8;
-}
-.topic-case-label {
-  color: var(--color-accent);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.topic-case-title {
-  margin-top: 0.6rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.8;
-}
-.topic-case-description {
-  margin-top: 0.5rem;
-  color: var(--color-ink-soft);
-  font-size: 0.8rem;
-  line-height: 1.9;
-}
-.topic-case-contribution {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.5rem 1rem;
-  margin-top: 1rem;
-  padding-left: 0.8rem;
-  border-left: 2px solid var(--color-accent);
-  font-size: 0.8rem;
-  line-height: 1.9;
-}
-.topic-case-contribution dt {
-  color: var(--color-accent);
-  font-weight: 700;
-}
-.topic-case-contribution dd {
-  color: var(--color-ink-soft);
-}
-.topic-case-ongoing {
-  margin-top: 0.75rem;
-  color: var(--color-ink-faint);
-  font-size: 0.7rem;
-  line-height: 1.8;
-}
+/* ===== 技術トピック：課題と解決策の概念図 ===== */
+.topic-case-study { margin-top: 1rem; min-width: 0; }
+.topic-case-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.topic-case-panel { padding: 1.1rem; border: 1px solid var(--color-line); border-radius: 0.375rem; background: var(--color-paper); }
+.topic-case-solution { background: var(--color-accent-soft); border-color: #bac8d8; }
+.topic-case-label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; color: var(--color-accent); font-size: 0.75rem; font-weight: 700; }
+.topic-case-label span { color: var(--color-ink-soft); font-size: 0.65rem; font-weight: 400; }
+.topic-case-title { margin-top: 0.6rem; font-size: 0.95rem; font-weight: 700; line-height: 1.8; }
+.case-visual { display: flex; flex-direction: column; justify-content: center; min-height: 200px; margin-top: 1rem; color: var(--color-ink-soft); }
+.case-visual svg { flex-shrink: 0; }
+.case-data-sources { display: flex; justify-content: center; align-items: center; gap: 1rem; }
+.case-data-sources > span:not(.case-times) { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; }
+.case-times { font-size: 1.2rem; color: var(--color-ink-faint); }
+.case-load-path { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; margin: 0.8rem 0; font-size: 0.7rem; }
+.case-load-path svg { transform: rotate(90deg); }
+.case-shared-db { display: flex; justify-content: center; align-items: center; gap: 0.6rem; }
+.case-shared-db strong { display: block; font-size: 0.8rem; }
+.case-shared-db small { display: block; font-size: 0.65rem; }
+.case-processing { display: flex; justify-content: center; align-items: center; gap: 0.65rem; color: var(--color-accent); }
+.case-process-node { display: flex; flex-direction: column; align-items: center; gap: 0.65rem; min-width: 3.6rem; }
+.case-process-node strong { font-size: 0.75rem; }
+.case-go { display: flex; height: 36px; align-items: center; font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; }
+.case-control { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 1.2rem; }
+.case-control span { padding: 0.25rem 0.6rem; border: 1px solid #bac8d8; border-radius: 1rem; background: white; color: var(--color-accent); font-size: 0.65rem; }
+.case-visual-caption { margin-top: 0.9rem; font-size: 0.7rem; line-height: 1.8; text-align: center; }
+.case-tradeoff { display: flex; justify-content: center; align-items: center; gap: 1.8rem; }
+.case-tradeoff > span { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+.case-tradeoff small { margin-top: 0.3rem; font-size: 0.65rem; }
+.case-tradeoff strong { font-size: 0.85rem; }
+.case-connector { color: var(--color-ink-faint); }
+.case-cache-lanes { display: grid; gap: 1rem; }
+.case-cache-lanes > div { display: grid; grid-template-columns: 5.5rem 18px minmax(0, 1fr); align-items: center; gap: 0.6rem; }
+.case-cache-lanes > div > span { font-size: 0.7rem; }
+.case-cache-lanes strong { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 0.1rem 0.5rem; align-items: center; color: var(--color-accent); font-size: 0.8rem; }
+.case-cache-lanes strong svg { grid-row: span 2; }
+.case-cache-lanes small { grid-column: 2; color: var(--color-ink-soft); font-size: 0.65rem; font-weight: 400; }
+.topic-case-contribution { display: flex; gap: 0.7rem; align-items: center; margin-top: 1rem; color: var(--color-accent); }
+.topic-case-contribution > svg { flex-shrink: 0; }
+.topic-case-contribution p { color: var(--color-ink-soft); font-size: 0.75rem; line-height: 1.9; }
+.topic-case-contribution strong { margin-right: 0.8rem; color: var(--color-accent); font-weight: 700; }
+.topic-case-details { margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--color-line); font-size: 0.75rem; line-height: 1.9; color: var(--color-ink-soft); }
+.topic-case-details summary { width: fit-content; cursor: pointer; color: var(--color-accent); }
+.topic-case-details summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; border-radius: 2px; }
+.topic-case-details dl { margin-top: 0.8rem; }
+.topic-case-details dt { margin-top: 0.6rem; font-weight: 700; color: var(--color-ink); }
 @media (max-width: 639px) {
-  .topic-case-columns,
-  .topic-case-contribution {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .topic-case-columns { grid-template-columns: minmax(0, 1fr); }
+  .topic-case-contribution strong { display: block; }
+}
+@media (max-width: 374px) {
+  .topic-case-panel { padding: 0.85rem; }
+  .case-data-sources { gap: 0.5rem; }
+  .case-data-sources > span:not(.case-times) { flex-direction: column; }
+  .case-processing { gap: 0.2rem; }
+  .case-process-node { min-width: 3rem; }
+  .case-tradeoff { gap: 1rem; }
+  .case-cache-lanes > div { grid-template-columns: 4.8rem 18px minmax(0, 1fr); gap: 0.35rem; }
 }
 
 /* ===== 方眼紙風の地 ===== */
