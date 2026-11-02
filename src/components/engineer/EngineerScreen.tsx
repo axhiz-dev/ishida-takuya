@@ -21,6 +21,7 @@ import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 import { SiteHeader } from "./SiteHeader";
 import { Tag } from "./Tag";
+import { TechTopicDiagram } from "./TechTopicDiagram";
 
 /* ===== 技術タグのフィルタ ===== */
 
@@ -373,6 +374,7 @@ export function EngineerScreen() {
                   </p>
                   <h3 className="mt-1.5 text-[15px] leading-relaxed font-bold">{topic.title}</h3>
                   <p className="mt-2 flex-1 text-[13px] leading-[1.8] text-ink-soft">{topic.summary}</p>
+                  {topic.diagram && <TechTopicDiagram kind={topic.diagram} />}
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {topic.tech.map((tech) => (
                       <Tag key={tech}>{tech}</Tag>
@@ -383,7 +385,7 @@ export function EngineerScreen() {
               );
               const cardClass = "flex h-full flex-col rounded-md border border-line bg-white p-5";
               return (
-                <Reveal key={topic.title}>
+                <Reveal key={topic.title} className={topic.diagram ? "md:col-span-2" : undefined}>
                   {topic.href ? (
                     <a href={topic.href} target="_blank" rel="noreferrer" className={`${cardClass} card-hover`}>
                       {body}

@@ -82,14 +82,14 @@ export const engineerNow: EngineerNow = {
   initiatives: [
     {
       tab: "グラフパーツ",
-      title: "既存グラフサービス終了に伴う代替機能の開発",
+      title: "ノーコードツールのグラフ機能開発",
       role: "仕様検討・フルスタック開発",
       // 開始月は本人の記憶に基づく概算（2026年4月頃）。
       period: { from: "2026-04", to: "present" },
       status: "ongoing",
-      situation: "既存サービス終了後も顧客が人事データの分析を継続できるよう、ノーコードツール内にグラフパーツを開発。",
+      situation: "人事データを利用者自身で可視化できるよう、ノーコードツール内にグラフパーツを開発。",
       action:
-        "キャッシュ導入を提案し、PdM・テックリードとデータ鮮度・運用コストを踏まえて仕様を決定。大規模顧客の待ち時間を課題として、中央DBチームと性能改善を協議。",
+        "キャッシュ導入を提案し、PdM・テックリードとデータ鮮度・運用コストを踏まえて仕様を決定。大規模顧客の待ち時間を課題として、共通基盤チームと性能改善を協議。",
       outcome: "Go・Reactで実装中。共通基盤への負荷と顧客の使い勝手を検証しながら、設計を調整している。",
       tech: ["Go", "React", "Recharts", "Valkey"],
     },
@@ -162,24 +162,27 @@ export type TechTopic = {
   summary: string;
   tech: string[];
   href?: string;
+  diagram?: "aggregation" | "cache";
 };
 
 export const engineerTechTopics: TechTopic[] = [
   {
     source: "HRBrain（実装中）",
     period: { from: "2026-04", to: "present" },
-    title: "最大約4.2万人・25時点の集計設計と性能検証",
+    title: "事前集計から都度集計へ：時系列集計の設計と性能検証",
     summary:
-      "BigQueryの事前集計から都度集計へ移行する設計。中央DBチームと合意した1,000人単位の分割取得で、共通基盤への負荷を抑える方針。低スペックの開発環境では1万人・25時点の集計完了に約44秒と実測（描画時間は含まない）。取得件数・並列度・基盤増強を協議中。",
+      "BigQueryによる事前集計から、閲覧時に必要なデータを取得する都度集計へ移行する設計。Goで分割取得・集計処理を実装し、共通基盤への負荷に配慮。性能検証で待ち時間の課題を把握し、取得件数・並列度・基盤側の性能改善を関係チームと協議している。",
     tech: ["Go", "BigQuery", "React", "Recharts"],
+    diagram: "aggregation",
   },
   {
     source: "HRBrain（実装中）",
     period: { from: "2026-04", to: "present" },
-    title: "データ鮮度と運用コストを踏まえたキャッシュ設計",
+    title: "Valkeyで集計結果を再利用：データ鮮度と負荷のバランス設計",
     summary:
-      "Valkey導入を提案し、DB負荷・更新反映の遅れ・問い合わせ対応コストを踏まえて保持時間を4時間に合意。管理者画面には更新ボタンと押下後30秒の無効化を用意。singleflight・非同期処理も検討し、他プロダクトにも効果のある中央DB強化を優先して現時点では見送った。",
+      "Valkeyによる集計結果のキャッシュ導入を提案。DB負荷・表示待ち時間・更新反映の遅れによる問い合わせ対応を踏まえ、PdM・テックリードと保持方針を決定。管理者向けの手動更新と連続操作の抑制も設計し、共通基盤側の改善とアプリ側の追加対策を比較検討している。",
     tech: ["Go", "Valkey", "React"],
+    diagram: "cache",
   },
   {
     source: "HRBrain",
