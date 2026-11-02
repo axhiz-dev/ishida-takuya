@@ -58,6 +58,7 @@ export type NowInitiative = {
   /** released なら結果、ongoing ならいまの状況。 */
   outcome: string;
   tech: string[];
+  visual?: "dashboard-migration";
 };
 
 export type EngineerNow = {
@@ -81,17 +82,18 @@ export const engineerNow: EngineerNow = {
   team: "グラフパーツ開発：エンジニア4名／QA2名／PdM・テックリード各1名",
   initiatives: [
     {
-      tab: "グラフパーツ",
-      title: "ノーコードツールのグラフ機能開発",
-      role: "仕様検討・フルスタック開発",
+      tab: "ダッシュボード移行",
+      title: "顧客の業務と開発の実現性から、移行仕様を決める",
+      role: "仕様整理・合意形成・フルスタック開発",
       // 開始月は本人の記憶に基づく概算（2026年4月頃）。
       period: { from: "2026-04", to: "present" },
       status: "ongoing",
-      situation: "人事データを利用者自身で可視化できるよう、ノーコードツール内にグラフパーツを開発。",
+      situation: "既存ダッシュボード機能の移行に向け、顧客の利用実態とCS・セールスの視点から、提供する機能と使い方を整理。",
       action:
-        "キャッシュ導入を提案し、PdM・テックリードとデータ鮮度・運用コストを踏まえて仕様を決定。大規模顧客の待ち時間を課題として、共通基盤チームと性能改善を協議。",
-      outcome: "Go・Reactで実装中。共通基盤への負荷と顧客の使い勝手を検証しながら、設計を調整している。",
-      tech: ["Go", "React", "Recharts", "Valkey"],
+        "引き継ぐ機能、省ける機能、使いやすく再構成する機能を検討。開発組織全体の目標スケジュールを踏まえ、必要な仕様変更を関係者と調整した。",
+      outcome: "顧客の業務継続と開発の実現性を踏まえ、提供範囲・仕様・進め方に合意。Go・Reactで実装を進めている。",
+      tech: ["Go", "React"],
+      visual: "dashboard-migration",
     },
     {
       tab: "テンプレート生成",
@@ -162,61 +164,18 @@ export type TechTopic = {
   summary: string;
   tech: string[];
   href?: string;
-  caseStudy?: {
-    visual: "aggregation" | "cache";
-    problem: { title: string; description: string };
-    solution: { title: string; description: string };
-    contribution: string;
-    ongoing: string;
-  };
+  visual?: "dashboard-migration";
 };
 
 export const engineerTechTopics: TechTopic[] = [
   {
     source: "HRBrain（実装中）",
     period: { from: "2026-04", to: "present" },
-    title: "共通基盤への負荷を抑える、時系列集計の設計",
+    title: "必要な時に取得・集計し、共通基盤への負荷を抑える",
     summary:
-      "事前集計の運用コストを背景に、BigQueryから都度集計へ移行する設計。共有DBに負荷を集中させないようGoで分割取得・集計処理を実装。性能検証をもとに、共通基盤チームと取得件数・並列度・基盤側の性能改善を協議している。",
-    tech: ["Go", "BigQuery"],
-    caseStudy: {
-      visual: "aggregation",
-      problem: {
-        title: "重い集計が、共通基盤の負荷になる",
-        description:
-          "事前集計の運用コストを背景に、閲覧時に集計する方式へ移行。人事データを過去の複数時点で集計するため処理が重く、他プロダクトも使う共通基盤への負荷が課題になった。",
-      },
-      solution: {
-        title: "分けて取得し、負荷をコントロール",
-        description:
-          "共通基盤チームと取得単位を協議し、Goで分割取得・集計処理を実装。性能検証で待ち時間を把握し、取得件数や並列度の調整、基盤側の性能改善も含めて検討している。",
-      },
-      contribution: "Goで集計を実装し、共通基盤チームと負荷・待ち時間の要件を調整。",
-      ongoing: "実装・検証中。初回の集計待ち時間の改善を継続している。",
-    },
-  },
-  {
-    source: "HRBrain（実装中）",
-    period: { from: "2026-04", to: "present" },
-    title: "待ち時間とデータ鮮度を両立する、キャッシュの仕様設計",
-    summary:
-      "都度集計の負荷・待ち時間を抑えるため、Valkeyの導入を提案。更新反映の遅れによる問い合わせ対応も踏まえ、PdM・テックリードと保持方針を決定。更新を確認したい管理者向けに手動更新と連続操作の抑制も設計している。",
-    tech: ["Go", "Valkey", "React"],
-    caseStudy: {
-      visual: "cache",
-      problem: {
-        title: "速さを取ると、更新が伝わりにくい",
-        description:
-          "閲覧のたびに再集計すると、待ち時間とDB負荷が発生する。一方、キャッシュを長く保持すると人事データの変更が反映されず、問い合わせ対応が増える懸念があった。",
-      },
-      solution: {
-        title: "通常は再利用、更新確認は手動で",
-        description:
-          "Valkeyで集計結果をキャッシュ。負荷と更新反映の遅れを踏まえて保持方針を決め、管理者が更新を確認できる操作も用意。連続操作を抑制する仕様を合わせて設計した。",
-      },
-      contribution: "Valkey導入を提案し、PdM・テックリードと保持方針・更新操作を決定。",
-      ongoing: "実装中。初回は集計が必要となるため、基盤側の性能改善と合わせて検証している。",
-    },
+      "BigQueryに日次蓄積していた過去データのインフラコストと保守負担を見直し、中央DBから必要なデータを集計時に取得する方式へ移行。大規模な過去時点集計によるDB負荷と表示待ち時間に対し、Goでの分割取得とValkeyによる結果キャッシュを設計。データ鮮度・問い合わせ対応コストを踏まえて保持方針と管理者の手動更新を検討し、中央DBチームと性能改善を協議しながら、Go・Reactで実装・検証を進めている。",
+    tech: ["Go", "React", "BigQuery", "Valkey"],
+    visual: "dashboard-migration",
   },
   {
     source: "HRBrain",

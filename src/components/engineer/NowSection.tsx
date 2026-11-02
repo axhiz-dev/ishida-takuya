@@ -5,6 +5,7 @@ import { engineerNow, type NowInitiative } from "@/content/engineer";
 import { formatDotPeriod } from "@/lib/derive";
 import { Reveal } from "./Reveal";
 import { Tag } from "./Tag";
+import { ProductMigrationStory } from "./MigrationStory";
 
 /**
  * 現職での取り組み。主張のカードと、取り組みを 1 枚ずつ見せるカルーセル。
@@ -25,6 +26,7 @@ function Slide({ initiative, index, active }: { initiative: NowInitiative; index
       role="tabpanel"
       aria-labelledby={`now-tab-${index}`}
       aria-hidden={!active}
+      inert={!active}
       data-testid="now-slide"
       className="w-full shrink-0 snap-start px-5 py-6 sm:px-6"
     >
@@ -36,12 +38,15 @@ function Slide({ initiative, index, active }: { initiative: NowInitiative; index
         >
           {ongoing ? "進行中" : "リリース済"}
         </span>
-        <h4 className="text-[17px] font-bold">{initiative.title}</h4>
+        <h4 className={initiative.visual ? "text-[20px] leading-relaxed font-bold sm:text-[22px]" : "text-[17px] font-bold"}>{initiative.title}</h4>
         <p className="text-[11px] text-ink-faint">
           {initiative.role} ・ {formatDotPeriod(initiative.period)}
         </p>
       </div>
 
+      {initiative.visual === "dashboard-migration" ? (
+        <ProductMigrationStory initiative={initiative} />
+      ) : (
       <div className="mt-4 grid gap-2.5 md:grid-cols-[1fr_1.25fr_1fr] md:gap-0">
         <p className="now-beat text-[13px] leading-[1.8]">
           <span className="now-beat-label text-ink-faint">状況</span>
@@ -56,6 +61,8 @@ function Slide({ initiative, index, active }: { initiative: NowInitiative; index
           {initiative.outcome}
         </p>
       </div>
+
+      )}
 
       {initiative.tech.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-1.5">
