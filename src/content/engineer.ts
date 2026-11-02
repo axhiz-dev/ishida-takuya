@@ -58,6 +58,7 @@ export type NowInitiative = {
   /** released なら結果、ongoing ならいまの状況。 */
   outcome: string;
   tech: string[];
+  visual?: "dashboard-migration";
 };
 
 export type EngineerNow = {
@@ -81,17 +82,18 @@ export const engineerNow: EngineerNow = {
   team: "グラフパーツ開発：エンジニア4名／QA2名／PdM・テックリード各1名",
   initiatives: [
     {
-      tab: "グラフパーツ",
-      title: "既存グラフサービス終了に伴う代替機能の開発",
-      role: "仕様検討・フルスタック開発",
+      tab: "ダッシュボード移行",
+      title: "顧客の業務と開発の実現性から、移行仕様を決める",
+      role: "仕様整理・合意形成・フルスタック開発",
       // 開始月は本人の記憶に基づく概算（2026年4月頃）。
       period: { from: "2026-04", to: "present" },
       status: "ongoing",
-      situation: "既存サービス終了後も顧客が人事データの分析を継続できるよう、ノーコードツール内にグラフパーツを開発。",
+      situation: "既存ダッシュボード機能の移行に向け、顧客の利用実態とCS・セールスの視点から、提供する機能と使い方を整理。",
       action:
-        "キャッシュ導入を提案し、PdM・テックリードとデータ鮮度・運用コストを踏まえて仕様を決定。大規模顧客の待ち時間を課題として、中央DBチームと性能改善を協議。",
-      outcome: "Go・Reactで実装中。共通基盤への負荷と顧客の使い勝手を検証しながら、設計を調整している。",
-      tech: ["Go", "React", "Recharts", "Valkey"],
+        "引き継ぐ機能、省ける機能、使いやすく再構成する機能を検討。開発組織全体の目標スケジュールを踏まえ、必要な仕様変更を関係者と調整した。",
+      outcome: "顧客の業務継続と開発の実現性を踏まえ、提供範囲・仕様・進め方に合意。Go・Reactで実装を進めている。",
+      tech: ["Go", "React"],
+      visual: "dashboard-migration",
     },
     {
       tab: "テンプレート生成",
@@ -162,24 +164,18 @@ export type TechTopic = {
   summary: string;
   tech: string[];
   href?: string;
+  visual?: "dashboard-migration";
 };
 
 export const engineerTechTopics: TechTopic[] = [
   {
     source: "HRBrain（実装中）",
     period: { from: "2026-04", to: "present" },
-    title: "最大約4.2万人・25時点の集計設計と性能検証",
+    title: "必要な時に取得・集計し、共通基盤への負荷を抑える",
     summary:
-      "BigQueryの事前集計から都度集計へ移行する設計。中央DBチームと合意した1,000人単位の分割取得で、共通基盤への負荷を抑える方針。低スペックの開発環境では1万人・25時点の集計完了に約44秒と実測（描画時間は含まない）。取得件数・並列度・基盤増強を協議中。",
-    tech: ["Go", "BigQuery", "React", "Recharts"],
-  },
-  {
-    source: "HRBrain（実装中）",
-    period: { from: "2026-04", to: "present" },
-    title: "データ鮮度と運用コストを踏まえたキャッシュ設計",
-    summary:
-      "Valkey導入を提案し、DB負荷・更新反映の遅れ・問い合わせ対応コストを踏まえて保持時間を4時間に合意。管理者画面には更新ボタンと押下後30秒の無効化を用意。singleflight・非同期処理も検討し、他プロダクトにも効果のある中央DB強化を優先して現時点では見送った。",
-    tech: ["Go", "Valkey", "React"],
+      "BigQueryに日次蓄積していた過去データのインフラコストと保守負担を見直し、中央DBから必要なデータを集計時に取得する方式へ移行。大規模な過去時点集計によるDB負荷と表示待ち時間に対し、Goでの分割取得とValkeyによる結果キャッシュを設計。データ鮮度・問い合わせ対応コストを踏まえて保持方針と管理者の手動更新を検討し、中央DBチームと性能改善を協議しながら、Go・Reactで実装・検証を進めている。",
+    tech: ["Go", "React", "BigQuery", "Valkey"],
+    visual: "dashboard-migration",
   },
   {
     source: "HRBrain",

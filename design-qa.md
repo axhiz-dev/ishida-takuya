@@ -1,3 +1,37 @@
+# Dashboard migration diagrams QA
+
+final result: passed
+
+## Scope and visual truth
+- Selected reference: revised first Product Design option, `/workspace/scratch/8410e71dce3f/generated_images/exec-7779806d-43a0-4abe-85f9-1771e904c054.png` (1036 × 1518).
+- The approved placement separates the two diagrams: specification/consensus in the HRBrain initiative carousel, technical migration in Tech Topics. The global mock page title is intentionally not added to the existing resume.
+- Browser preview: `http://terminal.local:4173/engineer/`, cloud Chrome. Checked product diagram, details disclosure, initiative tabs, technical-topic navigation and technical disclosure.
+- Local static browser captures at 1440 × 1000 CSS px, device scale 1: `/tmp/migration-product-desktop.png` (974 × 645) and `/tmp/migration-tech-desktop.png` (976 × 864).
+- Combined evidence: `/tmp/migration-product-comparison.png` and `/tmp/migration-tech-comparison.png`. Corresponding source sections and rendered components normalized to 980px width, then placed side by side. No browser/device chrome in the component comparisons.
+- Mobile evidence: `/tmp/migration-product-mobile.png`, `/tmp/migration-tech-mobile.png`, 375 × 900 CSS viewport. Additional 320 / 414 / 768px checks passed without horizontal overflow.
+
+## Findings and required surfaces
+No outstanding actionable P0/P1/P2 issues.
+- Typography: existing Japanese site font retained. Visual initiative/topic headings enlarged to 20–22px; diagram labels and explanatory text remain readable. Nested headings follow the existing H4/H5 initiative and H3/H4 topic hierarchy.
+- Spacing/layout: matches the selected three-viewpoint → three-step specification review → agreed scope map. Technical section retains three causally ordered rows. Existing carousel/card framing is intentional. Narrow screens stack the stages and rotate flow arrows downward.
+- Tokens: existing offwhite, navy, light-blue and ink colors retained. Contrast E2E passed.
+- Assets: Phosphor icons used for people, calendar, steps, database, document and arrows. No rasterized diagram text. All labels are selectable HTML, with decorative icons hidden from assistive technology.
+- Copy: approved product and technical narratives preserved. The generated mock's incorrect “期間を分割” is corrected to “データを分割して取得”. Implementation is explicitly ongoing; improvement effects are not claimed as measured outcomes.
+
+## Comparison and verification history
+- Initial browser capture: diagram headings were too close to the old small-card type scale. Enlarged visual headings and key node labels before the final combined comparison.
+- Existing carousel review: taller diagrams would have left excess space in shorter inactive slides. Inactive slides now have zero block height and `inert`, while keeping their horizontal carousel slot. Static browser verification measured 645px for the diagram slide and 232px for the template slide.
+- Post-fix desktop and mobile combined/cropped evidence reviewed. No clipping, overlapping connectors or unreadable labels found. Differences from the full standalone mock are the intentional existing-page section placement and framing.
+- Cloud browser disclosures and tab switching passed; static browser keyboard disclosure check passed.
+- App console: no page errors in static browser capture. Cloud logs contain unrelated extension metadata errors; no application error associated with these changes.
+- Lint, typecheck, static export and 15 existing engineer-related E2E tests passed, including contrast, responsive layout, print and seven-page A4 PDF output.
+
+## Follow-up polish
+- P3: icon outlines and connector curvature differ slightly from the generated mock to use the site's existing icon library and responsive HTML layout.
+- Physical devices and browser engines other than Chromium were not tested locally.
+
+---
+
 # Business profile banner QA
 
 final result: passed
