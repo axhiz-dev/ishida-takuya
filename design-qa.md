@@ -1,3 +1,41 @@
+# HRBrain five initiative stories QA
+
+final result: passed
+
+## Scope and source
+- User approved applying the existing graph-parts diagram language to all five initiatives and requested this order: グラフパーツ → ユニットリーダー → AI駆動開発 → Slack MCP → テンプレート機能.
+- Visual reference: `/workspace/scratch/8410e71dce3f/generated_images/exec-7779806d-43a0-4abe-85f9-1771e904c054.png` (1036 × 1518); upper product-engineering section is the approved pattern.
+- User's new template emphasis: voluntary feature proposal and completed PoC, leading to sales/CS proposal activity. The resulting copy describes additional proposals, not a measured revenue increase.
+- Existing site framing, tabs, typeface and technical-topic diagram remain in place. Each initiative supplies its own context, three actions, outcome/current state and personal contribution to the shared diagram component.
+
+## Evidence and normalization
+- Cloud preview: `http://terminal.local:4173/engineer/`. Cloud Chrome DOM confirmed requested tab order and all four new diagram headings. Tab switching and the settled template diagram were inspected.
+- Static browser screenshots: `/tmp/initiative-{0..4}-1440.png`, captured at 1440 × 1000 CSS px, device scale 1. Focus outlines on the disclosure in these captures reflect the keyboard verification state.
+- Mobile screenshots: `/tmp/initiative-{0..4}-375.png` at 375 × 1000 CSS px, scale 1. All five slides at 320 / 375 / 414 / 768px were checked for overflow and disclosure operation.
+- Combined comparisons: `/tmp/initiative-comparison-{0..4}.png`. Approved source section and each implementation were normalized to 980px width, placed side by side, and inspected. The reference supplies layout/style; the four new stories intentionally have new content and icons.
+- Final balanced-heading captures: `/tmp/initiative-{0..4}-final.png`.
+
+## Findings and fidelity surfaces
+No remaining actionable P0/P1/P2 findings.
+- Fonts/typography: same Japanese site font, 20–22px initiative heading, navy bold action labels and readable secondary copy. Result headings use balanced wrapping to avoid orphan final characters.
+- Layout/spacing: context on the left, connected three-step action sequence in the center, outcome/current state on the right. Template story has two input nodes; connector position adapts to node count. On narrow screens the stages stack with downward connectors.
+- Colors/tokens: existing paper, ink, navy and light-blue tokens retained. Existing contrast E2E passed.
+- Image/icon fidelity: editable HTML content with Phosphor icons, matching the previously approved visual language. No rasterized text or added decorative image assets. Decorative icons are hidden from assistive technology; headings and ordered lists preserve meaning.
+- Copy/content: leadership emphasizes decision structure and cross-team planning; AI development emphasizes quality-first prioritization and Skills/E2E; Slack MCP covers adoption conditions through ongoing operation; template covers self-initiated proposal, PoC and sales/CS adoption. Ongoing work is not presented as a completed speed/revenue improvement.
+
+## Iterations and verification
+- Initial combined review found an orphan final character in a narrow outcome column. Added balanced wrapping, then captured the final built slides again.
+- All five tabs and disclosures passed at desktop and four narrow widths, including Enter to open/close each disclosure and ArrowRight tab navigation.
+- Static browser page errors: none.
+- Existing engineer E2E: 15 passed, including responsive overflow, headings, contrast, print visibility, all-initiative print content and seven-page A4 PDF export.
+- Lint, typecheck and static export passed. Final static export repeated after the wrapping adjustment.
+
+## Follow-up polish
+- P3: exact connector curvature and individual icon shapes differ from the generated mock; existing icon library and responsive connector layout are retained.
+- Physical devices and non-Chromium browser engines were not checked locally.
+
+---
+
 # Dashboard migration diagrams QA
 
 final result: passed

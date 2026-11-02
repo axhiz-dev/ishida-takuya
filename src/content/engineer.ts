@@ -39,11 +39,30 @@ export const engineerLinks = [
 
 /* ────────────────────────────── 現職での取り組み ── */
 
-/**
- * 現職の取り組み 1 件。画面ではカルーセルの 1 枚、紙では縦に並ぶ箱になる。
- * 「状況 → 取りに行ったこと → 結果」の順で読ませる。技術の中身はここに書かず、
- * 技術トピック（engineerTechTopics）へ回す。
- */
+/** 取り組みの図で使うアイコン。本文・図の文言はこのファイルに集約する。 */
+export type InitiativeStoryIcon =
+  | "users" | "support" | "calendar" | "list" | "tree" | "settings"
+  | "document" | "target" | "code" | "test" | "shield" | "install"
+  | "lightbulb" | "chart" | "checks" | "workflow";
+
+export type InitiativeStoryNode = {
+  icon: InitiativeStoryIcon;
+  title: string;
+  note: string;
+};
+
+export type InitiativeStoryData = {
+  intro: string;
+  inputTitle: string;
+  inputs: InitiativeStoryNode[];
+  processTitle: string;
+  steps: InitiativeStoryNode[];
+  outcomeTitle: string;
+  outcome: InitiativeStoryNode;
+  contribution: string;
+};
+
+/** 現職の取り組み。画面は図、紙版は状況・行動・結果の文章で説明する。 */
 export type NowInitiative = {
   /** カルーセルのタブに出る短い名前。 */
   tab: string;
@@ -51,14 +70,14 @@ export type NowInitiative = {
   /** 「案件オーナー」など、この件での立場。 */
   role: string;
   period: Period;
-  /** "ongoing" は進行中。3 段目の見出しが「現在」になり、緑の印が付く。 */
+  /** "ongoing" は進行中。画面では緑の印、紙版では「現在」の見出しが付く。 */
   status: "released" | "ongoing";
   situation: string;
   action: string;
   /** released なら結果、ongoing ならいまの状況。 */
   outcome: string;
   tech: string[];
-  visual?: "dashboard-migration";
+  story: InitiativeStoryData;
 };
 
 export type EngineerNow = {
@@ -82,70 +101,149 @@ export const engineerNow: EngineerNow = {
   team: "グラフパーツ開発：エンジニア4名／QA2名／PdM・テックリード各1名",
   initiatives: [
     {
-      tab: "ダッシュボード移行",
+      tab: "グラフパーツ",
       title: "顧客の業務と開発の実現性から、移行仕様を決める",
       role: "仕様整理・合意形成・フルスタック開発",
       // 開始月は本人の記憶に基づく概算（2026年4月頃）。
       period: { from: "2026-04", to: "present" },
       status: "ongoing",
       situation: "既存ダッシュボード機能の移行に向け、顧客の利用実態とCS・セールスの視点から、提供する機能と使い方を整理。",
-      action:
-        "引き継ぐ機能、省ける機能、使いやすく再構成する機能を検討。開発組織全体の目標スケジュールを踏まえ、必要な仕様変更を関係者と調整した。",
+      action: "引き継ぐ機能、省ける機能、使いやすく再構成する機能を検討。開発組織全体の目標スケジュールを踏まえ、必要な仕様変更を関係者と調整した。",
       outcome: "顧客の業務継続と開発の実現性を踏まえ、提供範囲・仕様・進め方に合意。Go・Reactで実装を進めている。",
       tech: ["Go", "React"],
-      visual: "dashboard-migration",
-    },
-    {
-      tab: "テンプレート生成",
-      title: "新機能「テンプレート生成」",
-      role: "起案〜全社展開",
-      period: { from: "2026-06", to: "2026-09" },
-      status: "released",
-      situation: "顧客オンボーディングのたびに、アプリを手作業でゼロから組み立てていた。",
-      action:
-        "自ら起案し、PoCで価値を見せて本実装へ。顧客に出さずに実運用で試せるよう、社内IP限定で有効化できる仕組みも新設した。",
-      outcome: "2026.09に全社展開。社内IP限定リリースの仕組みはプロダクト全体の資産になった。",
-      // TODO: 技術タグを確認してください（仮置き）
-      tech: ["React", "TypeScript", "Go", "FeatureFlag"],
-    },
-    {
-      tab: "Slack MCP",
-      title: "社内AI活用基盤「Slack MCPサーバー」",
-      role: "起案・設計・実装・展開",
-      period: { from: "2026-01", to: "2026-07" },
-      status: "released",
-      situation:
-        "Slackに埋もれた解決事例をAIから引きたいが、既製のコネクタでは読める範囲が広すぎて導入できなかった。",
-      action: "自作すると決め、権限設計から監査要件の合意、非エンジニア向けのインストーラーまで一人で用意した。",
-      outcome: "2026.07に社内で解禁。その後の運用も継続して担当している。",
-      tech: ["MCP", "OAuth", "Slack API"],
-    },
-    {
-      tab: "AI駆動開発",
-      title: "AI駆動開発の仕組みづくり",
-      role: "ユニットリーダー",
-      period: { from: "2026-07", to: "present" },
-      status: "ongoing",
-      situation: "AIによって開発スピードは上がったが、レビューが追い付かずボトルネックになっていた。",
-      action:
-        "「レビューを速くするには、まずE2Eで品質の下限を保証する必要がある」と逆算して着手順を決めた。仕様を着手前に握り、実装はAIに任せるフローをSkill群として整備し、E2Eを「QAでも書ける」自律生成基盤として構築した。",
-      outcome: "リポジトリ内で稼働し、日々の開発で運用中。",
-      // TODO: 技術タグを確認してください（仮置き）
-      tech: ["Claude Code", "E2E"],
+      story: {
+        intro: "既存機能の移行に向け、利用実態・要望・期限を整理し、関係者と仕様をすり合わせる。",
+        inputTitle: "判断の材料",
+        inputs: [
+          { icon: "users", title: "顧客の利用実態", note: "業務に必要な機能・使い方" },
+          { icon: "support", title: "CS・セールスの視点", note: "顧客の要望・案内や提案のしやすさ" },
+          { icon: "calendar", title: "開発スケジュール", note: "目標時期・実現できる範囲" },
+        ],
+        processTitle: "移行仕様をすり合わせる",
+        steps: [
+          { icon: "list", title: "必要な機能・使い方を整理", note: "利用実態・要望をもとに、必要な範囲を明確化" },
+          { icon: "tree", title: "使いやすい構成を検討", note: "顧客の業務に合わせて、機能の構成を見直す" },
+          { icon: "settings", title: "期限に合わせて仕様を調整", note: "関係者と変更点をすり合わせる" },
+        ],
+        outcomeTitle: "合意した移行方針",
+        outcome: { icon: "document", title: "提供範囲・仕様・進め方に合意", note: "Go・Reactで実装中" },
+        contribution: "仕様の再整理と、関係者との合意形成。",
+      },
     },
     {
       tab: "ユニットリーダー",
-      title: "プロダクト統合プロジェクトの技術リード",
-      role: "技術リード",
+      title: "論点と依存関係を整理し、統合プロジェクトを前に進める",
+      role: "ユニットリーダー・技術リード",
       period: { from: "2026-07", to: "present" },
       status: "ongoing",
-      situation:
-        "別プロダクトの機能を主力プロダクトへ統合する案件。「何を再現し、何を諦めるか」が決まらないまま、体制も想定の5名から3名に縮んだ。",
-      action:
-        "止まっていた最大の論点を「結論 → 理由 → 段階案 → 決めるべき問い」の形で提案し、意思決定を前に進めた。他チームへの依頼は受け入れ基準と性能目標を数値で渡し、計画は体制に合わせて3回引き直した。",
-      outcome: "技術方針の承認と、11月末の1stリリースの合意まで取り付け、実装に着手。",
-      // TODO: 技術タグを確認してください（仮置き）
+      situation: "別プロダクトの機能を主力プロダクトへ統合する案件で、再現する範囲が未確定。体制変更や他チームとの依存も踏まえ、実行できる方針と計画をまとめる必要があった。",
+      action: "止まっていた論点を「結論・理由・段階案・決めるべき問い」に整理して提案。他チームへの依頼は受け入れ基準と性能目標を明確にし、体制に合わせて計画を見直した。",
+      outcome: "技術方針の承認と段階的なリリース計画への合意を得て、実装に着手。関係チームと調整しながら進行している。",
       tech: ["React", "TypeScript", "Go", "BigQuery"],
+      story: {
+        intro: "未確定の仕様・体制変更・他チームへの依頼を整理し、意思決定と実装を前に進める。",
+        inputTitle: "進行を難しくしていたこと",
+        inputs: [
+          { icon: "list", title: "統合範囲が未確定", note: "何を再現し、どこまで対応するか" },
+          { icon: "users", title: "開発体制の変更", note: "体制に応じた計画の見直しが必要" },
+          { icon: "workflow", title: "他チームとの依存", note: "依頼内容と受け入れ条件の共有" },
+        ],
+        processTitle: "決められる形に整理する",
+        steps: [
+          { icon: "document", title: "論点と段階案を提示", note: "結論・理由・決めるべき問いを明確に" },
+          { icon: "target", title: "依頼の受け入れ基準を定義", note: "品質・性能の目標を他チームと共有" },
+          { icon: "calendar", title: "体制に合わせて計画を調整", note: "段階的な進め方を関係者と合意" },
+        ],
+        outcomeTitle: "現在の到達点",
+        outcome: { icon: "checks", title: "技術方針・計画に合意し、実装へ", note: "関係チームと調整しながら進行中" },
+        contribution: "論点の構造化、技術方針の提案、チーム間の依頼・計画調整。",
+      },
+    },
+    {
+      tab: "AI駆動開発",
+      title: "レビューの詰まりから逆算し、AI開発の品質を支える",
+      role: "ユニットリーダー・開発プロセス整備",
+      period: { from: "2026-07", to: "present" },
+      status: "ongoing",
+      situation: "AIで実装が速くなる一方、レビューが追い付かずボトルネックになっていた。品質を担保しながら開発全体を速める仕組みが必要だった。",
+      action: "レビューを速める前提としてE2Eによる品質担保を優先。着手前に仕様を合意し、AIで実装する流れをSkill群として整備した。QAも利用できるE2Eの自律生成基盤を構築。",
+      outcome: "Skill群とE2E生成基盤がリポジトリ内で稼働し、日々の開発で運用中。効果を確認しながら改善を続けている。",
+      tech: ["Claude Code", "E2E"],
+      story: {
+        intro: "実装速度だけでなく、レビューと品質担保まで含めてAI前提の開発手順を整える。",
+        inputTitle: "実装の先に生まれた課題",
+        inputs: [
+          { icon: "code", title: "AIで実装が加速", note: "コードを書く速さが向上" },
+          { icon: "list", title: "レビューが追い付かない", note: "確認待ちが次のボトルネックに" },
+          { icon: "shield", title: "品質を保つ必要", note: "レビューを速めるための前提" },
+        ],
+        processTitle: "品質から逆算して整備する",
+        steps: [
+          { icon: "test", title: "E2Eによる品質担保を優先", note: "着手する順序を、詰まりの原因から判断" },
+          { icon: "workflow", title: "仕様合意・AI実装を手順化", note: "開発の流れをSkill群として整備" },
+          { icon: "users", title: "QAも使えるテスト生成基盤", note: "E2Eを自律生成できる仕組みを構築" },
+        ],
+        outcomeTitle: "現在の運用",
+        outcome: { icon: "settings", title: "日々の開発で運用中", note: "Skill群とE2E生成基盤が稼働" },
+        contribution: "優先順位の判断から、Skill整備・E2E生成基盤の構築まで担当。",
+      },
+    },
+    {
+      tab: "Slack MCP",
+      title: "権限・監査・導入方法まで整え、社内の知見をAIで使える形に",
+      role: "起案・設計・実装・展開・運用",
+      period: { from: "2026-01", to: "2026-07" },
+      status: "released",
+      situation: "Slackに蓄積した解決事例をAIから参照したいが、既製のコネクタでは読める範囲が広すぎて導入できなかった。",
+      action: "社内向けMCPサーバーの自作を提案。権限設計と監査要件の合意から実装、非エンジニア向けインストーラーの用意まで一貫して担当した。",
+      outcome: "社内での利用を開始し、その後の運用も継続して担当している。",
+      tech: ["MCP", "OAuth", "Slack API"],
+      story: {
+        intro: "知見を参照する機能だけでなく、社内で導入・運用できる条件まで整備する。",
+        inputTitle: "導入に必要だった条件",
+        inputs: [
+          { icon: "support", title: "Slackに蓄積した知見", note: "AIから解決事例を参照したい" },
+          { icon: "shield", title: "既製コネクタの権限", note: "読める範囲が広く、導入が難しい" },
+          { icon: "users", title: "非エンジニアも利用", note: "導入しやすい方法が必要" },
+        ],
+        processTitle: "社内で使える条件を整える",
+        steps: [
+          { icon: "shield", title: "権限・監査要件を合意", note: "参照範囲と運用上の要件を整理" },
+          { icon: "code", title: "MCPサーバーを自作", note: "社内の利用条件に合わせて実装" },
+          { icon: "install", title: "導入用インストーラーを用意", note: "非エンジニアへの展開まで対応" },
+        ],
+        outcomeTitle: "利用開始とその後",
+        outcome: { icon: "users", title: "社内利用を開始、運用も継続", note: "導入後の対応も担当" },
+        contribution: "起案から権限設計・合意・実装・展開・継続運用まで担当。",
+      },
+    },
+    {
+      tab: "テンプレート機能",
+      title: "自ら提案し、PoCで価値を示して営業・CSの提案につなげる",
+      role: "自主提案・PoC・社内展開",
+      period: { from: "2026-06", to: "2026-09" },
+      status: "released",
+      situation: "顧客オンボーディングのたびに、アプリを手作業でゼロから組み立てていた。",
+      action: "テンプレート機能を自ら提案し、PoCまでやり切って価値を提示。社内で実運用を試せる仕組みも用意し、セールス・CSへの展開につなげた。",
+      outcome: "セールス・CSの双方で、テンプレート機能を軸とした追加提案の動きが生まれた。社内で試せるリリースの仕組みもプロダクト全体で利用できる形にした。",
+      tech: ["React", "TypeScript", "Go", "FeatureFlag"],
+      story: {
+        intro: "現場の手作業から着想し、動くPoCで価値を示して提案活動につなげる。",
+        inputTitle: "提案のきっかけ",
+        inputs: [
+          { icon: "settings", title: "毎回ゼロから手作業で構築", note: "顧客オンボーディングの負担" },
+          { icon: "lightbulb", title: "テンプレート化を自主提案", note: "動く形で機能の価値を示す" },
+        ],
+        processTitle: "PoCから社内の活用へ",
+        steps: [
+          { icon: "lightbulb", title: "機能を起案し、PoCを実装", note: "アイデアを動くものにして価値を提示" },
+          { icon: "test", title: "社内で試せる環境を用意", note: "実運用で確認できるリリース方法を整備" },
+          { icon: "support", title: "セールス・CSに展開", note: "機能を軸にした追加提案へつなげる" },
+        ],
+        outcomeTitle: "提案活動への広がり",
+        outcome: { icon: "chart", title: "営業・CSの追加提案の軸に", note: "双方で活用の動きが生まれた" },
+        contribution: "自主的な機能提案とPoCを起点に、セールス・CSの提案活動へ接続。",
+      },
     },
   ],
 };
